@@ -11,6 +11,7 @@ class rent_dot_com:
 		self._state = state
 		self._overhead = 'https://www.rent.com'
 		self._apt_urls = []
+		self._apt_data = []
 
 	def _get_page_url(self, page_num):
 	    city = self._city.lower().replace(' ', '-')
@@ -50,7 +51,7 @@ class rent_dot_com:
 	        apts_num = int(apts_num)
 	        pages_num = int(np.ceil(apts_num/30))
 	        if verbose:
-	            print(f'total number of apartments in {city}, {state} is {apts_num}')
+	            print(f'total number of apartments in {self._city}, {self._state} is {apts_num}')
 	            print(f'total number of pages to be scraped is {pages_num}')
 	        
 	    for pg_num in range(pages_num):
@@ -58,7 +59,7 @@ class rent_dot_com:
 	        if verbose:
 	            print(f'page {pg_num} done')
 	    
-	    apt_urls = [url for url in apt_urls if state in url]
+	    apt_urls = [url for url in apt_urls if self._state in url]
 	    return apt_urls
 
 	def _get_address(self, address_tag):
@@ -163,7 +164,7 @@ class rent_dot_com:
 	    if not response.status_code == 404:
 	        soup = BeautifulSoup(results, 'lxml')
 	        address_tag = soup.find('div', '_3wnFl _3wnFl')
-	        addr = _get_address(address_tag)
+	        addr = self._get_address(address_tag)
 	        
 	        room_tags = soup.find_all('div', '_1ECa-')
 	        
@@ -174,16 +175,60 @@ class rent_dot_com:
 	            apartments = []
 	            for unit_tag in floor_plan:
 	                if unit_tag['data-tid'] == 'pdpfloorplan-row':
-	                    apt = list(addr)+_get_floorplan(unit_tag)
+	                    apt = list(addr)+self._get_floorplan(unit_tag)
 	                    apartments.append(apt)
 
 	                if unit_tag['data-tid'] == 'pdpfloorplans-unit-row':
-	                    apt = list(addr)+_get_units(unit_tag)
+	                    apt = list(addr)+self._get_units(unit_tag)
 	                    apartments.append(apt)
 	            apt_all += apartments 
 	                        
 	    return apt_all
 
 	def scrape_apt_urls(self, verbose=False):
-		self._apt_urls = 
+		self._apt_urls = self._get_apt_urls(verbose)
 
+	def scrape_apt_data(self, apt_urls, verbose=False):
+
+		apt_all_data = []
+
+		if verbose:
+			print(f'aparments in {len(apt_urls)} addresses to be scraped')
+
+		for i, apt_url in enumerate(apt_urls):
+			apt_all_data += self._get_apt_info(apt_url)
+			if verbose:
+				print(f'apartments in address {i} all scraped')
+
+		self._apt_data = apt_all_data
+
+	@property
+	def apt_urls(self):
+		return self._apt_urls
+
+	@property
+	def apt_data(self):
+		return self._apt_data
+
+if __name__ == '__main__':
+
+	rdc = rent_dot_com('philadelphia', 'pennsylvania')
+
+	rdc.scrape_apt_urls(verbose=True)
+	urls = rdc.apt_urls
+	rdc.scrape_apt_data(urls[:10], verbose=True)
+
+	data = rdc.apt_data
+	
+	cols = ['address',
+			'city',
+			'state',
+			'zipcode',
+			'apt',
+			'price',
+			'bedroom',
+			'bathroom',
+			'sqft']
+
+	df = pd.DataFrame(data, columns=cols)
+	df.to_csv('../data/sample/rent_doc_com_sample.csv')
