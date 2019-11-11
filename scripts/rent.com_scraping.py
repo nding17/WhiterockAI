@@ -132,11 +132,35 @@ class rent_dot_com:
 
     def _get_address(self, address_tag, hdr):
         """
-        
+        Scrape the address of the apartment given the address HTML tag
+
+        Parameters
+        ----------
+        address_tag : bs4.element.Tag
+            a beautifulsoup element tag containing address information
+            of the apartment
+
+        hdr : bs4.element.Tag
+            a beautifulsoup element tag containing header information of
+            the apartment in case there's no address in the address section
+            of the webpage 
+
+        Returns
+        -------
+        (address, city, state, zipcode) : tuple(str)
+
+        >>> _get_address(address_tag, hdr)
+        ('1015 S 18th St', 'Philadelphia', 'Pennsylvania', '19146')
 
         """
+
+        # try to find all the span tags in the address tag, the span tags
+        # include all the address information we need 
         try:
             elements = address_tag.find_all('span')
+
+            # scrape the text out of the span tags and remove
+            # all the whitespaces and punctuation marks
             address = elements[0].get_text()\
                                  .replace(',','')\
                                  .strip()
@@ -144,6 +168,9 @@ class rent_dot_com:
             state = elements[2].get_text().strip()
             zipcode = elements[3].get_text().strip()
             return address, city, state, zipcode
+        # however, sometimes the address tag does not include the street
+        # info, in this case, use the text in the header tag, which serves
+        # as a replacement for the address 
         except:
             address = hdr.get_text()
             elements = address_tag.find_all('span')
