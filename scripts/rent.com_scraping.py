@@ -391,41 +391,84 @@ class rent_dot_com:
         if not response.status_code == 404:
             try:
                 soup = BeautifulSoup(results, 'lxml')
+                # address tag
                 address_tag = soup.find('div', '_3wnFl _3wnFl')
+                # header tag
                 hdr = soup.find('h1', attrs={'data-tid': 'property-title'})
+                # scrape the address information
+                # get a tuple
                 addr = self._get_address(address_tag, hdr)
-                
+                # a list of room tags 
                 room_tags = soup.find_all('div', '_1ECa-')
             except:
                 return apt_all
 
             for rt in room_tags:
+                # for each room tag, identify what type of rows the room tag is
+                # only two options: unit in grey background, floorplan in white
+                # background 
                 room_table = rt.find('table', '_1GkPp F4skJ')
                 room_tbody = room_table.find('tbody')
                 floor_plan = room_tbody.find_all('tr')
                 apartments = []
                 for unit_tag in floor_plan:
+                    # unit tag
                     if unit_tag['data-tid'] == 'pdpfloorplan-row':
                         apt = list(addr)+self._get_floorplan(unit_tag)
                         apartments.append(apt)
-
+                    # floorplan tag
                     if unit_tag['data-tid'] == 'pdpfloorplans-unit-row':
                         apt = list(addr)+self._get_units(unit_tag)
                         apartments.append(apt)
+                # update the list that contains all the apartments info
                 apt_all += apartments 
                             
         return apt_all
 
     def scrape_apt_urls(self, verbose=False):
+        """
+        A public function that allows you to call to scrape apartment URLs
+
+        Parameters
+        ----------
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_urls will be updated
+            and all the apartments URLs will be stored in this field 
+        """
         self._apt_urls = self._get_apt_urls(verbose)
 
     def scrape_apt_data(self, apt_urls, verbose=False):
+        """
+        A public function that allows you to call to scrape apartment information
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            a list of apartment URLs that you hope to scrape the apartment 
+            info from
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_data will be updated
+            and all the apartments info will be stored in this field 
+        """
 
         apt_all_data = []
 
         if verbose:
             print(f'aparments in {len(apt_urls)} addresses to be scraped')
 
+        # loop through all the apartment URLs and scrape all the apartments
+        # information in each URL
         for i, apt_url in enumerate(apt_urls):
             apt_all_data += self._get_apt_info(apt_url)
             if verbose:
@@ -435,22 +478,34 @@ class rent_dot_com:
 
     @property
     def apt_urls(self):
+        # serve as a way to show the apt_urls
         return self._apt_urls
 
     @property
     def apt_data(self):
+        # serve as a way to show the apt_data
         return self._apt_data
 
 if __name__ == '__main__':
-
+    # construct data scraping object, use Philadelphia, Pennsylvania 
+    # as an example
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
 
+    # scrape all the apartment URLs in Philadelphia
+    # status update enabled
     rdc.scrape_apt_urls(verbose=True)
     urls = rdc.apt_urls
+    # in order to avoid crashes and loses all your data
+    # divide the list of URLs in batches and keep updating
+    # the csv file once the batch job is finished
     urls_chunk = np.array_split(urls, int(len(urls)//10))
 
+    # try to see if the current directory has a folder 
+    # that you can use to store data 
     os.chdir('..')
 
+    # this could be modified to fit the structure of 
+    # a specific user's directory
     if not os.path.exists('data'):
         os.mkdir('data')
 
@@ -459,6 +514,7 @@ if __name__ == '__main__':
         os.mkdir('sample')
     os.chdir('sample')
 
+    # the column names of the data frame 
     cols = ['address',
             'city',
             'state',
@@ -469,15 +525,21 @@ if __name__ == '__main__':
             'bathroom',
             'sqft']
 
+    # create an initial empty data file with all 
+    # the features of an apartment 
     if not os.path.exists('rent_dot_com.csv'):
         df = pd.DataFrame([], columns=cols)
         df.to_csv('./rent_dot_com.csv')
 
+    # running the batch and keep saving the intermediary 
+    # results from the data scraping jobs 
+    # each batch contains 10 URLs, but this could be modified
     for i, batch_urls in enumerate(urls_chunk):
         # print(batch_urls)
         rdc.scrape_apt_data(batch_urls, verbose=True)
         data = rdc.apt_data
         df_new = pd.DataFrame(data, columns=cols)
+        # append the results from each batch
         with open('rent_dot_com.csv', 'a') as df_old:
             df_new.to_csv(df_old, header=False)
         print(f'batch {i} finished running')
