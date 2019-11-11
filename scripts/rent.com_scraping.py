@@ -15,21 +15,61 @@ class rent_dot_com:
         self._apt_data = []
 
     def _get_page_url(self, page_num):
+        """
+        Get the page link with a specific page.
+        
+        Parameters
+        ----------
+        page_num : int
+            page number of the apartments in a specific city
+
+        Returns
+        -------
+        string 
+            the link of the page, given the page number 
+
+        >>> _get_page_url(1)
+        'rent.com/pennsylvania/philadelphia/apartments_condos_houses_townhouses?page=1'
+
+        """
+
+        # for city comes with 2 words, replace the space with -
+        # e.g. 'new york' -> 'new-york'
         city = self._city.lower().replace(' ', '-')
         state = self._state.lower().replace(' ', '-')
         page = f'{self._overhead}/{state}/{city}/apartments_condos_houses_townhouses?page={page_num}'
         return page
 
     def _get_apt_urls_per_page(self, pg_num):
+        """
+        Get all the apartment URLs listed in the same page (30 URLs per page)
+
+        Parameters
+        ----------
+        pg_num : int
+            page number of the apartments in a specific city
+
+        Returns:
+        apt_urls : list(str)
+            a list of apartment URLs correspond to different apartments in 
+            a same page 
+
+        """
+
+        # get the URL for the specific page given its page number 
         pg_url = self._get_page_url(pg_num)
         response = requests.get(pg_url)
-        results = response.content
+        # scrape the HTML web content from rent.com
+        results = response.content 
+        # a list that contains all the apartment URLs
         apt_urls = []
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
+            # apartment tags
             apts = soup.find_all('div', class_='_3PdAH _1EbNE')
             for apt in apts:
                 apt_sub = apt.find('div', class_='_3RRl_ _2Hrxl')
+                # find the URL tag
                 apt_link = apt_sub.find('a', class_='_3kMwn ByXwK')
                 url = apt_link['href']
                 apt_urls.append(url)
@@ -37,6 +77,25 @@ class rent_dot_com:
         return apt_urls
 
     def _get_apt_urls(self, verbose=False):
+        """
+        Get all the relevant apartment links in rent.com with a specified city
+
+        Parameters
+        ----------
+        verbose : boolean (optional)
+            since the scraping process takes quite a while, you have the option
+            to monitor the progress by enabling the status updates 
+
+        Returns
+        -------
+        apt_urls : list(str)
+            a list of apartment URLs correspond to different apartments in 
+            a same page
+
+        """
+
+        # access the first page and navigate through the page to check the total
+        # number of apartments
         pg_url = self._get_page_url(1)
         response = requests.get(pg_url)
         results = response.content
@@ -46,24 +105,36 @@ class rent_dot_com:
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
             apts_num_tag = soup.find('span', class_='_3YJue')
+            # this is a tag that displays the total number of apartments
             apts_num =  apts_num_tag.find('span', 
                                           attrs={'data-tid':'pagination-total'})\
                                     .get_text()
+            # try to convert text into integer 
             apts_num = int(apts_num)
+            # since every page contains 30 apartments, divide the total number of 
+            # apartments by 30 will give you the total number of pages
             pages_num = int(np.ceil(apts_num/30))
+            # if enabled, you will see status updates on the terminal
             if verbose:
                 print(f'total number of apartments in {self._city}, {self._state} is {apts_num}')
                 print(f'total number of pages to be scraped is {pages_num}')
-            
+        
+        # after getting the total number of pages that need to be scraped,
+        # we can leave the rest for the loop to handle 
         for pg_num in range(pages_num):
             apt_urls += self._get_apt_urls_per_page(pg_num)
             if verbose:
                 print(f'page {pg_num} done')
         
+        # make sure that all the links are in the state user specified 
         apt_urls = [url for url in apt_urls if self._state in url]
         return apt_urls
 
     def _get_address(self, address_tag, hdr):
+        """
+        
+
+        """
         try:
             elements = address_tag.find_all('span')
             address = elements[0].get_text()\
