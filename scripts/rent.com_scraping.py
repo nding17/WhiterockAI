@@ -63,7 +63,7 @@ class rent_dot_com:
 	    apt_urls = [url for url in apt_urls if self._state in url]
 	    return apt_urls
 
-	def _get_address(self, address_tag):
+	def _get_address(self, address_tag, hdr):
 		try:
 			elements = address_tag.find_all('span')
 			address = elements[0].get_text()\
@@ -74,7 +74,6 @@ class rent_dot_com:
 			zipcode = elements[3].get_text().strip()
 			return address, city, state, zipcode
 		except:
-			hdr = address_tag.find('h1', attrs={'data-tid': 'property-title'})
 			address = hdr.get_text()
 			elements = address_tag.find_all('span')
 			city = elements[0].get_text()\
@@ -176,7 +175,8 @@ class rent_dot_com:
 	    if not response.status_code == 404:
 	        soup = BeautifulSoup(results, 'lxml')
 	        address_tag = soup.find('div', '_3wnFl _3wnFl')
-	        addr = self._get_address(address_tag)
+	        hdr = soup.find('h1', attrs={'data-tid': 'property-title'})
+	        addr = self._get_address(address_tag, hdr)
 	        
 	        room_tags = soup.find_all('div', '_1ECa-')
 	        
