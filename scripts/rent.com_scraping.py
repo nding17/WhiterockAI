@@ -3,13 +3,14 @@
 """ 
 rent.com_scraping.py : Scrape the apartment rental infomation in rent.com 
 all the users need to do is to specify a city and state and it will automatically
-scrape all the details related to all the apartments in the city you are looking
-at.
+scrape all the details related to all the apartments in the city users are
+looking at.
 """
 
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
+__version__ = '1.0.1'
 __status__ = 'completed'
 
 import pandas as pd
@@ -207,26 +208,50 @@ class rent_dot_com:
 
         Parameters
         ----------
+        unit_tag : bs4.element.Tag
+            a beautifulsoup element tag that contains information about 
+            the apartment unit
 
+        Returns
+        -------
+        unit : list(Object)
+            a list that contains information about the apartment unit, 
+            including unit number, price, # bedrooms, # bathrooms and
+            area measured in square foot 
 
+        >>> _get_units(unit_tag)
+        ('1520 Hamilton Street', 'Philadelphia', 'Pennsylvania', '19130', '0606', 1894.0, 0.0, 1.0, 469.0)
 
         """
+
+        # a list that contains apartment unit's information
         unit = []
+        # use a loop to list all the cells in a row 
         for cell in unit_tag.find_all('td'):
-            if cell.attrs:
+            if cell.attrs: # omit the cell with nothing in it 
+                # look for the apartment #, however, this info is not
+                # consistent across the entire webiste
                 if cell['data-tid'] == 'pdpfloorplans-unit-displayText':
                     unit_num = cell.get_text()
                     unit.append(unit_num)
+                # scrape the price of the unit
                 if cell['data-tid'] == 'pdpfloorplans-unit-price':
                     try:
                         unit_price = cell.get_text().replace('$', '')
+                        # try to convert the price to float 
                         unit.append(float(unit_price))
                     except:
+                        # if there's no price for this unit
+                        # append the list with a null value 
                         unit.append(np.nan)
                 if cell['data-tid'] == 'pdpfloorplans-unit-bedbath':
                     try:
+                        # try to extract the tags that include the number
+                        # of bedrooms and bathrooms 
                         bedbath_tag = cell.find_all('span')
                         bed_tag, bath_tag = bedbath_tag[0], bedbath_tag[1]
+                        # regular expression pattern for extracting any types
+                        # of numbers, including integer and floating numbers 
                         pattern = r'[-+]?\d*\.\d+|\d+'
                         bed = re.findall(pattern, bed_tag.get_text())
                         bath = re.findall(pattern, bath_tag.get_text())
@@ -238,9 +263,13 @@ class rent_dot_com:
                         unit.append(float(bed_unit))
                         unit.append(float(bath_unit))
                     except:
+                        # if the convertion failed, append the list
+                        # will two null values 
                         unit.append(np.nan)
                         unit.append(np.nan)
                 if cell['data-tid'] == 'pdpfloorplans-unit-sqft':
+                    # follow the same procedure as above, but this time
+                    # scrape the square foot of the apartment unit
                     try:
                         pattern = r'[-+]?\d*\.\d+|\d+'
                         sqft_unit = re.findall(pattern, cell.get_text())[0]
@@ -250,14 +279,44 @@ class rent_dot_com:
         return unit
 
     def _get_floorplan(self, unit_tag):
+        """
+        Scrape the actual apartments' information in the table provided by 
+        a specific address
+
+        -------
+
+        very similar to the code in _get_units(unit_tag) function, this functino
+        aims to scrape the apartment unit's info in the white background if you
+        open the webpage. It's usually a summary of a list of apartments. 
+
+        Parameters
+        ----------
+        unit_tag : bs4.element.Tag
+            a beautifulsoup element tag that contains information about 
+            the apartment unit
+
+        Returns
+        -------
+        unit : list(Object)
+            a list that contains information about the apartment unit, 
+            including unit number, price, # bedrooms, # bathrooms and
+            area measured in square foot 
+
+        >>> _get_units(unit_tag)
+        ('1520 Hamilton Street', 'Philadelphia', 'Pennsylvania', 'Studio-S4B', '0606', 1894.0, 0.0, 1.0, 469.0)
+
+        """
         unit = []
         for cell in unit_tag.find_all('td'):
             if cell.attrs:
+                # scrape the apartment number 
                 if cell['data-tid'] == 'pdpfloorplan-displayText':
                     floorplan_num = cell.get_text()
                     unit.append(floorplan_num)
+                # scrape the apartment price 
                 if cell['data-tid'] == 'pdpfloorplan-price':
                     try:
+                        # remove any punctuation marks and $ sign
                         fp_price = cell.get_text()\
                                        .replace('$','')\
                                        .replace(',','')
@@ -266,6 +325,7 @@ class rent_dot_com:
                         unit.append(float(price))
                     except:
                         unit.append(np.nan)
+                # scrape the number of bedrooms and bathrooms 
                 if cell['data-tid'] == 'pdpfloorplan-bedbaths':
                     try:
                         bedbath_tag = cell.find_all('span')
@@ -283,6 +343,7 @@ class rent_dot_com:
                     except:
                         unit.append(np.nan)
                         unit.append(np.nan)
+                # scrape the area of the apartment in square foot 
                 if cell['data-tid'] == 'pdpfloorplan-sqft':
                     try:
                         pattern = r'[-+]?\d*\.\d+|\d+'
@@ -293,10 +354,38 @@ class rent_dot_com:
         return unit
 
     def _get_apt_info(self, apt_url):
+        """
+        Given the apartment URL, scrape the apartment unit's information regardless
+        of what type of tag it is
 
+        -------
+        
+        Systematically run through the entire webpage of the apartments located in a 
+        fixed address, and scrape all the relevant information that's out there in the page.
+        That being said, studio apartments, 1bed, 2beds etc. 
+
+        Parameters
+        ----------
+        apt_url : str
+            a specific apartment URL that has a fixed physical address
+
+        Returns
+        -------
+        apt_all : list(Object) 
+            a list of apartment information
+
+        >>> _get_apt_info(apt_url)
+        [('1520 Hamilton Street', 'Philadelphia', 'Pennsylvania', '19130', 'Studio-S4B', 1894.0, 0.0, 1.0, 469.0),
+        ('1520 Hamilton Street', 'Philadelphia', 'Pennsylvania', '19130', '0903', 1894.0, 0.0, 1.0, 469.0),
+        ('1520 Hamilton Street', 'Philadelphia', 'Pennsylvania', '19130', '1003', 1894.0, 0.0, 1.0, 469.0),
+        ....]
+        """
+
+        # get the complete url of the apartments in a specified address 
         complete_url = self._overhead+apt_url
         response = requests.get(complete_url)
         results = response.content
+        # a list that contains all the apartment information
         apt_all = []
         
         if not response.status_code == 404:
