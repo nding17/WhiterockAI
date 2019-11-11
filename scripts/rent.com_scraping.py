@@ -1,3 +1,17 @@
+#!/usr/bin/env python
+
+""" 
+rent.com_scraping.py : Scrape the apartment rental infomation in rent.com 
+all the users need to do is to specify a city and state and it will automatically
+scrape all the details related to all the apartments in the city you are looking
+at.
+"""
+
+__author__ = 'Naili Ding'
+__email__ = 'nd2588@columbia.edu'
+__maintainer__ = 'Naili Ding'
+__status__ = 'completed'
+
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -182,6 +196,21 @@ class rent_dot_com:
             return address, city, state, zipcode
 
     def _get_units(self, unit_tag):
+        """
+        Scrape the actual apartments' information in the table provided by 
+        a specific address
+
+        -------
+
+        When you open up the apartment page, this should be the units with 
+        grey backgroud, rather than the rows in bright white background
+
+        Parameters
+        ----------
+
+
+
+        """
         unit = []
         for cell in unit_tag.find_all('td'):
             if cell.attrs:
