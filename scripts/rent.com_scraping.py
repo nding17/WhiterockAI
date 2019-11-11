@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests
 import numpy as np
 import re
+import os
 
 class rent_dot_com:
 
@@ -63,14 +64,25 @@ class rent_dot_com:
 	    return apt_urls
 
 	def _get_address(self, address_tag):
-		elements = address_tag.find_all('span')
-		address = elements[0].get_text()\
-		                     .replace(',','')\
-		                     .strip()
-		city = elements[1].get_text().strip()
-		state = elements[2].get_text().strip()
-		zipcode = elements[3].get_text().strip()
-		return address, city, state, zipcode
+		try:
+			elements = address_tag.find_all('span')
+			address = elements[0].get_text()\
+			                     .replace(',','')\
+			                     .strip()
+			city = elements[1].get_text().strip()
+			state = elements[2].get_text().strip()
+			zipcode = elements[3].get_text().strip()
+			return address, city, state, zipcode
+		except:
+			hdr = address_tag.find('h1', attrs={'data-tid': 'property-title'})
+			address = hdr.get_text()
+			elements = address_tag.find_all('span')
+			city = elements[0].get_text()\
+			                     .replace(',','')\
+			                     .strip()
+			state = elements[1].get_text().strip()
+			zipcode = elements[2].get_text().strip()
+			return address, city, state, zipcode
 
 	def _get_units(self, unit_tag):
 	    unit = []
@@ -216,10 +228,18 @@ if __name__ == '__main__':
 
 	rdc.scrape_apt_urls(verbose=True)
 	urls = rdc.apt_urls
-	rdc.scrape_apt_data(urls[:10], verbose=True)
+	urls_chunk = np.array_split(urls, int(len(urls)//10))
 
-	data = rdc.apt_data
-	
+	os.chdir('..')
+
+	if not os.path.exists('data'):
+		os.mkdir('data')
+
+	os.chdir('./data')
+	if not os.path.exists('sample'):
+		os.mkdir('sample')
+	os.chdir('sample')
+
 	cols = ['address',
 			'city',
 			'state',
@@ -230,5 +250,17 @@ if __name__ == '__main__':
 			'bathroom',
 			'sqft']
 
-	df = pd.DataFrame(data, columns=cols)
-	df.to_csv('../data/sample/rent_doc_com_sample.csv')
+	if not os.path.exists('rent_dot_com.csv'):
+		df = pd.DataFrame([], columns=cols)
+		df.to_csv('./rent_dot_com.csv')
+
+	for i, batch_urls in enumerate(urls_chunk[9:]):
+		print(batch_urls)
+		rdc.scrape_apt_data(batch_urls, verbose=True)
+		data = rdc.apt_data
+		df_new = pd.DataFrame(data, columns=cols)
+		with open('rent_dot_com.csv', 'a') as df_old:
+			df_new.to_csv(df_old, header=False)
+		print(f'batch {i} finished running')
+
+	print('job finished!')
