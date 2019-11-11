@@ -173,12 +173,15 @@ class rent_dot_com:
         apt_all = []
         
         if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-            address_tag = soup.find('div', '_3wnFl _3wnFl')
-            hdr = soup.find('h1', attrs={'data-tid': 'property-title'})
-            addr = self._get_address(address_tag, hdr)
-            
-            room_tags = soup.find_all('div', '_1ECa-')
+            try:
+                soup = BeautifulSoup(results, 'lxml')
+                address_tag = soup.find('div', '_3wnFl _3wnFl')
+                hdr = soup.find('h1', attrs={'data-tid': 'property-title'})
+                addr = self._get_address(address_tag, hdr)
+                
+                room_tags = soup.find_all('div', '_1ECa-')
+            except:
+                return apt_all
 
             for rt in room_tags:
                 room_table = rt.find('table', '_1GkPp F4skJ')
@@ -254,8 +257,8 @@ if __name__ == '__main__':
         df = pd.DataFrame([], columns=cols)
         df.to_csv('./rent_dot_com.csv')
 
-    for i, batch_urls in enumerate(urls_chunk[40:]):
-        print(batch_urls)
+    for i, batch_urls in enumerate(urls_chunk):
+        # print(batch_urls)
         rdc.scrape_apt_data(batch_urls, verbose=True)
         data = rdc.apt_data
         df_new = pd.DataFrame(data, columns=cols)
