@@ -1,1 +1,1171 @@
 ,address,city,state,zipcode,apt,price,bedroom,bathroom,sqft
+0,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",1658.0,1.0,1.0,736.0
+1,1415 N 31st St,Philadelphia,Pennsylvania,19121,402,1658.0,1.0,1.0,736.0
+2,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",1433.0,1.0,1.0,546.0
+3,1415 N 31st St,Philadelphia,Pennsylvania,19121,304,1433.0,1.0,1.0,546.0
+4,1415 N 31st St,Philadelphia,Pennsylvania,19121,205,1433.0,1.0,1.0,546.0
+5,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",1528.0,1.0,1.0,557.0
+6,1415 N 31st St,Philadelphia,Pennsylvania,19121,110,1528.0,1.0,1.0,557.0
+7,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",,1.0,1.0,557.0
+8,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",,1.0,1.0,569.0
+9,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",,1.0,1.0,565.0
+10,1415 N 31st St,Philadelphia,Pennsylvania,19121,"1 Bedroom, 1 Bathroom",,1.0,1.0,598.0
+11,1415 N 31st St,Philadelphia,Pennsylvania,19121,"2 Bedroom, 2 Bathroom",,2.0,2.0,767.0
+12,1415 N 31st St,Philadelphia,Pennsylvania,19121,"2 Bedroom, 2 Bathroom",,2.0,2.0,838.0
+13,437 West School House Lane,Philadelphia,Pennsylvania,19144,Studio Junior,975.0,0.0,1.0,411.0
+14,437 West School House Lane,Philadelphia,Pennsylvania,19144,Studio Regular,1035.0,0.0,1.0,455.0
+15,437 West School House Lane,Philadelphia,Pennsylvania,19144,Studio Large,1065.0,0.0,1.0,496.0
+16,437 West School House Lane,Philadelphia,Pennsylvania,19144,Studio XL,1075.0,0.0,1.0,510.0
+17,437 West School House Lane,Philadelphia,Pennsylvania,19144,1 Bedroom Junior,1100.0,1.0,1.0,520.0
+18,437 West School House Lane,Philadelphia,Pennsylvania,19144,1 Bedroom Regular,1165.0,1.0,1.0,585.0
+19,437 West School House Lane,Philadelphia,Pennsylvania,19144,1 Bedroom Large,1200.0,1.0,1.0,625.0
+20,437 West School House Lane,Philadelphia,Pennsylvania,19144,1 Bedroom XL,1215.0,1.0,1.0,635.0
+21,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Apartment,,0.0,0.0,
+22,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Apartment,,0.0,0.0,
+23,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Apartment,,0.0,0.0,
+24,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Apartment,,0.0,0.0,
+25,2301 Tremont Street,Philadelphia,Pennsylvania,19115,One Bedroom with Den,1025.0,1.0,1.0,900.0
+26,2301 Tremont Street,Philadelphia,Pennsylvania,19115,One Bedroom,910.0,1.0,1.0,650.0
+27,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Two Bedroom,1240.0,2.0,2.0,1000.0
+28,2301 Tremont Street,Philadelphia,Pennsylvania,19115,Two Bedroom with Den,1345.0,2.0,2.0,1100.0
+29,101 South 39th Street,Philadelphia,Pennsylvania,19104,One Bedroom K2,1725.0,1.0,1.0,717.0
+30,101 South 39th Street,Philadelphia,Pennsylvania,19104,One Bedroom K1,1945.0,1.0,1.0,600.0
+31,101 South 39th Street,Philadelphia,Pennsylvania,19104,Two Bedroom K1,3095.0,2.0,1.0,1200.0
+32,101 South 39th Street,Philadelphia,Pennsylvania,19104,K201,3095.0,2.0,1.0,1200.0
+33,101 South 39th Street,Philadelphia,Pennsylvania,19104,Two Bedroom K3,3095.0,2.0,1.0,1100.0
+34,101 South 39th Street,Philadelphia,Pennsylvania,19104,Two Bedroom K2,2895.0,2.0,1.0,1230.0
+35,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom C2,3795.0,3.0,1.0,1315.0
+36,101 South 39th Street,Philadelphia,Pennsylvania,19104,C102,3795.0,3.0,1.0,1315.0
+37,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom D,3795.0,3.0,1.0,1310.0
+38,101 South 39th Street,Philadelphia,Pennsylvania,19104,D201,3795.0,3.0,1.0,1310.0
+39,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom E1,3300.0,3.0,1.0,1310.0
+40,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom E2,3300.0,3.0,1.0,1310.0
+41,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom E3,3300.0,3.0,1.0,1310.0
+42,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom B1,3500.0,3.0,1.0,1160.0
+43,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom G,3775.0,3.0,1.0,1590.0
+44,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom B2,3795.0,3.0,1.0,1310.0
+45,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom C1,3795.0,3.0,1.0,1300.0
+46,101 South 39th Street,Philadelphia,Pennsylvania,19104,Three Bedroom F,3925.0,3.0,1.0,1310.0
+47,101 South 39th Street,Philadelphia,Pennsylvania,19104,Four Bedroom E2,5145.0,4.0,1.0,1540.0
+48,101 South 39th Street,Philadelphia,Pennsylvania,19104,E401,5145.0,4.0,1.0,1540.0
+49,101 South 39th Street,Philadelphia,Pennsylvania,19104,Four Bedroom H,5195.0,4.0,1.0,1590.0
+50,101 South 39th Street,Philadelphia,Pennsylvania,19104,H201,5195.0,4.0,1.0,1590.0
+51,101 South 39th Street,Philadelphia,Pennsylvania,19104,Four Bedroom F,5295.0,4.0,1.0,1590.0
+52,101 South 39th Street,Philadelphia,Pennsylvania,19104,Five Bedroom D,5895.0,5.0,2.0,1610.0
+53,101 South 39th Street,Philadelphia,Pennsylvania,19104,Five Bedroom G,5995.0,5.0,2.0,1610.0
+54,101 South 39th Street,Philadelphia,Pennsylvania,19104,G201,5995.0,5.0,2.0,1610.0
+55,101 South 39th Street,Philadelphia,Pennsylvania,19104,Four Bedroom E1,5145.0,4.0,1.0,1540.0
+56,101 South 39th Street,Philadelphia,Pennsylvania,19104,Four Bedroom A,5445.0,4.0,2.0,1450.0
+57,101 South 39th Street,Philadelphia,Pennsylvania,19104,Five Bedroom A,5795.0,5.0,2.0,1780.0
+58,1401 Walnut St,Philadelphia,Pennsylvania,19102,302-602 Study,2500.0,1.0,1.5,1162.0
+59,1401 Walnut St,Philadelphia,Pennsylvania,19102,1002-1202 Study,2700.0,1.0,1.5,1200.0
+60,1401 Walnut St,Philadelphia,Pennsylvania,19102,301-601 Den,2700.0,1.0,2.0,1460.0
+61,1401 Walnut St,Philadelphia,Pennsylvania,19102,304-604,2700.0,1.0,1.5,1094.0
+62,1401 Walnut St,Philadelphia,Pennsylvania,19102,1001-1201 Den,2950.0,1.0,2.0,1400.0
+63,1401 Walnut St,Philadelphia,Pennsylvania,19102,303-603,3500.0,2.0,2.0,1756.0
+64,1401 Walnut St,Philadelphia,Pennsylvania,19102,305-505 Den,3750.0,2.0,2.0,1984.0
+65,1401 Walnut St,Philadelphia,Pennsylvania,19102,1003-1203 Den,4700.0,2.0,2.0,2250.0
+66,1401 Walnut St,Philadelphia,Pennsylvania,19102,1005-1205 Den,4700.0,2.0,2.0,2500.0
+67,1401 Walnut St,Philadelphia,Pennsylvania,19102,605,5000.0,3.0,2.0,1984.0
+68,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A11,2374.0,1.0,1.0,799.0
+69,834 Chestnut Street,Philadelphia,Pennsylvania,19107,1216,2374.0,1.0,1.0,799.0
+70,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A2,2337.0,1.0,1.0,845.0
+71,834 Chestnut Street,Philadelphia,Pennsylvania,19107,0802,2337.0,1.0,1.0,845.0
+72,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A7,2400.0,1.0,1.0,811.0
+73,834 Chestnut Street,Philadelphia,Pennsylvania,19107,1711,2400.0,1.0,1.0,811.0
+74,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A1,,1.0,1.0,708.0
+75,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A10,,1.0,1.0,810.0
+76,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A12,,1.0,1.0,812.0
+77,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A3,,1.0,1.0,725.0
+78,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A4,,1.0,1.0,740.0
+79,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A5,,1.0,1.0,704.0
+80,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A6,,1.0,1.0,758.0
+81,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A8,,1.0,1.0,857.0
+82,834 Chestnut Street,Philadelphia,Pennsylvania,19107,A9,,1.0,1.0,856.0
+83,834 Chestnut Street,Philadelphia,Pennsylvania,19107,E1,,1.0,1.0,621.0
+84,834 Chestnut Street,Philadelphia,Pennsylvania,19107,E2,,1.0,1.0,613.0
+85,834 Chestnut Street,Philadelphia,Pennsylvania,19107,E3,,1.0,1.0,687.0
+86,834 Chestnut Street,Philadelphia,Pennsylvania,19107,Penthouse One Bedroom,,1.0,1.0,803.0
+87,834 Chestnut Street,Philadelphia,Pennsylvania,19107,Upgraded,,1.0,1.0,708.0
+88,834 Chestnut Street,Philadelphia,Pennsylvania,19107,B3,3275.0,2.0,2.0,893.0
+89,834 Chestnut Street,Philadelphia,Pennsylvania,19107,0828,3275.0,2.0,2.0,893.0
+90,834 Chestnut Street,Philadelphia,Pennsylvania,19107,B1,,2.0,2.0,993.0
+91,834 Chestnut Street,Philadelphia,Pennsylvania,19107,B2,,2.0,2.0,1045.0
+92,834 Chestnut Street,Philadelphia,Pennsylvania,19107,B4,,2.0,2.0,1080.0
+93,834 Chestnut Street,Philadelphia,Pennsylvania,19107,B5,,2.0,2.0,1045.0
+94,834 Chestnut Street,Philadelphia,Pennsylvania,19107,Penthouse Two Bedroom,,2.0,2.0,1544.0
+95,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,Studio A,1155.0,0.0,1.0,370.0
+96,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0707,1170.0,0.0,1.0,370.0
+97,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0412,1155.0,0.0,1.0,370.0
+98,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0712,1170.0,0.0,1.0,370.0
+99,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1112,1200.0,0.0,1.0,370.0
+100,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1207,1205.0,0.0,1.0,370.0
+101,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1112,1200.0,0.0,1.0,370.0
+102,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0707,1170.0,0.0,1.0,370.0
+103,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,Studio B,1285.0,0.0,1.0,400.0
+104,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0109,1285.0,0.0,1.0,400.0
+105,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0210,1315.0,0.0,1.0,400.0
+106,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0410,1315.0,0.0,1.0,400.0
+107,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1210,1365.0,0.0,1.0,400.0
+108,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0710,1330.0,0.0,1.0,400.0
+109,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1010,1355.0,0.0,1.0,400.0
+110,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1010,1355.0,0.0,1.0,400.0
+111,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0610,1330.0,0.0,1.0,400.0
+112,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0110,1285.0,0.0,1.0,400.0
+113,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0210,1315.0,0.0,1.0,400.0
+114,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom B ADA,,0.0,0.0,725.0
+115,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,Studio C,,0.0,1.0,400.0
+116,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom A,1435.0,1.0,1.0,550.0
+117,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0508,1480.0,1.0,1.0,550.0
+118,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0611,1480.0,1.0,1.0,550.0
+119,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0111,1435.0,1.0,1.0,550.0
+120,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom C,1645.0,1.0,1.0,725.0
+121,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1225,1695.0,1.0,1.0,725.0
+122,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0325,1645.0,1.0,1.0,725.0
+123,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0320,1645.0,1.0,1.0,725.0
+124,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1025,1685.0,1.0,1.0,725.0
+125,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom D,1645.0,1.0,1.0,725.0
+126,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0213,1645.0,1.0,1.0,725.0
+127,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0306,1645.0,1.0,1.0,725.0
+128,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0513,1660.0,1.0,1.0,725.0
+129,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom F,1665.0,1.0,1.0,775.0
+130,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1221,1745.0,1.0,1.0,775.0
+131,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0124,1665.0,1.0,1.0,775.0
+132,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0521,1710.0,1.0,1.0,775.0
+133,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1024,1735.0,1.0,1.0,775.0
+134,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0424,1695.0,1.0,1.0,775.0
+135,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom E,1675.0,1.0,1.0,750.0
+136,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0303,1675.0,1.0,1.0,750.0
+137,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0403,1675.0,1.0,1.0,750.0
+138,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0503,1690.0,1.0,1.0,750.0
+139,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0516,1690.0,1.0,1.0,750.0
+140,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0817,1700.0,1.0,1.0,750.0
+141,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1017,1715.0,1.0,1.0,750.0
+142,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1103,1720.0,1.0,1.0,750.0
+143,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0917,1710.0,1.0,1.0,750.0
+144,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1203,1725.0,1.0,1.0,750.0
+145,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0203,1675.0,1.0,1.0,750.0
+146,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0617,1690.0,1.0,1.0,750.0
+147,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1016,1715.0,1.0,1.0,750.0
+148,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0916,1710.0,1.0,1.0,750.0
+149,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0203,1675.0,1.0,1.0,750.0
+150,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0816,1700.0,1.0,1.0,750.0
+151,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0902,1710.0,1.0,1.0,750.0
+152,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom B,1640.0,1.0,1.0,725.0
+153,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0923,1640.0,1.0,1.0,725.0
+154,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,One Bedroom G,,1.0,1.0,700.0
+155,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,Two Bedroom,1865.0,2.0,2.0,950.0
+156,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0514,1910.0,2.0,2.0,950.0
+157,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0901,1930.0,2.0,2.0,950.0
+158,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0118,1865.0,2.0,2.0,950.0
+159,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0204,1895.0,2.0,2.0,950.0
+160,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0214,1895.0,2.0,2.0,950.0
+161,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0226,1895.0,2.0,2.0,950.0
+162,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1018,1935.0,2.0,2.0,950.0
+163,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0119,1865.0,2.0,2.0,950.0
+164,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0426,1895.0,2.0,2.0,950.0
+165,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0814,1920.0,2.0,2.0,950.0
+166,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1219,1945.0,2.0,2.0,950.0
+167,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0918,1930.0,2.0,2.0,950.0
+168,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A1214,1945.0,2.0,2.0,950.0
+169,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0314,1895.0,2.0,2.0,950.0
+170,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0704,1910.0,2.0,2.0,950.0
+171,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0304,1895.0,2.0,2.0,950.0
+172,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0601,1910.0,2.0,2.0,950.0
+173,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B1005,1935.0,2.0,2.0,950.0
+174,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0401,1895.0,2.0,2.0,950.0
+175,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0915,1930.0,2.0,2.0,950.0
+176,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,A0305,1895.0,2.0,2.0,950.0
+177,633 W. Rittenhouse Street,Philadelphia,Pennsylvania,19144,B0914,1930.0,2.0,2.0,950.0
+178,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,Studio,900.0,0.0,1.0,520.0
+179,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,C1517,,0.0,1.0,
+180,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,One Bedroom,950.0,1.0,1.0,830.0
+181,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,V3912,,1.0,1.0,
+182,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,One Bedroom with Den,962.0,1.0,1.0,870.0
+183,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,M2115,,1.0,1.0,
+184,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,Two Bedroom,1135.0,2.0,1.0,910.0
+185,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,C1603,,2.0,1.0,
+186,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,C2310,,2.0,1.0,
+187,8400 Lindbergh Blvd Apt 303,Philadelphia,Pennsylvania,19153,V3202,,2.0,1.0,
+188,1401 Spruce Street,Philadelphia,Pennsylvania,19102,Studio A,2165.0,0.0,1.0,645.0
+189,1401 Spruce Street,Philadelphia,Pennsylvania,19102,Studio B,2265.0,0.0,1.0,745.0
+190,1401 Spruce Street,Philadelphia,Pennsylvania,19102,1 Bedroom A,2295.0,1.0,1.0,645.0
+191,1401 Spruce Street,Philadelphia,Pennsylvania,19102,1 Bedroom B,2545.0,1.0,1.0,685.0
+192,1401 Spruce Street,Philadelphia,Pennsylvania,19102,1 Bedroom Den,3715.0,1.0,1.0,1080.0
+193,1401 Spruce Street,Philadelphia,Pennsylvania,19102,1 Bedroom Penthouse,6295.0,1.0,1.5,1655.0
+194,1401 Spruce Street,Philadelphia,Pennsylvania,19102,2 Bedroom A,3655.0,2.0,1.0,910.0
+195,1401 Spruce Street,Philadelphia,Pennsylvania,19102,2 Bedroom B,4175.0,2.0,1.5,1080.0
+196,1401 Spruce Street,Philadelphia,Pennsylvania,19102,2 Bedroom C,5955.0,2.0,2.0,1600.0
+197,1401 Spruce Street,Philadelphia,Pennsylvania,19102,3 Bedroom A,6005.0,3.0,2.5,1645.0
+198,1401 Spruce Street,Philadelphia,Pennsylvania,19102,3 Bedroom B,7725.0,3.0,3.5,2030.0
+199,1 Montgomery Avenue,Bala Cynwyd,Pennsylvania,19004,Studio,1045.0,0.0,1.0,
+200,1 Montgomery Avenue,Bala Cynwyd,Pennsylvania,19004,Apartment,1145.0,1.0,1.0,
+201,1 Montgomery Avenue,Bala Cynwyd,Pennsylvania,19004,Apartment,1595.0,2.0,2.0,
+202,1 Montgomery Avenue,Bala Cynwyd,Pennsylvania,19004,2 Bedroom,1675.0,2.0,1.0,992.0
+203,1 Montgomery Avenue,Bala Cynwyd,Pennsylvania,19004,Apartment,2095.0,3.0,2.0,
+0,411 North 34th St,Philadelphia,Pennsylvania,19104,Brand New Student Housing,2250.0,3.0,3.0,1000.0
+1,3901 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Studio,845.0,0.0,1.0,515.0
+2,3901 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1100.0,1.0,1.0,730.0
+3,3901 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1425.0,2.0,1.5,930.0
+4,3901 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1475.0,2.0,2.0,1030.0
+5,3901 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Townhome,1495.0,2.0,2.5,1060.0
+6,32 Conshohocken State Road,Bala Cynwyd,Pennsylvania,19004,2 Bedroom,2205.0,2.0,2.5,1800.0
+7,32 Conshohocken State Road,Bala Cynwyd,Pennsylvania,19004,2 Bedroom 3 Bath w/ Den,2255.0,2.0,3.0,1600.0
+8,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,1 Bedroom Deluxe,1135.0,1.0,1.0,600.0
+9,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,A203,,1.0,1.0,600.0
+10,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,A516,,1.0,1.0,600.0
+11,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,1 Bedroom,1140.0,1.0,1.0,520.0
+12,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,A110,,1.0,1.0,520.0
+13,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,C114,,1.0,1.0,520.0
+14,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,2 Bedroom Corner,1470.0,2.0,1.0,800.0
+15,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,B105,,2.0,1.0,800.0
+16,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,2 Bedroom,1570.0,2.0,1.0,800.0
+17,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,A401,,2.0,1.0,800.0
+18,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,B324,,2.0,1.0,800.0
+19,3900 Gateway Dr,Philadelphia,Pennsylvania,19145,2 Bedroom Deluxe,,2.0,1.0,950.0
+20,4200 Ludlow St,Philadelphia,Pennsylvania,19104,Apartment,2000.0,2.0,2.0,
+21,4200 Ludlow St,Philadelphia,Pennsylvania,19104,Apartment,2000.0,3.0,2.0,
+22,3900 City Avenue,Philadelphia,Pennsylvania,19131,Studio,1235.0,0.0,1.0,415.0
+23,3900 City Avenue,Philadelphia,Pennsylvania,19131,1 Bedroom,1485.0,1.0,1.0,490.0
+24,3900 City Avenue,Philadelphia,Pennsylvania,19131,1 Bedroom Penthouse,2715.0,1.0,1.5,1450.0
+25,3900 City Avenue,Philadelphia,Pennsylvania,19131,2 Bedroom,1925.0,2.0,2.0,900.0
+26,3900 City Avenue,Philadelphia,Pennsylvania,19131,2 Bedroom Penthouse,3295.0,2.0,2.0,1800.0
+27,3900 City Avenue,Philadelphia,Pennsylvania,19131,3 Bedroom,2995.0,3.0,3.0,1400.0
+28,3900 City Avenue,Philadelphia,Pennsylvania,19131,3 Bedroom Penthouse,4535.0,3.0,3.0,2600.0
+29,1720 Lombard St,Philadelphia,Pennsylvania,19146,Studio,1225.0,0.0,1.0,300.0
+30,1720 Lombard St,Philadelphia,Pennsylvania,19146,1 Bedroom,1495.0,1.0,1.0,500.0
+31,1720 Lombard St,Philadelphia,Pennsylvania,19146,Penthouse,1795.0,2.0,2.0,800.0
+32,1720 Lombard St,Philadelphia,Pennsylvania,19146,2 Bedroom Maisonettes,1995.0,2.0,2.0,800.0
+33,1720 Lombard St,Philadelphia,Pennsylvania,19146,2 Bedroom,2150.0,2.0,1.0,800.0
+34,410 Lancaster Ave Ste 5A,Haverford,Pennsylvania,19041,Studio,909.0,0.0,1.0,252.0
+35,410 Lancaster Ave Ste 5A,Haverford,Pennsylvania,19041,MicroSuite,1260.0,0.0,1.0,252.0
+36,410 Lancaster Ave Ste 5A,Haverford,Pennsylvania,19041,1 Bedroom,1300.0,1.0,1.0,551.0
+37,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Studio,1049.0,0.0,1.0,450.0
+38,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Deluxe One Bedroom,1231.0,1.0,1.0,875.0
+39,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Classic One Bedroom,1322.0,1.0,1.0,650.0
+40,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Two Bedroom,1681.0,2.0,2.0,1300.0
+41,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Two Bedroom One Bath,1427.0,2.0,1.0,1200.0
+42,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Two Bedroom Two Bath,1681.0,2.0,2.0,1300.0
+43,7600 Stenton Ave,Philadelphia,Pennsylvania,19118,Three Bedroom,,3.0,2.0,1500.0
+44,902 Valley Road #34 Clubhouse,Elkins Park,Pennsylvania,19027,The Abington,1120.0,1.0,1.0,800.0
+45,902 Valley Road #34 Clubhouse,Elkins Park,Pennsylvania,19027,The Cheltenham,1260.0,2.0,1.0,900.0
+46,902 Valley Road #34 Clubhouse,Elkins Park,Pennsylvania,19027,The Montgomery,1340.0,2.0,1.0,990.0
+47,902 Valley Road #34 Clubhouse,Elkins Park,Pennsylvania,19027,The Melrose,1850.0,3.0,2.0,1800.0
+0,271 S 15th Street,Philadelphia,Pennsylvania,19102,Studio,1220.0,0.0,1.0,550.0
+1,271 S 15th Street,Philadelphia,Pennsylvania,19102,Penthouse,4850.0,0.0,3.5,
+2,271 S 15th Street,Philadelphia,Pennsylvania,19102,1 Bedroom,1430.0,1.0,1.0,650.0
+3,271 S 15th Street,Philadelphia,Pennsylvania,19102,1419 Spruce,1610.0,1.0,1.0,
+4,271 S 15th Street,Philadelphia,Pennsylvania,19102,2 Bedroom,1860.0,2.0,1.0,750.0
+5,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 05,1895.0,0.0,1.0,670.0
+6,1520 Spruce St,Philadelphia,Pennsylvania,19102,0205,1895.0,0.0,1.0,670.0
+7,1520 Spruce St,Philadelphia,Pennsylvania,19102,0305,1925.0,0.0,1.0,670.0
+8,1520 Spruce St,Philadelphia,Pennsylvania,19102,Classic 05,1775.0,0.0,1.0,670.0
+9,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 405,1950.0,0.0,1.0,670.0
+10,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 605 & 705,1990.0,0.0,1.0,670.0
+11,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 805,2045.0,0.0,1.0,670.0
+12,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 1105,2105.0,0.0,1.0,670.0
+13,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 02,2400.0,1.0,1.5,926.0
+14,1520 Spruce St,Philadelphia,Pennsylvania,19102,0502,2525.0,1.0,1.5,926.0
+15,1520 Spruce St,Philadelphia,Pennsylvania,19102,0802,2645.0,1.0,1.5,926.0
+16,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 03,2505.0,1.0,1.0,915.0
+17,1520 Spruce St,Philadelphia,Pennsylvania,19102,0303,4500.0,1.0,1.0,915.0
+18,1520 Spruce St,Philadelphia,Pennsylvania,19102,1103,2700.0,1.0,1.0,915.0
+19,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 101,2000.0,1.0,1.0,973.0
+20,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 10,2135.0,1.0,1.0,639.0
+21,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 103,2165.0,1.0,1.0,915.0
+22,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 203,2195.0,1.0,1.0,915.0
+23,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 204,2355.0,1.0,1.0,986.0
+24,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 04,2405.0,1.0,1.0,986.0
+25,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 704,2475.0,1.0,1.0,986.0
+26,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 304,2795.0,1.0,1.0,986.0
+27,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 08,2815.0,1.0,1.0,923.0
+28,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 07,3105.0,1.0,1.5,1232.0
+29,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 707 & 907,3595.0,1.0,1.5,1232.0
+30,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 607,3600.0,1.0,1.5,1232.0
+31,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 09,4035.0,2.0,2.0,1592.0
+32,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 06,4195.0,2.0,2.0,1917.0
+33,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 501,4675.0,2.0,2.0,1762.0
+34,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 506 & 906,4765.0,2.0,2.0,1917.0
+35,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 01,4795.0,2.0,2.0,1762.0
+36,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 00,6765.0,3.0,2.5,2483.0
+37,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 401,7295.0,3.0,2.5,2678.0
+38,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 807,7355.0,3.0,3.5,2096.0
+39,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 1100,7625.0,3.0,2.5,2483.0
+40,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 1006,7725.0,3.0,2.5,2580.0
+41,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored PH01,7765.0,3.0,2.5,2678.0
+42,1520 Spruce St,Philadelphia,Pennsylvania,19102,Restored 1001,9545.0,4.0,3.5,4410.0
+43,1520 Spruce St,Philadelphia,Pennsylvania,19102,1531 Spruce Townhouse,12000.0,5.0,4.0,5440.0
+44,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,Studio Classic,1329.0,0.0,1.0,
+45,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,Studio Plus,1399.0,0.0,1.0,
+46,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,Studio Deluxe,1459.0,0.0,1.0,
+47,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Urban",1449.0,1.0,1.0,
+48,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Classic",1549.0,1.0,1.0,
+49,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Plus",1609.0,1.0,1.0,
+50,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Deluxe",1659.0,1.0,1.0,
+51,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Den",1679.0,1.0,1.0,
+52,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"1 Bed, 1 Bath Study",1789.0,1.0,1.0,
+53,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"2 Bed, 1 Bath Urban",679.0,2.0,1.0,
+54,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"2 Bed, 2 Bath Study",759.0,2.0,2.0,
+55,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"2 Bed, 1 Bath Classic",999.0,2.0,1.0,
+56,3500 Powelton Ave,Philadelphia,Pennsylvania,19104,"2 Bed, 2 Bath Classic",1209.0,2.0,2.0,
+57,9140 Old Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,810.0,1.0,1.0,700.0
+58,9140 Old Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,910.0,2.0,1.0,820.0
+59,206 Osborn St,Philadelphia,Pennsylvania,19128,1 Bedroom,1050.0,1.0,1.0,725.0
+60,206 Osborn St,Philadelphia,Pennsylvania,19128,2 Bedroom,1250.0,2.0,1.0,850.0
+61,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+62,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+63,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+64,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+65,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+66,8526 Alicia Street,Philadelphia,Pennsylvania,19111,1st Floor,1015.0,2.0,1.0,900.0
+67,8526 Alicia Street,Philadelphia,Pennsylvania,19111,2nd Floor,1025.0,2.0,1.0,900.0
+68,3101-3201 Woodhaven Road,Philadelphia,Pennsylvania,19154,Apartment,1025.0,1.0,1.0,750.0
+69,3101-3201 Woodhaven Road,Philadelphia,Pennsylvania,19154,Apartment,1200.0,2.0,1.0,850.0
+70,3101-3201 Woodhaven Road,Philadelphia,Pennsylvania,19154,Apartment,1200.0,2.0,1.0,875.0
+71,20 South 36th Street,Philadelphia,Pennsylvania,19104,Apartment,1100.0,1.0,1.0,186.0
+72,20 South 36th Street,Philadelphia,Pennsylvania,19104,Apartment,800.0,2.0,1.0,252.0
+73,9527 State Rd Q,Philadelphia,Pennsylvania,19114,Apartment,,1.0,1.0,880.0
+74,9527 State Rd Q,Philadelphia,Pennsylvania,19114,Apartment,,1.0,1.0,880.0
+75,9527 State Rd Q,Philadelphia,Pennsylvania,19114,Apartment,,2.0,2.0,1100.0
+76,9527 State Rd Q,Philadelphia,Pennsylvania,19114,River View,,2.0,2.0,1100.0
+0,9200 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,905.0,1.0,1.0,714.0
+1,9200 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment w Den,930.0,1.0,1.0,813.0
+2,9200 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,1060.0,2.0,1.5,917.0
+3,9200 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment w Den,1090.0,2.0,1.5,1088.0
+4,5215 Schuyler St # 5231,Philadelphia,Pennsylvania,19144,Apartment,845.0,1.0,1.0,550.0
+5,5215 Schuyler St # 5231,Philadelphia,Pennsylvania,19144,Apartment,1050.0,2.0,1.0,700.0
+6,5215 Schuyler St # 5231,Philadelphia,Pennsylvania,19144,Apartment,1400.0,3.0,1.0,1000.0
+7,1530 Spruce Street,Philadelphia,Pennsylvania,19102,Apartment,,1.0,1.0,
+8,1530 Spruce Street,Philadelphia,Pennsylvania,19102,Apartment,,2.0,1.0,
+9,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,765.0,0.0,1.0,460.0
+10,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,,0.0,0.0,
+11,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,835.0,1.0,1.0,520.0
+12,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,905.0,1.0,1.0,646.0
+13,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,1080.0,2.0,1.0,888.0
+14,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,1205.0,2.0,2.0,923.0
+15,250 Beverly Boulevard,Upper Darby,Pennsylvania,19082,Apartment,1560.0,3.0,2.0,1178.0
+16,2630 Welsh Road,Philadelphia,Pennsylvania,19114,Studio,725.0,0.0,1.0,460.0
+17,2630 Welsh Road,Philadelphia,Pennsylvania,19114,1 Bedroom,835.0,1.0,1.0,620.0
+18,2630 Welsh Road,Philadelphia,Pennsylvania,19114,2 Bedroom,995.0,2.0,1.0,780.0
+19,5325 Old York Road,Philadelphia,Pennsylvania,19141,Studio,920.0,0.0,1.0,350.0
+20,5325 Old York Road,Philadelphia,Pennsylvania,19141,0228,920.0,0.0,1.0,350.0
+21,5325 Old York Road,Philadelphia,Pennsylvania,19141,0412,1145.0,0.0,1.0,380.0
+22,5325 Old York Road,Philadelphia,Pennsylvania,19141,1 Bedroom,1493.0,1.0,1.0,380.0
+23,5325 Old York Road,Philadelphia,Pennsylvania,19141,1208,1493.0,1.0,1.0,380.0
+24,5325 Old York Road,Philadelphia,Pennsylvania,19141,1 Bedroom Deluxe,1855.0,1.0,2.0,760.0
+25,5325 Old York Road,Philadelphia,Pennsylvania,19141,0715,1855.0,1.0,2.0,760.0
+26,5325 Old York Road,Philadelphia,Pennsylvania,19141,0815,1875.0,1.0,2.0,760.0
+27,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio L Classic,1095.0,0.0,1.0,350.0
+28,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio AA Classic,,0.0,1.0,330.0
+29,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio AA Premier,,0.0,1.0,330.0
+30,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio C Classic,,0.0,1.0,800.0
+31,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio C Premier,,0.0,1.0,800.0
+32,4701 Pine St,Philadelphia,Pennsylvania,19143,Studio I Classic,,0.0,1.0,350.0
+33,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom E Classic,1480.0,1.0,1.0,900.0
+34,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom M Classic,1520.0,1.0,1.0,860.0
+35,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom G Classic,1565.0,1.0,1.0,1020.0
+36,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom F Classic,1575.0,1.0,1.0,1010.0
+37,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom B Classic,1635.0,1.0,1.0,1030.0
+38,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom B Premier,,1.0,1.0,1030.0
+39,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom E Premier,,1.0,1.0,900.0
+40,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom G Premier,,1.0,1.0,1020.0
+41,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom K Classic,,1.0,1.0,1400.0
+42,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom M Premier,,1.0,1.0,860.0
+43,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom N Classic,,1.0,1.5,1000.0
+44,4701 Pine St,Philadelphia,Pennsylvania,19143,One Bedroom N Premier,,1.0,1.0,1000.0
+45,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom A Classic,1665.0,2.0,1.0,1300.0
+46,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom D Classic,,2.0,1.0,1250.0
+47,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom D Premier,,2.0,1.0,1250.0
+48,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom J Classic,,2.0,1.0,1400.0
+49,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom K Classic,,2.0,1.0,1400.0
+50,4701 Pine St,Philadelphia,Pennsylvania,19143,Two Bedroom K Premier,,2.0,1.0,1450.0
+51,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom  K Premier,3045.0,3.0,2.0,1700.0
+52,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom A Premier,3505.0,3.0,2.0,1680.0
+53,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom A Classic,,3.0,2.0,1680.0
+54,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom J Classic,,3.0,2.0,1700.0
+55,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom J Premier,,3.0,2.0,1700.0
+56,4701 Pine St,Philadelphia,Pennsylvania,19143,Three Bedroom K Classic,,3.0,2.0,1700.0
+57,7284 Radbourne Road,Upper Darby,Pennsylvania,19082,1 Bedroom,765.0,1.0,1.0,500.0
+58,4901 Spruce Street,Philadelphia,Pennsylvania,19139,One Bedroom,779.0,1.0,1.0,650.0
+59,4901 Spruce Street,Philadelphia,Pennsylvania,19139,Two Bedroom,929.0,2.0,1.0,800.0
+60,4901 Spruce Street,Philadelphia,Pennsylvania,19139,Three Bedroom,1069.0,3.0,1.0,
+61,3300 Henry Avenue,Philadelphia,Pennsylvania,19129,Studio,1300.0,0.0,1.0,
+62,3300 Henry Avenue,Philadelphia,Pennsylvania,19129,Apartment,1499.0,1.0,1.0,
+63,3300 Henry Avenue,Philadelphia,Pennsylvania,19129,Apartment,1599.0,2.0,1.0,
+64,3300 Henry Avenue,Philadelphia,Pennsylvania,19129,Apartment,1600.0,2.0,2.0,
+0,1600 Garrett Road,Upper Darby,Pennsylvania,19082,Jr. Apartment,745.0,1.0,1.0,495.0
+1,1600 Garrett Road,Upper Darby,Pennsylvania,19082,Apartment,805.0,1.0,1.0,608.0
+2,1600 Garrett Road,Upper Darby,Pennsylvania,19082,Apartment,945.0,2.0,1.0,798.0
+3,1600 Garrett Road,Upper Darby,Pennsylvania,19082,Apartment,1005.0,2.0,1.0,922.0
+4,1600 Garrett Road,Upper Darby,Pennsylvania,19082,Apartment,1380.0,3.0,2.0,1190.0
+5,9275 Jamison Avenue,Philadelphia,Pennsylvania,19115,Aberdeen TH,1290.0,2.0,2.0,1250.0
+6,9275 Jamison Avenue,Philadelphia,Pennsylvania,19115,Douglas TH,1465.0,2.0,2.5,1600.0
+7,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,1 Bedroom Jr.,1120.0,1.0,1.0,500.0
+8,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,A212,,1.0,1.0,500.0
+9,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,1 Bedroom,1105.0,1.0,1.0,700.0
+10,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,R404,,1.0,1.0,700.0
+11,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,A305,,1.0,1.0,700.0
+12,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,1 Bedroom with Den,,1.0,1.0,750.0
+13,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,2 Bedroom,1135.0,2.0,2.0,1050.0
+14,7400 Roosevelt Blvd,Philadelphia,Pennsylvania,19152,2 Bedroom with Den,1405.0,2.0,2.0,1100.0
+15,8118 Verree Road E-206,Philadelphia,Pennsylvania,19111,Studio,740.0,0.0,1.0,304.0
+16,8118 Verree Road E-206,Philadelphia,Pennsylvania,19111,1 Bedroom,895.0,1.0,1.0,576.0
+17,8118 Verree Road E-206,Philadelphia,Pennsylvania,19111,1BD Junior,800.0,1.0,1.0,396.0
+18,8118 Verree Road E-206,Philadelphia,Pennsylvania,19111,2 Bedroom,995.0,2.0,1.0,800.0
+19,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,Studio A (D16),1150.0,0.0,1.0,350.0
+20,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,Studio B (C04),1150.0,0.0,1.0,390.0
+21,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,Studio C (C06),1250.0,0.0,1.0,470.0
+22,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,Studio C Deluxe (D07),1275.0,0.0,1.0,470.0
+23,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,Studio B Deluxe (D04),1175.0,0.0,1.0,390.0
+24,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,1 Bedroom B (B02),1400.0,1.0,1.0,560.0
+25,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,1A (107),1200.0,1.0,1.0,417.0
+26,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,2A (201),1500.0,2.0,1.0,649.0
+27,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,2B (103),1650.0,2.0,1.0,702.0
+28,4311 and 4317 Spruce Street,Philadelphia,Pennsylvania,19104,2B Deluxe (305),1675.0,2.0,1.0,725.0
+29,2300 Hartel Avenue,Philadelphia,Pennsylvania,19152,1 Bed/1 Bath Renovated,950.0,1.0,1.0,650.0
+30,2300 Hartel Avenue,Philadelphia,Pennsylvania,19152,1 Bed/1 Bath Standard,850.0,1.0,1.0,650.0
+31,1240 Roosevelt Drive,Havertown,Pennsylvania,19083,Apartment,900.0,1.0,1.0,
+32,1240 Roosevelt Drive,Havertown,Pennsylvania,19083,Apartment,1100.0,2.0,1.0,
+33,8020-8100 Algon Avenue,Philadelphia,Pennsylvania,19152,Apartment,,0.0,0.0,
+34,8020-8100 Algon Avenue,Philadelphia,Pennsylvania,19152,1 Bedroom,975.0,1.0,1.0,750.0
+35,8020-8100 Algon Avenue,Philadelphia,Pennsylvania,19152,2 Bedroom,1125.0,2.0,1.0,925.0
+36,9213 Blue Grass Road Apt. 2,Philadelphia,Pennsylvania,19114,Junior,835.0,1.0,1.0,460.0
+37,9213 Blue Grass Road Apt. 2,Philadelphia,Pennsylvania,19114,One Bedroom,895.0,1.0,1.0,660.0
+38,9213 Blue Grass Road Apt. 2,Philadelphia,Pennsylvania,19114,Two Bedroom,1025.0,2.0,1.0,
+39,9213 Blue Grass Road Apt. 2,Philadelphia,Pennsylvania,19114,Three Bedroom,1325.0,3.0,1.0,1050.0
+40,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,Studio,738.0,0.0,1.0,375.0
+41,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,1 (One) Bedroom,981.0,1.0,1.0,525.0
+42,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0211,1361.0,1.0,1.0,610.0
+43,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0306,1297.0,1.0,1.0,525.0
+44,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0317,1339.0,1.0,1.0,610.0
+45,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0517,1285.0,1.0,1.0,610.0
+46,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0801,1252.0,1.0,1.0,525.0
+47,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0248,1294.0,1.0,1.0,525.0
+48,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0431,950.0,1.0,1.0,525.0
+49,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0108,1273.0,1.0,1.0,610.0
+50,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0423,1367.0,1.0,1.0,610.0
+51,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0502,1285.0,1.0,1.0,610.0
+52,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-1138,1303.0,1.0,1.0,610.0
+53,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0206,1294.0,1.0,1.0,525.0
+54,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0332,1279.0,1.0,1.0,610.0
+55,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0806,1252.0,1.0,1.0,525.0
+56,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0214,1361.0,1.0,1.0,610.0
+57,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0948,1255.0,1.0,1.0,525.0
+58,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-1135,1378.0,1.0,1.0,610.0
+59,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0236,1194.0,1.0,1.0,525.0
+60,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-1106,1261.0,1.0,1.0,525.0
+61,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-1048,1258.0,1.0,1.0,525.0
+62,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0647,1288.0,1.0,1.0,610.0
+63,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0918,1255.0,1.0,1.0,525.0
+64,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0250,1361.0,1.0,1.0,610.0
+65,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,2 (Two) Bedroom,1209.0,2.0,1.0,875.0
+66,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0522,1548.0,2.0,1.0,875.0
+67,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0604,1551.0,2.0,1.0,875.0
+68,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0804,1472.0,2.0,1.0,875.0
+69,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0151,1536.0,2.0,1.0,875.0
+70,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0240,1539.0,2.0,1.0,875.0
+71,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0746,1594.0,2.0,1.0,875.0
+72,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0946,1525.0,2.0,1.0,875.0
+73,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-1052,1478.0,2.0,1.0,875.0
+74,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0421,1545.0,2.0,1.0,875.0
+75,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-1121,1481.0,2.0,1.0,875.0
+76,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0546,1423.0,2.0,1.0,875.0
+77,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0816,1472.0,2.0,1.0,875.0
+78,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0940,1600.0,2.0,1.0,875.0
+79,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0246,1414.0,2.0,1.0,875.0
+80,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0352,1417.0,2.0,1.0,875.0
+81,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-1009,1563.0,2.0,1.0,875.0
+82,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0145,1411.0,2.0,1.0,875.0
+83,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0345,1542.0,2.0,1.0,875.0
+84,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0322,1542.0,2.0,1.0,875.0
+85,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,B-0939,1535.0,2.0,1.0,875.0
+86,5450 Wissahickon Avenue,Philadelphia,Pennsylvania,19144,A-0215,1539.0,2.0,1.0,875.0
+0,400 S 48th Street,Philadelphia,Pennsylvania,19143,C404,795.0,0.0,1.0,
+1,400 S 48th Street,Philadelphia,Pennsylvania,19143,Apartment,750.0,1.0,1.0,
+2,400 S 48th Street,Philadelphia,Pennsylvania,19143,c302,1250.0,2.0,1.0,
+3,400 S 48th Street,Philadelphia,Pennsylvania,19143,Apartment,1300.0,3.0,2.0,
+4,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 14,,2.0,2.0,
+5,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 19,,2.0,2.0,
+6,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 24,,2.0,2.0,
+7,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 4,,2.0,2.0,
+8,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 9,,2.0,2.0,
+9,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 1,,3.0,3.0,
+10,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 10,,3.0,3.0,
+11,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 11,,3.0,3.0,
+12,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 12,,3.0,3.0,
+13,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 13,,3.0,3.0,
+14,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 15,,3.0,3.0,
+15,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 16,,3.0,3.0,
+16,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 17,,3.0,3.0,
+17,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 18,,3.0,3.0,
+18,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 2,,3.0,3.0,
+19,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 20,,3.0,3.0,
+20,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 21,,3.0,3.0,
+21,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 22,,3.0,3.0,
+22,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 23,,3.0,3.0,
+23,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 25,,3.0,3.0,
+24,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 3,,3.0,3.0,
+25,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 5,,3.0,3.0,
+26,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 6,,3.0,3.0,
+27,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 7,,3.0,3.0,
+28,4042-44 Chestnut Street,Philadelphia,Pennsylvania,19104,Unit 8,,3.0,3.0,
+29,6901 Old York Road,Philadelphia,Pennsylvania,19126,Efficiency,873.0,0.0,1.0,369.0
+30,6901 Old York Road,Philadelphia,Pennsylvania,19126,A205,898.0,0.0,1.0,429.0
+31,6901 Old York Road,Philadelphia,Pennsylvania,19126,A313,873.0,0.0,1.0,369.0
+32,6901 Old York Road,Philadelphia,Pennsylvania,19126,1 Bedroom Deluxe,1087.0,1.0,1.0,710.0
+33,6901 Old York Road,Philadelphia,Pennsylvania,19126,A311,1087.0,1.0,1.0,710.0
+34,6901 Old York Road,Philadelphia,Pennsylvania,19126,B308,1132.0,1.0,1.0,710.0
+35,6901 Old York Road,Philadelphia,Pennsylvania,19126,1 Bedroom,,1.0,1.0,535.0
+36,6901 Old York Road,Philadelphia,Pennsylvania,19126,2 Bedroom,1378.0,2.0,2.0,988.0
+37,6901 Old York Road,Philadelphia,Pennsylvania,19126,C409,1423.0,2.0,2.0,1052.0
+38,6901 Old York Road,Philadelphia,Pennsylvania,19126,D304,1433.0,2.0,2.0,1052.0
+39,717 S. Christopher Columbus Blvd.,Philadelphia,Pennsylvania,19147,Studio,,0.0,1.0,669.0
+40,717 S. Christopher Columbus Blvd.,Philadelphia,Pennsylvania,19147,Apartment,2200.0,2.0,2.0,1251.0
+41,717 S. Christopher Columbus Blvd.,Philadelphia,Pennsylvania,19147,Apartment,3060.0,3.0,2.5,1845.0
+42,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+43,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+44,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+45,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+46,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+47,1601 Federal Street,Philadelphia,Pennsylvania,19146,Apartment,623.0,1.0,1.0,630.0
+48,1601 Federal Street,Philadelphia,Pennsylvania,19146,Apartment,738.0,2.0,1.0,788.0
+49,1601 Federal Street,Philadelphia,Pennsylvania,19146,Apartment,844.0,3.0,1.0,1200.0
+50,1601 Federal Street,Philadelphia,Pennsylvania,19146,Apartment,910.0,4.0,1.0,1300.0
+51,2630 West Chester Pike,Broomall,Pennsylvania,19008,1 Bedroom,900.0,1.0,1.0,700.0
+52,2630 West Chester Pike,Broomall,Pennsylvania,19008,2 Bedroom,1000.0,2.0,1.0,870.0
+53,2901 Welsh Road,Philadelphia,Pennsylvania,19152,Studio,,0.0,1.0,750.0
+54,2901 Welsh Road,Philadelphia,Pennsylvania,19152,1 Bedroom,830.0,1.0,1.0,750.0
+55,2901 Welsh Road,Philadelphia,Pennsylvania,19152,B301,,1.0,1.0,750.0
+56,2901 Welsh Road,Philadelphia,Pennsylvania,19152,C126,,1.0,1.0,750.0
+57,2901 Welsh Road,Philadelphia,Pennsylvania,19152,2 Bedroom,,2.0,1.0,900.0
+58,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,A2,875.0,1.0,1.0,689.0
+59,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,A-402,875.0,1.0,1.0,702.0
+60,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,F-601,875.0,1.0,1.0,702.0
+61,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,G-101,999.0,1.0,1.0,689.0
+62,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,G-102,999.0,1.0,1.0,689.0
+63,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,K-201,875.0,1.0,1.0,689.0
+64,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,A1,985.0,1.0,1.0,689.0
+65,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,B1,1100.0,2.0,1.0,841.0
+66,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,H-505,1100.0,2.0,1.0,841.0
+67,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,O-304,1100.0,2.0,1.0,841.0
+68,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,P-204,1150.0,2.0,1.0,841.0
+69,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,E-105,1200.0,2.0,1.0,841.0
+70,155 East Godfrey Avenue,Philadelphia,Pennsylvania,19120,F-203,1200.0,2.0,1.0,841.0
+71,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit G,,0.0,1.0,469.0
+72,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit D,,1.0,1.5,797.0
+73,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit E,,1.0,1.0,728.0
+74,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit F,,1.0,1.0,626.0
+75,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit F2,,1.0,1.0,560.0
+76,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit H,,1.0,1.0,586.0
+77,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit A,,2.0,2.0,1060.0
+78,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit B,,2.0,2.0,1228.0
+79,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit C,,2.0,1.5,1251.0
+80,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit J,,2.0,2.0,1092.0
+81,9503 State Rd,Philadelphia,Pennsylvania,19114,Unit K,,2.0,1.0,1000.0
+0,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom A,1350.0,1.0,1.0,950.0
+1,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,One Bedroom,,1.0,1.0,890.0
+2,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom D,1250.0,2.0,1.0,800.0
+3,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom G,1250.0,2.0,1.0,800.0
+4,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom B,1350.0,2.0,1.0,800.0
+5,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom F,1450.0,2.0,1.0,1050.0
+6,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom C,1500.0,2.0,1.0,950.0
+7,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom E,,2.0,1.0,890.0
+8,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom H,,2.0,1.0,780.0
+9,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Two Bedroom I,,2.0,1.0,980.0
+10,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Three Bedroom,1500.0,3.0,2.0,1900.0
+11,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Five Bedroom,2795.0,5.0,2.0,2670.0
+12,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Four Bedroom  A,,4.0,2.0,2340.0
+13,4400-18 Walnut Street,Philadelphia,Pennsylvania,19104,Four Bedroom B,,4.0,2.0,2670.0
+14,6300 City Ave,Philadelphia,Pennsylvania,19151,City Studio,950.0,0.0,0.0,
+15,6300 City Ave,Philadelphia,Pennsylvania,19151,City One Bedroom,1200.0,1.0,1.0,
+16,6300 City Ave,Philadelphia,Pennsylvania,19151,City Corner Unit,1300.0,1.0,1.0,
+17,6300 City Ave,Philadelphia,Pennsylvania,19151,Shurs One Bedroom,1405.0,1.0,1.0,
+18,6300 City Ave,Philadelphia,Pennsylvania,19151,Krams One Bedroom,1705.0,1.0,1.0,
+19,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,1 Bedroom,1530.0,1.0,1.0,950.0
+20,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,3928B1,,1.0,1.0,950.0
+21,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,2 Bedroom,1585.0,2.0,2.0,850.0
+22,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,3914A3,,2.0,2.0,880.0
+23,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,3952C1,,2.0,2.0,880.0
+24,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,2 Bedroom Deluxe,1690.0,2.0,2.0,950.0
+25,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,3916B2,,2.0,2.0,1100.0
+26,3900 Gateway Drive,Philadelphia,Pennsylvania,19145,3942A4,,2.0,2.0,1100.0
+27,9951 Academy Road,Philadelphia,Pennsylvania,19114,Junior One Bed,1000.0,1.0,1.0,450.0
+28,9951 Academy Road,Philadelphia,Pennsylvania,19114,One Bed,1175.0,1.0,1.0,650.0
+29,9951 Academy Road,Philadelphia,Pennsylvania,19114,Two Bed,1370.0,2.0,1.0,800.0
+30,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Harrison,1495.0,0.0,1.0,450.0
+31,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,302,1495.0,0.0,1.0,450.0
+32,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,303,1495.0,0.0,1.0,450.0
+33,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Jefferson,1661.0,1.0,1.0,595.0
+34,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,511,1661.0,1.0,1.0,595.0
+35,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Van Buren,1711.0,1.0,1.0,600.0
+36,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,504,1711.0,1.0,1.0,600.0
+37,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Jackson,1691.0,1.0,1.0,604.0
+38,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Madison,1691.0,1.0,1.0,605.0
+39,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Monroe,1736.0,1.0,1.0,655.0
+40,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Tyler,1736.0,1.0,1.0,625.0
+41,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,Adams,2400.0,2.0,2.0,830.0
+42,1200 Washington Avenue,Philadelphia,Pennsylvania,19147,212,2400.0,2.0,2.0,830.0
+43,135 South 20th Street,Philadelphia,Pennsylvania,19103,Studio,1300.0,0.0,1.0,500.0
+44,135 South 20th Street,Philadelphia,Pennsylvania,19103,One Bedroom,1550.0,1.0,1.0,900.0
+45,135 South 20th Street,Philadelphia,Pennsylvania,19103,Two Bedroom,1900.0,2.0,1.0,1200.0
+46,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Studio,700.0,0.0,1.0,330.0
+47,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Studio,700.0,0.0,1.0,430.0
+48,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Apartment,870.0,1.0,1.0,
+49,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Apartment,870.0,1.0,1.0,579.0
+50,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Apartment,870.0,1.0,1.0,
+51,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Apartment,900.0,2.0,1.0,830.0
+52,7500 Algon Avenue Suite B,Philadelphia,Pennsylvania,19111,Apartment,950.0,2.0,1.0,850.0
+53,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1026 Spruce Street #9,1450.0,0.0,1.0,400.0
+54,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1023 Spruce Street #7,1513.0,1.0,1.0,
+55,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1027 Spruce Street #8,1558.0,1.0,1.0,600.0
+56,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1026 Spruce Street #6,1450.0,1.0,1.0,500.0
+57,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1023 Spruce Street #3,1350.0,1.0,1.0,350.0
+58,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1028 Spruce Street #6,1650.0,1.0,1.0,650.0
+59,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1027 Spruce Street #5,1700.0,1.0,1.0,700.0
+60,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1027 Spruce Street #2,2100.0,2.0,1.0,1100.0
+61,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1027 Spruce Street #1,2100.0,2.0,1.0,1100.0
+62,1023 Spruce Street,Philadelphia,Pennsylvania,19107,1028 Spruce Street #2,2100.0,2.0,1.0,1100.0
+63,2113 Green Street,Philadelphia,Pennsylvania,19130,Loft,1000.0,0.0,2.0,
+64,2113 Green Street,Philadelphia,Pennsylvania,19130,Loft,1085.0,0.0,1.0,
+65,2113 Green Street,Philadelphia,Pennsylvania,19130,Studio,775.0,0.0,1.0,
+66,2113 Green Street,Philadelphia,Pennsylvania,19130,Apartment,1025.0,1.0,1.0,
+67,2113 Green Street,Philadelphia,Pennsylvania,19130,Apartment,1400.0,2.0,2.0,
+68,2113 Green Street,Philadelphia,Pennsylvania,19130,Apartment,1750.0,3.0,2.0,
+69,2113 Green Street,Philadelphia,Pennsylvania,19130,Apartment,1750.0,5.0,1.5,
+70,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,Studio,,0.0,1.0,610.0
+71,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,1 Bedroom 1 Bath,975.0,1.0,1.0,590.0
+72,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,14B,,1.0,1.0,655.0
+73,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,06A,,1.0,1.0,590.0
+74,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,69A,,1.0,1.0,590.0
+75,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,72A,,1.0,1.0,590.0
+76,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,09F,,1.0,1.0,590.0
+77,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,1 Bedroom 1 Bath Grand,1115.0,1.0,1.0,816.0
+78,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,17E,,1.0,1.0,816.0
+79,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,43C,,1.0,1.0,816.0
+80,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,58E,,1.0,1.0,816.0
+81,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,39C,,1.0,1.0,816.0
+82,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,08E,,1.0,1.0,816.0
+83,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,57B,,1.0,1.0,816.0
+84,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,13E,,1.0,1.0,816.0
+85,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,76B,,1.0,1.0,816.0
+86,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,24F,,1.0,1.0,816.0
+87,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,62E,,1.0,1.0,816.0
+88,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,2 Bedroom 2 Bath,1400.0,2.0,2.0,1001.0
+89,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,02B,,2.0,2.0,1001.0
+90,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,13D,,2.0,2.0,1001.0
+91,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,37C,,2.0,2.0,1001.0
+92,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,76E,,2.0,2.0,1001.0
+93,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,51C,,2.0,2.0,1001.0
+94,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,46C,,2.0,2.0,1001.0
+95,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,24E,,2.0,2.0,1001.0
+96,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,2 Bedroom 2 Bath Den,1505.0,2.0,2.0,1214.0
+97,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,49A,,2.0,2.0,1214.0
+98,3400 Red Lion Road,Philadelphia,Pennsylvania,19114,3 Bedroom 2.5 Bath,,3.0,2.5,1305.0
+0,206 South 13th Street,Philadelphia,Pennsylvania,19107,Studio,890.0,0.0,1.0,238.0
+1,206 South 13th Street,Philadelphia,Pennsylvania,19107,1 Bedroom,1200.0,1.0,1.0,525.0
+2,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,SN5,,0.0,1.0,583.0
+3,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,323,2066.0,0.0,1.0,583.0
+4,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,SN3,,0.0,1.0,564.0
+5,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,528,1991.0,0.0,1.0,564.0
+6,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,SN1,,0.0,1.0,509.0
+7,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,SN2-A,,0.0,1.0,511.0
+8,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,SN4,,0.0,1.0,578.0
+9,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N11,,1.0,1.0,707.0
+10,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,233,2200.0,1.0,1.0,707.0
+11,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,433,2241.0,1.0,1.0,707.0
+12,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,527,2258.0,1.0,1.0,707.0
+13,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N12-M,,1.0,1.0,711.0
+14,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,104,2234.0,1.0,1.0,711.0
+15,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N13-M,,1.0,1.0,716.0
+16,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,105,2165.0,1.0,1.0,716.0
+17,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,108,2252.0,1.0,1.0,716.0
+18,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N14,,1.0,1.0,729.0
+19,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,401,2293.0,1.0,1.0,729.0
+20,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N4-A,,1.0,1.0,644.0
+21,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,217,2148.0,1.0,1.0,644.0
+22,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N6,,1.0,1.0,663.0
+23,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,203,2200.0,1.0,1.0,663.0
+24,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,205,2200.0,1.0,1.0,663.0
+25,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,207,2200.0,1.0,1.0,663.0
+26,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N8,,1.0,1.0,685.0
+27,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,201,2226.0,1.0,1.0,685.0
+28,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,301,2194.0,1.0,1.0,685.0
+29,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,501,2236.0,1.0,1.0,685.0
+30,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N1,,1.0,1.0,559.0
+31,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N10-M,,1.0,1.0,702.0
+32,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N15-M,,1.0,1.0,735.0
+33,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N16,,1.0,1.0,761.0
+34,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N17-M,,1.0,1.0,800.0
+35,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N18-M,,1.0,1.0,979.0
+36,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N2,,1.0,1.0,643.0
+37,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N3,,1.0,1.0,644.0
+38,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N5,,1.0,1.0,658.0
+39,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N7,,1.0,1.0,668.0
+40,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,1N9,,1.0,1.0,692.0
+41,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N12,,2.0,2.0,1043.0
+42,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,326,3445.0,2.0,2.0,1043.0
+43,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N4,,2.0,2.0,941.0
+44,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,311,3174.0,2.0,2.0,941.0
+45,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N1,,2.0,2.0,866.0
+46,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N10,,2.0,2.0,1018.0
+47,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N11,,2.0,2.0,1034.0
+48,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N2,,2.0,2.0,885.0
+49,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N3,,2.0,2.0,938.0
+50,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N5,,2.0,2.0,954.0
+51,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N6,,2.0,2.0,978.0
+52,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N7,,2.0,2.0,990.0
+53,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N8,,2.0,2.0,1013.0
+54,121 N. 2nd Street,Philadelphia,Pennsylvania,19106,2N9,,2.0,2.0,1015.0
+55,2607 Welsh Road,Philadelphia,Pennsylvania,19114,1 Bedroom Deluxe,900.0,1.0,1.0,820.0
+56,2607 Welsh Road,Philadelphia,Pennsylvania,19114,G0208,,1.0,1.0,820.0
+57,2607 Welsh Road,Philadelphia,Pennsylvania,19114,J0107,,1.0,1.0,820.0
+58,2607 Welsh Road,Philadelphia,Pennsylvania,19114,1 Bedroom,,1.0,1.0,650.0
+59,2607 Welsh Road,Philadelphia,Pennsylvania,19114,1 Bedroom Jr.,,1.0,1.0,650.0
+60,2607 Welsh Road,Philadelphia,Pennsylvania,19114,2 Bedroom,1140.0,2.0,1.0,1045.0
+61,2607 Welsh Road,Philadelphia,Pennsylvania,19114,N0201,,2.0,1.0,1045.0
+62,2607 Welsh Road,Philadelphia,Pennsylvania,19114,N0204,,2.0,1.0,1045.0
+63,2607 Welsh Road,Philadelphia,Pennsylvania,19114,2 Bedroom Deluxe,1275.0,2.0,1.0,1031.0
+64,2607 Welsh Road,Philadelphia,Pennsylvania,19114,3 Bedroom,,3.0,2.0,1156.0
+65,1201 Jackson Street,Philadelphia,Pennsylvania,19148,Studio,1550.0,0.0,1.0,659.0
+66,1201 Jackson Street,Philadelphia,Pennsylvania,19148,Apartment,1500.0,1.0,1.0,615.0
+67,1201 Jackson Street,Philadelphia,Pennsylvania,19148,Apartment,1800.0,2.0,2.0,1172.0
+68,1201 Jackson Street,Philadelphia,Pennsylvania,19148,Apartment,2150.0,2.0,2.0,1100.0
+69,1201 Jackson Street,Philadelphia,Pennsylvania,19148,Apartment,2750.0,3.0,2.0,1381.0
+70,519 West Kings Street,Philadelphia,Pennsylvania,19144,Studio,700.0,0.0,1.0,
+71,519 West Kings Street,Philadelphia,Pennsylvania,19144,Apartment,775.0,1.0,1.0,
+72,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,Studio,972.0,0.0,1.0,600.0
+73,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,Junior 1 BDR,997.0,1.0,1.0,650.0
+74,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,1 BDR with Balcony,1178.0,1.0,1.0,700.0
+75,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,1 BDR with Terrace,1158.0,1.0,1.0,700.0
+76,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,2 BDR with Terrace,1325.0,1.0,1.0,900.0
+77,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,2 BDR Balcony,1360.0,2.0,1.0,900.0
+78,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,2 BDR Deluxe,1425.0,2.0,2.0,900.0
+79,8200 Henry Avenue,Philadelphia,Pennsylvania,19128,3 BDR,1742.0,3.0,3.0,1100.0
+80,9000 Tinicum Blvd,Philadelphia,Pennsylvania,19153,Studio,1247.0,0.0,1.0,300.0
+81,9805 Haldeman Avenue,Philadelphia,Pennsylvania,19115,Apartment,790.0,1.0,1.0,775.0
+82,9805 Haldeman Avenue,Philadelphia,Pennsylvania,19115,Apartment,990.0,2.0,1.5,975.0
+83,1156 N 3rd Street,Philadelphia,Pennsylvania,19123,E,2475.0,3.0,2.0,1390.0
+84,1156 N 3rd Street,Philadelphia,Pennsylvania,19123,H,2475.0,3.0,2.0,1390.0
+85,1156 N 3rd Street,Philadelphia,Pennsylvania,19123,A,2500.0,3.0,2.0,1490.0
+86,630 W. Fisher Ave,Philadelphia,Pennsylvania,19120,Studio,,0.0,1.0,340.0
+87,630 W. Fisher Ave,Philadelphia,Pennsylvania,19120,1 Bedroom,,1.0,1.0,484.0
+88,630 W. Fisher Ave,Philadelphia,Pennsylvania,19120,1 Bedroom Deluxe,,1.0,1.0,528.0
+89,630 W. Fisher Ave,Philadelphia,Pennsylvania,19120,2 Bedroom,,2.0,1.0,740.0
+0,3601 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Renovated Studio,,0.0,1.0,511.0
+1,3601 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,1 Bed 1 Bath,,1.0,1.0,535.0
+2,3601 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,2 Bedroom 2 Bath,,2.0,2.0,1112.0
+3,3601 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Renovated 2 Bedroom 1 Bath,,2.0,1.0,928.0
+4,1340 Steward's Way,Northeast Philadelphia,Pennsylvania,19154,Apartment,989.0,1.0,1.0,680.0
+5,1340 Steward's Way,Northeast Philadelphia,Pennsylvania,19154,Apartment,999.0,1.0,1.0,704.0
+6,1340 Steward's Way,Northeast Philadelphia,Pennsylvania,19154,Apartment,1169.0,2.0,1.0,821.0
+7,1340 Steward's Way,Northeast Philadelphia,Pennsylvania,19154,Apartment,1219.0,2.0,2.0,944.0
+8,1340 Steward's Way,Northeast Philadelphia,Pennsylvania,19154,Apartment,1529.0,4.0,2.0,1440.0
+9,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+10,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+11,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+12,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+13,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+14,828 Red Lion Rd,Northeast Philadelphia,Pennsylvania,19115,Ambassador I - Aston,1039.0,1.0,1.0,839.0
+15,828 Red Lion Rd,Northeast Philadelphia,Pennsylvania,19115,Ambassador II - Chelsea,1039.0,1.0,1.0,783.0
+16,828 Red Lion Rd,Northeast Philadelphia,Pennsylvania,19115,Ambassador II - Cambridge,1209.0,2.0,1.0,1023.0
+17,828 Red Lion Rd,Northeast Philadelphia,Pennsylvania,19115,Ambassador I - Sheffield,1219.0,2.0,2.0,1121.0
+18,828 Red Lion Rd,Northeast Philadelphia,Pennsylvania,19115,Ambassador II - Oxford,1219.0,2.0,2.0,1023.0
+19,1801 Winchester Avenue,Northeast Philadelphia,Pennsylvania,19115,The Brandywine,1079.0,1.0,1.0,874.0
+20,1801 Winchester Avenue,Northeast Philadelphia,Pennsylvania,19115,The Devonshire,1079.0,1.0,1.0,874.0
+21,1801 Winchester Avenue,Northeast Philadelphia,Pennsylvania,19115,The Audobon,1289.0,2.0,2.0,1075.0
+22,1801 Winchester Avenue,Northeast Philadelphia,Pennsylvania,19115,The Coventry,1289.0,2.0,2.0,1075.0
+23,8040 Rowland Avenue,Northeast Philadelphia,Pennsylvania,19115,Apartment,970.0,1.0,1.0,700.0
+24,8040 Rowland Avenue,Northeast Philadelphia,Pennsylvania,19115,Apartment,880.0,1.0,1.0,600.0
+25,8040 Rowland Avenue,Northeast Philadelphia,Pennsylvania,19115,Apartment,1150.0,2.0,2.0,1000.0
+26,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Studio,1809.0,0.0,1.0,
+27,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Extended Studio,2229.0,0.0,1.0,
+28,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Apartment,2419.0,1.0,1.0,
+29,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Bedroom in 2BR,1349.0,2.0,2.0,
+30,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Bedroom in 3BR,1159.0,3.0,3.0,
+31,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Bedroom in 4BR,1119.0,4.0,4.0,
+32,2930 Chestnut St,Philadelphia,Pennsylvania,19104,Bedroom in 4BR Duplex,1229.0,4.0,4.0,
+33,3701 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Studio,917.0,0.0,1.0,559.0
+34,3701 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1248.0,1.0,1.0,818.0
+35,3701 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1366.0,2.0,1.0,1066.0
+36,3701 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,1585.0,2.0,2.0,1174.0
+37,3701 Conshohocken Avenue,Philadelphia,Pennsylvania,19131,Apartment,2014.0,3.0,2.0,1481.0
+38,170 Cotton Street,Manayunk,Pennsylvania,19127,Studio - Cotton Hill,1145.0,0.0,1.0,
+39,170 Cotton Street,Manayunk,Pennsylvania,19127,4356 Cresson St,1195.0,2.0,1.0,
+40,170 Cotton Street,Manayunk,Pennsylvania,19127,4131 Main,1925.0,2.0,2.0,
+41,170 Cotton Street,Manayunk,Pennsylvania,19127,209 Levering St,2450.0,2.0,2.0,
+42,170 Cotton Street,Manayunk,Pennsylvania,19127,4422 Fleming St,1925.0,3.0,2.0,1700.0
+43,5700 Ogontz Ave,Philadelphia,Pennsylvania,19141,Studio,685.0,0.0,1.0,
+44,5700 Ogontz Ave,Philadelphia,Pennsylvania,19141,Apartment,785.0,1.0,1.0,
+45,5700 Ogontz Ave,Philadelphia,Pennsylvania,19141,Apartment,835.0,2.0,1.0,
+46,5700 Ogontz Ave,Philadelphia,Pennsylvania,19141,Apartment,1260.0,3.0,2.0,
+0,300 Parker Ave,Philadelphia,Pennsylvania,19128,Apartment,,0.0,1.0,
+1,300 Parker Ave,Philadelphia,Pennsylvania,19128,Apartment,1025.0,1.0,1.0,
+2,300 Parker Ave,Philadelphia,Pennsylvania,19128,Apartment,1250.0,2.0,1.0,
+3,449 Domino Lane,Philadelphia,Pennsylvania,19128,Apartment,845.0,1.0,1.0,
+4,449 Domino Lane,Philadelphia,Pennsylvania,19128,Apartment,1025.0,2.0,1.0,
+5,7340 Old York Road,Elkins Park,Pennsylvania,19027,Studio,695.0,0.0,1.0,572.0
+6,7340 Old York Road,Elkins Park,Pennsylvania,19027,Apartment,825.0,1.0,1.0,700.0
+7,7340 Old York Road,Elkins Park,Pennsylvania,19027,Apartment,970.0,2.0,1.0,775.0
+8,7012 Rising Sun Avenue,Philadelphia,Pennsylvania,19111,Studio,745.0,0.0,1.0,300.0
+9,7012 Rising Sun Avenue,Philadelphia,Pennsylvania,19111,Apartment,880.0,1.0,1.0,700.0
+10,7012 Rising Sun Avenue,Philadelphia,Pennsylvania,19111,Apartment,1044.0,2.0,1.0,800.0
+11,1930 Lawrence Road,Havertown,Pennsylvania,19083,Apartment,985.0,1.0,1.0,850.0
+12,1930 Lawrence Road,Havertown,Pennsylvania,19083,Apartment,995.0,1.0,1.0,900.0
+13,1930 Lawrence Road,Havertown,Pennsylvania,19083,Apartment,1035.0,2.0,2.0,1200.0
+14,1930 Lawrence Road,Havertown,Pennsylvania,19083,Apartment,1065.0,2.0,2.0,1200.0
+15,7210 Oxford Avenue,Philadelphia,Pennsylvania,19111,Studio,750.0,0.0,1.0,550.0
+16,7210 Oxford Avenue,Philadelphia,Pennsylvania,19111,1 Bedroom,850.0,1.0,1.0,650.0
+17,7210 Oxford Avenue,Philadelphia,Pennsylvania,19111,2 Bedroom,1000.0,2.0,1.0,850.0
+18,800 Cottman Ave,Philadelphia,Pennsylvania,19111,Studio,,0.0,1.0,500.0
+19,800 Cottman Ave,Philadelphia,Pennsylvania,19111,1B,1064.0,1.0,1.0,650.0
+20,800 Cottman Ave,Philadelphia,Pennsylvania,19111,171,,1.0,1.0,650.0
+21,800 Cottman Ave,Philadelphia,Pennsylvania,19111,178,,1.0,1.0,650.0
+22,800 Cottman Ave,Philadelphia,Pennsylvania,19111,1C,958.0,1.0,1.0,822.0
+23,800 Cottman Ave,Philadelphia,Pennsylvania,19111,303,,1.0,1.0,822.0
+24,800 Cottman Ave,Philadelphia,Pennsylvania,19111,1A,,1.0,1.0,711.0
+25,800 Cottman Ave,Philadelphia,Pennsylvania,19111,1D,,1.0,1.0,837.0
+26,800 Cottman Ave,Philadelphia,Pennsylvania,19111,1DEN,,1.0,1.0,950.0
+27,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2C,1350.0,2.0,2.0,1139.0
+28,800 Cottman Ave,Philadelphia,Pennsylvania,19111,152,,2.0,2.0,1139.0
+29,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2B,1100.0,2.0,2.0,1045.0
+30,800 Cottman Ave,Philadelphia,Pennsylvania,19111,329,,2.0,2.0,1045.0
+31,800 Cottman Ave,Philadelphia,Pennsylvania,19111,113,,2.0,2.0,1045.0
+32,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2A,,2.0,2.0,1181.0
+33,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2B1B,,2.0,1.0,1050.0
+34,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2D,,2.0,2.0,1113.0
+35,800 Cottman Ave,Philadelphia,Pennsylvania,19111,2DEN,,2.0,2.0,1175.0
+36,800 Cottman Ave,Philadelphia,Pennsylvania,19111,3A,,3.0,2.0,1250.0
+37,2661 Willits Road,Philadelphia,Pennsylvania,19114,Efficiency,795.0,0.0,1.0,450.0
+38,2661 Willits Road,Philadelphia,Pennsylvania,19114,Apartment,995.0,1.0,1.0,760.0
+39,2661 Willits Road,Philadelphia,Pennsylvania,19114,Apartment,1195.0,2.0,2.0,1036.0
+40,9601 Ashton Road,Philadelphia,Pennsylvania,19114,Apartment,795.0,1.0,1.0,525.0
+41,9601 Ashton Road,Philadelphia,Pennsylvania,19114,Townhome,1125.0,2.0,1.5,1090.0
+42,9601 Ashton Road,Philadelphia,Pennsylvania,19114,Townhome,1500.0,3.0,2.5,1450.0
+43,9629 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Studio,795.0,0.0,1.0,410.0
+44,9629 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Jr. Apartment,885.0,1.0,1.0,520.0
+45,9629 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,950.0,1.0,1.0,730.0
+46,9629 Bustleton Avenue,Philadelphia,Pennsylvania,19115,Apartment,1200.0,2.0,1.0,930.0
+0,600 Petoni Place,Philadelphia,Pennsylvania,19116,Flat,,1.0,1.0,700.0
+1,600 Petoni Place,Philadelphia,Pennsylvania,19116,Flat,,2.0,1.0,800.0
+2,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,Jr. 1 Bedroom 1 Bathroom,890.0,1.0,1.0,350.0
+3,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,401,890.0,1.0,1.0,350.0
+4,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,432,890.0,1.0,1.0,350.0
+5,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,Deluxe 1 Bedroom 1 Bathroom,995.0,1.0,1.0,625.0
+6,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,302,995.0,1.0,1.0,625.0
+7,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,204,1045.0,1.0,1.0,625.0
+8,2555 Welsh Rd,Northeast Philadelphia,Pennsylvania,19114,412,1045.0,1.0,1.0,625.0
+9,2101 Market Street,Philadelphia,Pennsylvania,19103,,2499.0,1.0,1.0,800.0
+10,1414 S Penn Sq Unit 23G,Philadelphia,Pennsylvania,19102,,700.0,1.0,1.0,
+11,2114 Pine St,Philadelphia,Pennsylvania,19103,,2995.0,2.0,1.5,1400.0
+12,"1833 Lombard St, Unit B",Philadelphia,Pennsylvania,19146,,2095.0,2.0,1.0,1650.0
+13,302 S 12th St,Philadelphia,Pennsylvania,19107,,2500.0,0.0,1.0,350.0
+14,319 S. 12th Street Unit #2R,Philadelphia,Pennsylvania,19107,,1250.0,1.0,1.0,700.0
+15,1115 Spruce St,Philadelphia,Pennsylvania,19107,,1150.0,0.0,1.0,450.0
+16,319 S 12th St,Philadelphia,Pennsylvania,19107,,1150.0,0.0,1.0,500.0
+0,2529 Kimball Street,Philadelphia,Pennsylvania,19146,,1550.0,2.0,1.5,1700.0
+1,256 S Alder St,Philadelphia,Pennsylvania,19107,,1850.0,2.0,1.0,1070.0
+2,262 S Alder St,Philadelphia,Pennsylvania,19107,,2150.0,3.0,1.0,1048.0
+3,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+4,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+5,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+6,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+7,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+8,2145 Fernon St,Philadelphia,Pennsylvania,19145,,1500.0,2.0,1.0,900.0
+9,813 E. Passyunk Avenue,Philadelphia,Pennsylvania,19147,,4850.0,3.0,3.0,2323.0
+10,5227 Catharine St Unit 1,Philadelphia,Pennsylvania,19143,,1295.0,2.0,1.0,
+11,2425 S. Rosewood Street,Philadelphia,Pennsylvania,19145,,1450.0,3.0,1.0,1050.0
+12,1918 S Front St,Philadelphia,Pennsylvania,19148,,1400.0,3.0,2.0,1420.0
+13,6248 Cedar Avenue,Philadelphia,Pennsylvania,19143,,1500.0,3.0,1.5,1413.0
+0,5913 McCallum Street,Philadelphia,Pennsylvania,19144,,1340.0,2.0,1.0,800.0
+1,3758 Richmond Street,Philadelphia,Pennsylvania,19137,,1000.0,2.0,1.0,700.0
+2,"475 Domino Ln, , PA",Philadelphia,Pennsylvania,19128,,1000.0,3.0,2.0,1367.0
+3,5240 Saul St,Philadelphia,Pennsylvania,19124,,1054.0,3.0,2.0,1068.0
+4,249 Shawmont Ave Unit C,Philadelphia,Pennsylvania,19128,,1370.0,1.0,1.0,1000.0
+5,5546 Torresdale Ave,Philadelphia,Pennsylvania,19124,,850.0,3.0,1.5,1140.0
+6,Medway Street & Verree Road,Philadelphia,Pennsylvania,19115,,1575.0,3.0,2.0,1250.0
+7,7 Ruby Court,Philadelphia,Pennsylvania,18940,,,3.0,2.5,2800.0
+8,2221 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 525 sqft,995.0,1.0,1.0,525.0
+9,2221 Spring Garden St,Philadelphia,Pennsylvania,19130,3F,995.0,1.0,1.0,
+10,570 N 23rd St,Philadelphia,Pennsylvania,19130,2 bed 1.0 bath 900 sqft,1500.0,2.0,1.0,900.0
+0,2101 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 600 sqft,1450.0,1.0,1.0,600.0
+1,2101 Spring Garden St,Philadelphia,Pennsylvania,19130,1R,1450.0,1.0,1.0,
+2,2020 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,995.0,1.0,1.0,
+3,2029 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 650 sqft,1550.0,1.0,1.0,650.0
+4,2029 Spring Garden St,Philadelphia,Pennsylvania,19130,3F,1550.0,1.0,1.0,
+5,626 N 22nd St,Philadelphia,Pennsylvania,19130,0 bed 1.0 bath,895.0,0.0,1.0,
+6,1931 Spring Garden St,Philadelphia,Pennsylvania,19130,0 bed 1.0 bath 450 sqft,1025.0,0.0,1.0,450.0
+7,1931 Spring Garden St,Philadelphia,Pennsylvania,19130,3R,1025.0,0.0,1.0,
+8,1927 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 400 sqft,1295.0,1.0,1.0,400.0
+9,3120 Haverford Ave,Philadelphia,Pennsylvania,19104,4 bed 2.0 bath 2000 sqft,2250.0,4.0,2.0,2000.0
+10,123 N 20th St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath,1250.0,1.0,1.0,
+11,123 N 20th St,Philadelphia,Pennsylvania,19103,3F,1250.0,1.0,1.0,
+12,516 N 32nd St,Philadelphia,Pennsylvania,19104,4 bed 2.5 bath,2400.0,4.0,2.5,
+13,3132 Mantua Ave,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,950.0,2.0,1.0,
+0,615 N 32nd St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath 900 sqft,1000.0,2.0,1.0,900.0
+1,623 N 32nd St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath 900 sqft,1000.0,2.0,1.0,900.0
+2,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+3,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+4,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+5,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+6,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+7,2326 Brown St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 700 sqft,1150.0,1.0,1.0,700.0
+8,520 N Natrona St,Philadelphia,Pennsylvania,19104,4 bed 2.0 bath,2500.0,4.0,2.0,
+9,435 N 33rd St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,995.0,2.0,1.0,
+10,3210 Haverford Ave,Philadelphia,Pennsylvania,19104,5 bed 2.0 bath 1624 sqft,2500.0,5.0,2.0,1624.0
+11,3301 Powelton Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,950.0,1.0,1.0,
+12,3303 Powelton Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,950.0,1.0,1.0,
+13,3307 Powelton Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,895.0,1.0,1.0,
+0,1926 North St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 650 sqft,2800.0,1.0,1.0,650.0
+1,30 S 22nd St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath,1295.0,1.0,1.0,
+2,30 S 22nd St,Philadelphia,Pennsylvania,19103,5,1295.0,1.0,1.0,
+3,3312 Hamilton St,Philadelphia,Pennsylvania,19104,0 bed 1.0 bath 250 sqft,750.0,0.0,1.0,250.0
+4,3312 Hamilton St,Philadelphia,Pennsylvania,19104,20,750.0,0.0,1.0,
+5,1740 Green St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath,1795.0,2.0,2.0,
+6,747 N 20th St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 1000 sqft,2300.0,2.0,2.0,1000.0
+7,662 N 33rd St,Philadelphia,Pennsylvania,19104,0 bed 1.0 bath,850.0,0.0,1.0,
+8,3329 Mt Vernon St,Philadelphia,Pennsylvania,19104,4 bed 2.0 bath,2200.0,4.0,2.0,
+9,751 N 20th St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 1000 sqft,2400.0,2.0,2.0,1000.0
+10,714 N 19th St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 1000 sqft,2300.0,2.0,2.0,1000.0
+11,838 N Woodstock St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1350.0,1.0,1.0,
+0,1716 Wallace St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 1400 sqft,1495.0,2.0,2.0,1400.0
+1,128 S 22nd St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath 500 sqft,1195.0,1.0,1.0,500.0
+2,128 S 22nd St,Philadelphia,Pennsylvania,19103,LL,1195.0,1.0,1.0,
+3,1708 Wallace St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1495.0,1.0,1.0,
+4,1708 Wallace St,Philadelphia,Pennsylvania,19130,301,1495.0,1.0,1.0,
+5,2313 Walnut St,Philadelphia,Pennsylvania,19103,2 bed 2.0 bath,1475.0,2.0,2.0,
+6,2313 Walnut St,Philadelphia,Pennsylvania,19103,B6,1475.0,2.0,2.0,
+7,1619 Green St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1425.0,1.0,1.0,
+8,1619 Green St,Philadelphia,Pennsylvania,19130,1619,1425.0,1.0,1.0,
+9,1601 Spring Garden St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1260.0,1.0,1.0,
+10,3424 Wallace St,Philadelphia,Pennsylvania,19104,4 bed 4.0 bath,2500.0,4.0,4.0,
+11,3424 Wallace St,Philadelphia,Pennsylvania,19104,A,2500.0,4.0,4.0,
+12,1921 Chestnut St,Philadelphia,Pennsylvania,19103,2 bed 1.5 bath,1825.0,2.0,1.5,
+13,3505 Haverford Ave,Philadelphia,Pennsylvania,19104,3 bed 3.0 bath,2100.0,3.0,3.0,
+14,201 S 22nd St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath 500 sqft,1795.0,1.0,1.0,500.0
+0,856 N 20th St,Philadelphia,Pennsylvania,19130,3 bed 2.5 bath 1720 sqft,2600.0,3.0,2.5,1720.0
+1,938 N 26th St,Philadelphia,Pennsylvania,19130,3 bed 2.5 bath 2200 sqft,2250.0,3.0,2.5,2200.0
+2,222 S Bonsall St,Philadelphia,Pennsylvania,19103,2 bed 1.0 bath,1750.0,2.0,1.0,
+3,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+4,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+5,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+6,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+7,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+8,1531 Green St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1000.0,1.0,1.0,
+9,1534 Mt Vernon St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath,1550.0,2.0,2.0,
+10,1508 Brandywine,Philadelphia,Pennsylvania,19130,1508 Brandywine Street 302,1795.0,2.0,2.0,950.0
+11,1508 Brandywine St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 950 sqft,1795.0,2.0,2.0,950.0
+12,928 N 29th St,Philadelphia,Pennsylvania,19130,2 bed 1.5 bath 1120 sqft,1850.0,2.0,1.5,1120.0
+13,2737 W Girard Ave,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath,1125.0,2.0,2.0,
+14,2737 W Girard Ave,Philadelphia,Pennsylvania,19130,2-F,1125.0,2.0,2.0,
+0,1221 N. 27th Stteet,Philadelphia,Pennsylvania,19121,1221 N 27th Street Unit 5,1575.0,2.0,2.0,900.0
+1,1221 N 27th St,Philadelphia,Pennsylvania,19121,2 bed 2.0 bath 900 sqft,1575.0,2.0,2.0,900.0
+2,700 Block N. 16th St.,Philadelphia,Pennsylvania,19130,"718 N 16th Street, unit 1",1395.0,2.0,1.0,1000.0
+3,700 Block N. 16th St.,Philadelphia,Pennsylvania,19130,"721 North 16th Street, unit 2",1495.0,2.0,1.0,850.0
+4,700 Block N. 16th St.,Philadelphia,Pennsylvania,19130,"713 N 16th Street, unit 1",1595.0,3.0,1.0,1000.0
+5,2416 Manning St,Philadelphia,Pennsylvania,19103,2 bed 2.0 bath 720 sqft,2200.0,2.0,2.0,720.0
+6,2815 W. Girard,Philadelphia,Pennsylvania,19121,2815 W. Girard  - 2815 Girard #2 Unit 2,1300.0,1.0,1.0,950.0
+7,2815 W Girard Ave,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 950 sqft,1300.0,1.0,1.0,950.0
+8,2321 Spruce St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath 575 sqft,1695.0,1.0,1.0,575.0
+9,2321 Spruce St,Philadelphia,Pennsylvania,19103,1R,1695.0,1.0,1.0,
+10,1932 W Girard Ave,Philadelphia,Pennsylvania,19130,3 bed 2.0 bath,1725.0,3.0,2.0,
+11,1932 W Girard Ave,Philadelphia,Pennsylvania,19130,3,1725.0,3.0,2.0,
+12,711 N 16th St,Philadelphia,Pennsylvania,19130,2 bed 1.0 bath 1000 sqft,2300.0,2.0,1.0,1000.0
+13,3601 Fairmount Ave,Philadelphia,Pennsylvania,19104,3 bed 1.0 bath 1200 sqft,1200.0,3.0,1.0,1200.0
+0,3535 Aspen St,Philadelphia,Pennsylvania,19104,3 bed 1.5 bath 1362 sqft,1400.0,3.0,1.5,1362.0
+1,3741 Lancaster Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,850.0,1.0,1.0,
+2,2337 W Thompson St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath 1100 sqft,1450.0,2.0,1.0,1100.0
+3,3801 Baring St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,1200.0,2.0,1.0,
+4,1238 N 28th St,Philadelphia,Pennsylvania,19121,2 bed 2.0 bath 1000 sqft,1525.0,2.0,2.0,1000.0
+5,1424 Fairmount Ave,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath 800 sqft,1450.0,1.0,1.0,800.0
+6,1260 N Newkirk St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath 872 sqft,1137.0,2.0,1.0,872.0
+7,1306 N 22nd St,Philadelphia,Pennsylvania,19121,3 bed 2.0 bath 1300 sqft,1750.0,3.0,2.0,1300.0
+8,340 S 24th St,Philadelphia,Pennsylvania,19103,2 bed 1.0 bath 1010 sqft,2000.0,2.0,1.0,1010.0
+9,2516 Ingersoll St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath 848 sqft,1500.0,2.0,1.0,848.0
+0,847 N 16th St,Philadelphia,Pennsylvania,19130,1 bed 1.0 bath,1295.0,1.0,1.0,
+1,847 N 16th St,Philadelphia,Pennsylvania,19130,2,1295.0,1.0,1.0,
+2,1914 Spruce St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath 950 sqft,2295.0,1.0,1.0,950.0
+3,1914 Spruce St,Philadelphia,Pennsylvania,19103,2R,2295.0,1.0,1.0,
+4,1617 Poplar St,Philadelphia,Pennsylvania,19130,2 bed 2.0 bath 1200 sqft,1825.0,2.0,2.0,1200.0
+5,1335 N Marston Street,Philadelphia,Pennsylvania,19121,1335 N Marston Street - 101 Unit 101,1800.0,2.0,2.0,1200.0
+6,1335 N Marston Street,Philadelphia,Pennsylvania,19121,1335 N Marston Street - 201 Unit 201,2000.0,3.0,2.0,1300.0
+7,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+8,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+9,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+10,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+11,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+12,1342 N Marston Street,Philadelphia,Pennsylvania,19121,1342 N Marston Street Unit 4,1525.0,2.0,2.0,942.0
+13,222 N 13th St,Philadelphia,Pennsylvania,19107,2 bed 1.0 bath,1400.0,2.0,1.0,
+14,1342 N Marston St,Philadelphia,Pennsylvania,19121,2 bed 2.0 bath 942 sqft,1525.0,2.0,2.0,942.0
+15,2039 N College Ave,Philadelphia,Pennsylvania,19121,3 bed 3.0 bath 1800 sqft,2100.0,3.0,3.0,1800.0
+16,1330 N Newkirk St,Philadelphia,Pennsylvania,19121,3 bed 1.5 bath,1300.0,3.0,1.5,
+0,805 N. Carlisle Street,Philadelphia,Pennsylvania,19130,805 N. Carlisle Street - #2,1500.0,1.0,1.0,
+1,805 N. Carlisle Street,Philadelphia,Pennsylvania,19130,805 N. Carlisle Street - 2 R,1750.0,2.0,1.0,
+2,805 N. Carlisle Street,Philadelphia,Pennsylvania,19130,805 N. Carlisle Street - 3 R,1750.0,2.0,1.0,
+3,805 N. Carlisle Street,Philadelphia,Pennsylvania,19130,805 N. Carlisle Street - 3 F,1950.0,2.0,1.0,
+4,805 N. Carlisle Street,Philadelphia,Pennsylvania,19130,805 N. Carlisle Street- 2 F,1950.0,2.0,1.0,
+5,2122 Pine St,Philadelphia,Pennsylvania,19103,2 bed 1.0 bath 800 sqft,1695.0,2.0,1.0,800.0
+6,2122 Pine St,Philadelphia,Pennsylvania,19103,2R,1695.0,2.0,1.0,
+7,1309 Mt Vernon St,Philadelphia,Pennsylvania,19123,3 bed 1.0 bath,2300.0,3.0,1.0,
+8,844 N 15th St,Philadelphia,Pennsylvania,19130,3 bed 2.5 bath 1600 sqft,2300.0,3.0,2.5,1600.0
+9,1321 N Hollywood St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath,995.0,3.0,1.0,
+10,416 Saunders Ave,Philadelphia,Pennsylvania,19104,5 bed 2.5 bath,2500.0,5.0,2.5,
+11,1357 Ridge Ave,Philadelphia,Pennsylvania,19123,1357 Ridge Ave,1320.0,1.0,1.0,622.0
+12,1357 Ridge Ave - 205,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 205,1435.0,1.0,1.0,576.0
+13,1357 Ridge Ave - 504,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 504,1410.0,1.0,1.0,542.0
+14,1357 Ridge Ave - 410,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 410,1390.0,1.0,1.0,543.0
+0,1357 Ridge Ave - 208,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 208,1425.0,1.0,1.0,566.0
+1,1357 Ridge Ave - 209,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 209,2150.0,2.0,2.0,989.0
+2,1357 Ridge Ave - 206,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 206,1450.0,1.0,1.0,597.0
+3,1357 Ridge Ave - 203,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 203,1320.0,1.0,1.0,526.0
+4,1357 Ridge Ave - 201,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 201,1630.0,1.0,1.0,620.0
+5,1357 Ridge Ave - 304,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 304,1370.0,1.0,1.0,542.0
+6,1357 Ridge Ave - 204,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 204,1350.0,1.0,1.0,542.0
+7,1357 Ridge Ave - 610,Philadelphia,Pennsylvania,19123,1357 Ridge Ave - 610,1470.0,1.0,1.0,543.0
+8,1357 Ridge Ave,Philadelphia,Pennsylvania,19123,1357 Ridge Ave,1425.0,1.0,1.0,566.0
+9,1715 Spruce St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath,1495.0,1.0,1.0,
+0,3856 Haverford Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath 390 sqft,950.0,1.0,1.0,390.0
+1,1217 Spring Garden Street,Philadelphia,Pennsylvania,19123,1217 Spring Garden Street - Unit 509,1525.0,1.0,1.0,
+2,607 N 39th St,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,1150.0,1.0,1.0,
+3,340 N 12th St,Philadelphia,Pennsylvania,19107,2 bed 2.0 bath 1000 sqft,1800.0,2.0,2.0,1000.0
+4,3901 Brandywine St,Philadelphia,Pennsylvania,19104,2 bed 1.5 bath 1030 sqft,1400.0,2.0,1.5,1030.0
+5,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+6,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+7,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+8,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+9,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+10,1838 Ingersoll St,Philadelphia,Pennsylvania,19121,3 bed 2.5 bath 1290 sqft,1650.0,3.0,2.5,1290.0
+11,340 North 12th Street,Philadelphia,Pennsylvania,19107,340 North 12th Street - Wolf-PS-59,,0.0,0.0,
+12,1908 Pine St,Philadelphia,Pennsylvania,19103,0 bed 1.0 bath 350 sqft,925.0,0.0,1.0,350.0
+13,1934 Waverly St,Philadelphia,Pennsylvania,19146,0 bed 1.0 bath,1100.0,0.0,1.0,
+14,1934 Waverly St,Philadelphia,Pennsylvania,19146,E108,1100.0,0.0,1.0,
+0,1631 W Stiles St,Philadelphia,Pennsylvania,19121,4 bed 2.5 bath 2000 sqft,1750.0,4.0,2.5,2000.0
+1,1201 Brandywine Street,Philadelphia,Pennsylvania,19123,1201 Brandywine Street - Unit 33,1300.0,1.0,1.0,
+2,1201 Brandywine Street,Philadelphia,Pennsylvania,19123,1201 Brandywine Street - Unit 28,1800.0,2.0,1.0,
+3,1619 Spruce St,Philadelphia,Pennsylvania,19103,2 bed 2.0 bath 1150 sqft,2290.0,2.0,2.0,1150.0
+4,1619 Spruce St,Philadelphia,Pennsylvania,19103,6,2290.0,2.0,2.0,
+5,1447 N 28th St,Philadelphia,Pennsylvania,19121,4 bed 3.0 bath 2000 sqft,2550.0,4.0,3.0,2000.0
+6,1216 Wallace St,Philadelphia,Pennsylvania,19123,2 bed 2.0 bath 0 sqft,1700.0,2.0,2.0,
+7,1216 Wallace St,Philadelphia,Pennsylvania,19123,2B,1700.0,2.0,2.0,
+8,2439 W Jefferson St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath,1100.0,3.0,1.0,
+9,3928 Haverford Ave,Philadelphia,Pennsylvania,19104,3 bed 3.0 bath 1250 sqft,2175.0,3.0,3.0,1250.0
+10,1451 N Newkirk St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath,1200.0,2.0,1.0,
+11,3925 Haverford Avenue,Philadelphia,Pennsylvania,19104,3925 Haverford Avenue - LL 1,1750.0,2.0,2.0,923.0
+12,3925 Haverford Avenue,Philadelphia,Pennsylvania,19104,3925 Haverford Avenue - LL 3,1750.0,2.0,2.0,949.0
+13,3925 Haverford Avenue,Philadelphia,Pennsylvania,19104,3925 Haverford Avenue - LL 6,1750.0,2.0,2.0,949.0
+14,3925 Haverford Avenue,Philadelphia,Pennsylvania,19104,3925 Haverford Avenue - 104,1895.0,2.0,2.0,949.0
+15,3925 Haverford Avenue,Philadelphia,Pennsylvania,19104,3925 Haverford Avenue - 304,1945.0,2.0,2.0,949.0
+16,332 S 17th St,Philadelphia,Pennsylvania,19103,1 bed 1.0 bath 500 sqft,1125.0,1.0,1.0,500.0
+0,1458 N Dover St,Philadelphia,Pennsylvania,19121,2 bed 1.5 bath 840 sqft,1350.0,2.0,1.5,840.0
+1,1322 N 17th St,Philadelphia,Pennsylvania,19121,0 bed 1.0 bath,800.0,0.0,1.0,
+2,3916 Fairmount Ave,Philadelphia,Pennsylvania,19104,5 bed 2.0 bath 1915 sqft,1959.0,5.0,2.0,1915.0
+3,803 N 39th St,Philadelphia,Pennsylvania,19104,3 bed 1.5 bath 1186 sqft,1243.0,3.0,1.5,1186.0
+4,3951 Baring St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,890.0,2.0,1.0,
+5,318 S 15th St,Philadelphia,Pennsylvania,19102,1 bed 1.0 bath,1295.0,1.0,1.0,
+6,318 S 15th St,Philadelphia,Pennsylvania,19102,1F,1295.0,1.0,1.0,
+7,609 N 11th St,Philadelphia,Pennsylvania,19123,1 bed 1.0 bath,900.0,1.0,1.0,
+8,1619 Master St,Philadelphia,Pennsylvania,19121,4 bed 2.5 bath 1505 sqft,2600.0,4.0,2.5,1505.0
+9,1525 W Seybert St,Philadelphia,Pennsylvania,19121,1 bed 1.0 bath 640 sqft,950.0,1.0,1.0,640.0
+10,1331 N 16th St,Philadelphia,Pennsylvania,19121,4 bed 2.0 bath 0 sqft,1700.0,4.0,2.0,
+0,46 N 40th St,Philadelphia,Pennsylvania,19104,3 bed 3.0 bath,2100.0,3.0,3.0,
+1,1417 N 17th St,Philadelphia,Pennsylvania,19121,1 bed 1.0 bath,735.0,1.0,1.0,
+2,2319 Fitzwater Street,Philadelphia,Pennsylvania,19146,2319 Fitzwater Street Apt # 202,1475.0,1.0,1.0,545.0
+3,441 Wiota St,Philadelphia,Pennsylvania,19104,3 bed 3.0 bath 0 sqft,2500.0,3.0,3.0,
+4,441 Wiota St,Philadelphia,Pennsylvania,19104,3,2500.0,3.0,3.0,
+5,1210 Chestnut Street,Philadelphia,Pennsylvania,19107,"1210 Chestnut St, 401",1725.0,1.0,1.0,510.0
+6,1210 Chestnut Street,Philadelphia,Pennsylvania,19107,"1210 Chestnut St, 206",1995.0,1.0,1.5,735.0
+7,1210 Chestnut Street,Philadelphia,Pennsylvania,19107,"1210 Chestnut St, 202",2100.0,1.0,1.0,850.0
+8,1210 Chestnut Street,Philadelphia,Pennsylvania,19107,"1210 Chestnut St, 411",3200.0,2.0,2.0,1080.0
+9,1322 Locust St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath 875 sqft,1295.0,1.0,1.0,875.0
+10,1322 Locust St,Philadelphia,Pennsylvania,19107,3F,1295.0,1.0,1.0,
+11,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+12,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+13,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+14,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+15,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+16,4030 Green St,Philadelphia,Pennsylvania,19104,3 bed 2.0 bath,1250.0,3.0,2.0,
+17,417 N Preston St,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,1100.0,1.0,1.0,
+18,1430 Master St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath,1500.0,3.0,1.0,
+0,1428 Master St,Philadelphia,Pennsylvania,19121,1 bed 1.0 bath,950.0,1.0,1.0,
+1,4028 Market St,Philadelphia,Pennsylvania,19104,0 bed 1.0 bath 500 sqft,850.0,0.0,1.0,500.0
+2,801 N 40th St,Philadelphia,Pennsylvania,19104,5 bed 2.0 bath,2000.0,5.0,2.0,
+3,1424 Master St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath 1250 sqft,1300.0,3.0,1.0,1250.0
+4,1514 N 17th St,Philadelphia,Pennsylvania,19121,2 bed 2.0 bath 1425 sqft,1500.0,2.0,2.0,1425.0
+5,1422 Master St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath 1100 sqft,1350.0,3.0,1.0,1100.0
+6,625 N 10th St,Philadelphia,Pennsylvania,19123,4 bed 2.5 bath 0 sqft,2400.0,4.0,2.5,
+7,625 N 10th St,Philadelphia,Pennsylvania,19123,1,2400.0,4.0,2.5,
+8,1518 N 17th St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath 1300 sqft,1200.0,2.0,1.0,1300.0
+9,524 N Preston St,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath 675 sqft,700.0,1.0,1.0,675.0
+10,1512 Lombard St,Philadelphia,Pennsylvania,19146,2 bed 1.0 bath,2095.0,2.0,1.0,
+0,1512 Lombard Street,Philadelphia,Pennsylvania,19146,1512 Lombard Street-3F,1995.0,2.0,1.0,
+1,1222 Locust Street,Philadelphia,Pennsylvania,19107,"1222 Locust St, 102",2100.0,2.0,2.0,700.0
+2,1222 Locust Street,Philadelphia,Pennsylvania,19107,"1222 Locust St, 203",2450.0,2.0,2.0,857.0
+3,1222 Locust Street,Philadelphia,Pennsylvania,19107,"1222 Locust St, 407",2530.0,2.0,2.0,967.0
+4,1222 Locust Street,Philadelphia,Pennsylvania,19107,"1222 Locust St, 605",3500.0,2.0,2.0,928.0
+5,535 Budd St,Philadelphia,Pennsylvania,19104,0 bed 1.0 bath,850.0,0.0,1.0,
+6,1612 N Gratz St,Philadelphia,Pennsylvania,19121,4 bed 2.0 bath 1516 sqft,2250.0,4.0,2.0,1516.0
+7,1532 N 17th St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath,1300.0,2.0,1.0,
+8,1207 Locust St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath 575 sqft,1025.0,1.0,1.0,575.0
+9,1631 N 30th St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath 1344 sqft,1450.0,3.0,1.0,1344.0
+10,1300 Spruce St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath 852 sqft,1425.0,1.0,1.0,852.0
+11,1109 Walnut St,Philadelphia,Pennsylvania,19107,2 bed 2.0 bath,1895.0,2.0,2.0,
+12,801 N Preston St,Philadelphia,Pennsylvania,19104,3 bed 1.0 bath,1200.0,3.0,1.0,
+13,801 N Preston St,Philadelphia,Pennsylvania,19104,2,1200.0,3.0,1.0,
+0,1544 Willington St,Philadelphia,Pennsylvania,19121,1544 Willington St - Unit 2 All,2100.0,4.0,3.0,
+1,1605 N Bouvier St,Philadelphia,Pennsylvania,19121,3 bed 1.0 bath 1400 sqft,1100.0,3.0,1.0,1400.0
+2,1605 N Bouvier St,Philadelphia,Pennsylvania,19121,1,1100.0,3.0,1.0,
+3,425 S Broad St,Philadelphia,Pennsylvania,19147,2 bed 1.0 bath 950 sqft,2100.0,2.0,1.0,950.0
+4,4032 Reno St,Philadelphia,Pennsylvania,19104,3 bed 1.0 bath,950.0,3.0,1.0,
+5,3854 W Girard Ave,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,1050.0,1.0,1.0,
+6,1747 N 29th St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath 0 sqft,1050.0,2.0,1.0,
+7,1747 N 29th St,Philadelphia,Pennsylvania,19121,1,1050.0,2.0,1.0,
+8,1917 Christian St,Philadelphia,Pennsylvania,19146,2 bed 1.0 bath,1500.0,2.0,1.0,
+9,1917 Christian St,Philadelphia,Pennsylvania,19146,B,1500.0,2.0,1.0,
+10,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+11,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+12,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+13,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+14,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+15,116 S 10th St,Philadelphia,Pennsylvania,19107,5 bed 3.0 bath,2500.0,5.0,3.0,
+16,3225 Turner St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath,900.0,2.0,1.0,
+0,1632 Willington St,Philadelphia,Pennsylvania,19121,6 bed 3.5 bath 2100 sqft,3800.0,6.0,3.5,2100.0
+1,1626 Cecil B. Moore Ave,Philadelphia,Pennsylvania,19121,5 bed 4.0 bath 1500 sqft,3500.0,5.0,4.0,1500.0
+2,1815 N Etting St,Philadelphia,Pennsylvania,19121,2 bed 1.0 bath,975.0,2.0,1.0,
+3,1620 Cecil B. Moore Ave,Philadelphia,Pennsylvania,19121,0 bed 1.0 bath 500 sqft,1200.0,0.0,1.0,500.0
+4,1831 Judson St,Philadelphia,Pennsylvania,19121,3 bed 1.5 bath,1095.0,3.0,1.5,
+5,325 S 12th St,Philadelphia,Pennsylvania,19107,2 bed 1.0 bath 800 sqft,1595.0,2.0,1.0,800.0
+6,620 S Broad St,Philadelphia,Pennsylvania,19146,2 bed 1.5 bath 1800 sqft,1800.0,2.0,1.5,1800.0
+7,1821 N 28th St,Philadelphia,Pennsylvania,19121,3 bed 1.5 bath 1200 sqft,1395.0,3.0,1.5,1200.0
+8,1617 N Sydenham St,Philadelphia,Pennsylvania,19121,4 bed 2.0 bath 0 sqft,2650.0,4.0,2.0,
+9,1617 N Sydenham St,Philadelphia,Pennsylvania,19121,1,2650.0,4.0,2.0,
+10,1633 Cecil B. Moore Ave,Philadelphia,Pennsylvania,19121,5 bed 2.0 bath 2688 sqft,2500.0,5.0,2.0,2688.0
+0,620 N 42nd St,Philadelphia,Pennsylvania,19104,3 bed 1.0 bath 1548 sqft,1375.0,3.0,1.0,1548.0
+1,4115 Brown St,Philadelphia,Pennsylvania,19104,2 bed 2.0 bath 1040 sqft,1250.0,2.0,2.0,1040.0
+2,4220 Powelton Ave,Philadelphia,Pennsylvania,19104,4 bed 2.0 bath 1767 sqft,2400.0,4.0,2.0,1767.0
+3,4201 Wallace St,Philadelphia,Pennsylvania,19104,1 bed 1.0 bath,785.0,1.0,1.0,
+4,248 S Warnock St,Philadelphia,Pennsylvania,19107,3 bed 1.0 bath 940 sqft,2095.0,3.0,1.0,940.0
+5,763 S 16th St,Philadelphia,Pennsylvania,19146,2 bed 1.0 bath,1530.0,2.0,1.0,
+6,4204 Chestnut St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,1400.0,2.0,1.0,
+7,1903 W Montgomery Ave,Philadelphia,Pennsylvania,19121,0 bed 1.0 bath,550.0,0.0,1.0,
+8,1903 W Montgomery Ave,Philadelphia,Pennsylvania,19121,4,550.0,0.0,1.0,
+9,1105 N 40th St,Philadelphia,Pennsylvania,19104,4 bed 1.0 bath,1000.0,4.0,1.0,
+10,1028 Spruce St,Philadelphia,Pennsylvania,19107,2 bed 1.0 bath,1995.0,2.0,1.0,
+11,1028 Spruce St,Philadelphia,Pennsylvania,19107,7,1995.0,2.0,1.0,
+0,1026 Spruce St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath,1650.0,1.0,1.0,
+1,1026 Spruce St,Philadelphia,Pennsylvania,19107,7,1650.0,1.0,1.0,
+2,1011 Spruce St,Philadelphia,Pennsylvania,19107,0 bed 1.0 bath 450 sqft,1050.0,0.0,1.0,450.0
+3,1011 Spruce St,Philadelphia,Pennsylvania,19107,3R,1050.0,0.0,1.0,
+4,1723 Willington St,Philadelphia,Pennsylvania,19121,5 bed 2.5 bath 1103 sqft,3450.0,5.0,2.5,1103.0
+5,1723 Willington St,Philadelphia,Pennsylvania,19121,1,3450.0,5.0,2.5,
+6,4022 Poplar St,Philadelphia,Pennsylvania,19104,2 bed 1.0 bath,975.0,2.0,1.0,
+7,321 S 11th St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath 0 sqft,1895.0,1.0,1.0,
+8,321 S 11th St,Philadelphia,Pennsylvania,19107,5,1895.0,1.0,1.0,
+9,1813 N Gratz St,Philadelphia,Pennsylvania,19121,5 bed 2.0 bath 0 sqft,2250.0,5.0,2.0,
+10,1134 Rodman St,Philadelphia,Pennsylvania,19147,3 bed 2.0 bath 1200 sqft,1900.0,3.0,2.0,1200.0
+11,1134 Rodman St,Philadelphia,Pennsylvania,19147,6,1900.0,3.0,2.0,
+12,1705 W Montgomery Ave,Philadelphia,Pennsylvania,19121,9 bed 3.0 bath 3000 sqft,5850.0,9.0,3.0,3000.0
+13,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Modern/Junior,995.0,1.0,1.0,575.0
+14,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Dynasty,1100.0,1.0,1.0,647.0
+15,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Victorian,1100.0,1.0,1.0,622.0
+16,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Colonial,1320.0,2.0,1.0,810.0
+17,1950 Ashbourne Rd,Elkins Park,Pennsylvania,19027,Renaissance,1800.0,3.0,1.5,1120.0
+18,112 S 8th St,Philadelphia,Pennsylvania,19107,1 bed 1.0 bath,1295.0,1.0,1.0,

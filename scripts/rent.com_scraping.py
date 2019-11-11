@@ -254,7 +254,7 @@ if __name__ == '__main__':
 		df = pd.DataFrame([], columns=cols)
 		df.to_csv('./rent_dot_com.csv')
 
-	for i, batch_urls in enumerate(urls_chunk[9:]):
+	for i, batch_urls in enumerate(urls_chunk[33:]):
 		print(batch_urls)
 		rdc.scrape_apt_data(batch_urls, verbose=True)
 		data = rdc.apt_data
