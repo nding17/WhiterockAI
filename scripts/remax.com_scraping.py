@@ -256,7 +256,7 @@ class remax_dot_com:
         apt_all_data = []
 
         if verbose:
-            print(f'apartments in {len(apt_urls)} addresses to be scraped')
+            print(f'{len(apt_urls)} apartments to be scraped')
 
         for i, apt_url in enumerate(apt_urls):
             apt_all_data.append(self._get_apt_info(apt_url)) 
@@ -279,7 +279,6 @@ if __name__ == '__main__':
     urls = rmdc.apt_urls
 
     urls_chuck = np.array_split(urls, int(len(urls))//20)
-    print(urls_chuck[0][0])
 
     os.chdir('..')
 
@@ -321,6 +320,8 @@ if __name__ == '__main__':
     if not os.path.exists('remax_dot_com.csv'):
         df = pd.DataFrame([], columns=cols)
         df.to_csv('./remax_dot_com.csv')
+
+    print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
     for i, batch_urls in enumerate(urls_chuck):
         rmdc.scrape_apt_data(batch_urls, verbose=True)
