@@ -147,66 +147,8 @@ class remax_dot_com():
 	        return None
 
 
-	def remax_normal(self, soup):
-	    # REMAX normal property
-	    content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
-	    price = get_price(soup)
-	    street, city, state, zipcode = get_address(content_tag)
-	    sidict = get_sideinfo(content_tag)
-	    listid = access_dict(sidict, 'Listing ID')
-	    listtype = access_dict(sidict, 'Listing Type')
-	    bedrooms = access_dict(sidict, 'Bedrooms')
-	    bathrooms = access_dict(sidict, 'Bathrooms')
-	    sqft = access_dict(sidict, 'House Size')
-	    lotsf = access_dict(sidict, 'Lot Size')
-	    waterfront = access_dict(sidict, 'Waterfront')
-	    liststatus = access_dict(sidict, 'Listing Status')
-	    yrbuilt = access_dict(sidict, 'Year Built')
-	    county = access_dict(sidict, 'County')
-	    halfbath = access_dict(sidict, 'Half Bath')
-	    subdivision = access_dict(sidict, 'Subdivision')
-	    cooling = access_dict(sidict, 'Cooling')
-	    ac = access_dict(sidict, 'Air Conditioning')
-	    appliances = access_dict(sidict, 'Appliances')
-	    rooms = access_dict(sidict, 'Rooms')
-	    laundry = access_dict(sidict, 'Laundry')
-	    taxes = access_dict(sidict, 'Taxes')
-	    luxurious = 'No'
-
-	    unit = [
-	        street,
-	        city,
-	        state,
-	        zipcode,
-	        bathrooms,
-	        bedrooms,
-	        rooms,
-	        waterfront,
-	        cooling,
-	        ac,
-	        appliances,
-	        laundry,
-	        sqft,
-	        price,
-	        taxes,
-	        listtype,
-	        listid,
-	        lotsf,
-	        liststatus,
-	        yrbuilt,
-	        county,
-	        halfbath,
-	        subdivision,
-	        luxurious,
-	    ]
-
-	    return unit
-
-
-	def remax_collection(self, soup):
-	    # REMAX luxurious property 
+	def remax_apt(self, soup, content_tag):
 	    price = get_price_normal(soup)
-	    content_tag = soup.find('div', class_='property-details--details')
 	    street, city, state, zipcode = get_address(content_tag)
 	    sidict = get_sideinfo(content_tag)
 	    listid = access_dict(sidict, 'Listing ID')
@@ -278,15 +220,18 @@ class remax_dot_com():
 	        return False
 
 	def get_apt_info(self, apt_url):
-	    overhead = 'https://www.remax.com'
-	    response = requests.get(overhead+apt_url)
+	    response = requests.get(self._overhead+apt_url)
 	    results = response.content
 	    
 	    if not response.status_code == 404:
 	        soup = BeautifulSoup(results, 'lxml')
 	        is_lux = check_lux(soup)
 	        if is_lux:
-	            return remax_collection(soup)
+	            content_tag = soup.find('div', class_='property-details--details')
 	        else:
-	            return remax_normal(soup)
+	            content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
+	        apt_info = remax_apt(soup, content_tag)
+
+	    return apt_info
+
 
