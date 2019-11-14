@@ -61,8 +61,17 @@ class remax_dot_com:
             pg_lst = soup.find_all('li', class_='pages-item')
             try:
                 pg_tags = [pg.find('a', class_='js-pager-item pages-link') for pg in pg_lst]
-                pg_nums = [int(pg_tag.get_text()) for pg_tag in pg_tags]
+                pg_nums = []
+                for pg_tag in pg_tags:
+                    if pg_tag:
+                        try:
+                            pg_nums.append(int(pg_tag.get_text()))
+                        except:
+                            continue
                 max_pg = max(pg_nums)
+
+                if test:
+                    max_pg = 50
 
                 if verbose:
                     print(f'there are {max_pg} apartment URLs to be collected')
@@ -74,9 +83,7 @@ class remax_dot_com:
                     apt_ensemble_urls += self._get_apt_urls_per_page(pg_num)
                     if verbose:
                         print(f'page {pg_num} apartment URLs collected')
-                    if test:
-                        if pg_num > 50:
-                            break
+    
             if verbose:
                 print(f'all apartment URLs collected')
 
@@ -175,7 +182,6 @@ class remax_dot_com:
         rooms = self._access_dict(sidict, 'Rooms')
         laundry = self._access_dict(sidict, 'Laundry')
         taxes = self._access_dict(sidict, 'Taxes')
-        luxurious = 'Yes'
 
         unit = [
             street,
@@ -201,7 +207,6 @@ class remax_dot_com:
             county,
             halfbath,
             subdivision,
-            luxurious,
         ]
 
         return unit
@@ -232,16 +237,20 @@ class remax_dot_com:
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
             is_lux = self._check_lux(soup)
+            lux = 'No'
             if is_lux:
                 content_tag = soup.find('div', class_='property-details--details')
+                lux = 'Yes'
             else:
                 content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
+            
             apt_info = self._remax_apt(soup, content_tag)
+            apt_info.append(lux)
 
         return apt_info
 
-    def scrape_apt_urls(self, verbose=False):
-        self._apt_urls = self._get_ensemble_apt_urls(verbose)
+    def scrape_apt_urls(self, verbose=False, test=False):
+        self._apt_urls = self._get_ensemble_apt_urls(verbose=verbose, test=test)
 
     def scrape_apt_data(self, apt_urls, verbose=False):
         apt_all_data = []
@@ -250,7 +259,7 @@ class remax_dot_com:
             print(f'apartments in {len(apt_urls)} addresses to be scraped')
 
         for i, apt_url in enumerate(apt_urls):
-            apt_all_data += self._get_apt_info(apt_url)
+            apt_all_data.append(self._get_apt_info(apt_url)) 
         
         self._apt_data = apt_all_data
 
@@ -266,10 +275,11 @@ if __name__ == '__main__':
 
     rmdc = remax_dot_com('philadelphia', 'pa')
 
-    rmdc.scrape_apt_urls(verbose=True, test=True)
+    rmdc.scrape_apt_urls(verbose=True)
     urls = rmdc.apt_urls
 
     urls_chuck = np.array_split(urls, int(len(urls))//20)
+    print(urls_chuck[0][0])
 
     os.chdir('..')
 
