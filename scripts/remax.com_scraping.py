@@ -13,7 +13,7 @@ import numpy as np
 import re
 import os
 
-class remax_dot_com():
+class remax_dot_com:
 
     def __init__(self, city, state):
         self._city = city
@@ -50,7 +50,7 @@ class remax_dot_com():
             
         return apt_urls
 
-    def _get_ensemble_apt_urls(verbose=False):
+    def _get_ensemble_apt_urls(self, verbose=False, test=False):
         test_page = self._get_webpage(1)
         response = requests.get(test_page)
         results = response.content
@@ -60,8 +60,10 @@ class remax_dot_com():
             soup = BeautifulSoup(results, 'lxml')
             pg_lst = soup.find_all('li', class_='pages-item')
             try:
-                max_pg_tag = pg_lst[-1].find('a', class_='js-pager-item pages-link')
-                max_pg = int(max_pg_tag.get_text())
+                pg_tags = [pg.find('a', class_='js-pager-item pages-link') for pg in pg_lst]
+                pg_nums = [int(pg_tag.get_text()) for pg_tag in pg_tags]
+                max_pg = max(pg_nums)
+
                 if verbose:
                     print(f'there are {max_pg} apartment URLs to be collected')
             except:
@@ -72,6 +74,9 @@ class remax_dot_com():
                     apt_ensemble_urls += self._get_apt_urls_per_page(pg_num)
                     if verbose:
                         print(f'page {pg_num} apartment URLs collected')
+                    if test:
+                        if pg_num > 50:
+                            break
             if verbose:
                 print(f'all apartment URLs collected')
 
@@ -257,64 +262,63 @@ class remax_dot_com():
     def apt_data(self):
         return self._apt_data
     
-    if __name__ == '__main__':
+if __name__ == '__main__':
 
-        rmdc = remax_dot_com('philadelphia', 'pa')
+    rmdc = remax_dot_com('philadelphia', 'pa')
 
-        rmdc.scrape_apt_urls(verbose=True)
-        urls = rmdc.apt_urls
+    rmdc.scrape_apt_urls(verbose=True, test=True)
+    urls = rmdc.apt_urls
 
-        urls_chuck = np.array_split(urls, int(len(urls))//20)
+    urls_chuck = np.array_split(urls, int(len(urls))//20)
 
-        os.chdir('..')
+    os.chdir('..')
 
-        if not os.path.exists('data'):
-            os.mkdir('data')
+    if not os.path.exists('data'):
+        os.mkdir('data')
 
-        os.chdir('./data')
-        if not os.path.exists('sample'):
-            os.mkdir('sample')
-        os.chdir('sample')
+    os.chdir('./data')
+    if not os.path.exists('sample'):
+        os.mkdir('sample')
+    os.chdir('sample')
 
-        cols = [
-            'address',
-            'city',
-            'state',
-            'zipcode',
-            'bathrooms',
-            'bedrooms',
-            'rooms',
-            'waterfront',
-            'cooling',
-            'AC',
-            'appliances',
-            'laundry',
-            'sqft',
-            'price',
-            'taxes',
-            'list_type',
-            'list_id',
-            'lot_sqft',
-            'list_status',
-            'year_built',
-            'county',
-            'half_bath',
-            'subdivision',
-            'luxurious',
-        ]
+    cols = [
+        'address',
+        'city',
+        'state',
+        'zipcode',
+        'bathrooms',
+        'bedrooms',
+        'rooms',
+        'waterfront',
+        'cooling',
+        'AC',
+        'appliances',
+        'laundry',
+        'sqft',
+        'price',
+        'taxes',
+        'list_type',
+        'list_id',
+        'lot_sqft',
+        'list_status',
+        'year_built',
+        'county',
+        'half_bath',
+        'subdivision',
+        'luxurious',
+    ]
 
-        if not os.path.exists('remax_dot_com.csv'):
-            df = pd.DataFrame([], columns=cols)
-            df.to_csv('./remax_dot_com.csv')
+    if not os.path.exists('remax_dot_com.csv'):
+        df = pd.DataFrame([], columns=cols)
+        df.to_csv('./remax_dot_com.csv')
 
-        for i, batch_urls in enumerate(urls_chuck):
-            rmdc.scrape_apt_data(batch_urls, verbose=True)
-            data = rmdc.apt_data
-            df_new = pd.DataFrame(data, column=cols)
+    for i, batch_urls in enumerate(urls_chuck):
+        rmdc.scrape_apt_data(batch_urls, verbose=True)
+        data = rmdc.apt_data
+        df_new = pd.DataFrame(data, columns=cols)
 
-            with open('remax_dot_com.csv', 'a') as df_old:
-                df_new.to_csv(df_old, header=False)
-            print(f'batch {i} finished running')
+        with open('remax_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+        print(f'batch {i} finished running')
 
-        print('job done!')
-
+    print('job done!')
