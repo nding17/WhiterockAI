@@ -27,13 +27,14 @@ class remax_dot_com():
         city = self._city.strip().lower()
         state = self._state.strip().lower()
         dangle = 'realestatehomesforsale'
+        overhead = self._overhead
         url = f'{overhead}/{dangle}/{city}-{state}-p{pg_num}.html?query={city},{state}-search/newest-sortorder'
         return url
 
 
     def _get_apt_urls_per_page(self, pg_num):
 
-        webpage = get_webpage(pg_num)
+        webpage = self._get_webpage(pg_num)
         response = requests.get(webpage)
         results = response.content
         apt_urls = []
@@ -50,7 +51,7 @@ class remax_dot_com():
         return apt_urls
 
     def _get_ensemble_apt_urls(verbose=False):
-        test_page = get_webpage(1)
+        test_page = self._get_webpage(1)
         response = requests.get(test_page)
         results = response.content
         apt_ensemble_urls = []
@@ -68,7 +69,7 @@ class remax_dot_com():
             
             if not max_pg == np.nan:
                 for pg_num in range(1, max_pg+1):
-                    apt_ensemble_urls += get_apt_urls_per_page(pg_num)
+                    apt_ensemble_urls += self._get_apt_urls_per_page(pg_num)
                     if verbose:
                         print(f'page {pg_num} apartment URLs collected')
             if verbose:
@@ -132,7 +133,7 @@ class remax_dot_com():
         except:
             return sideinfo
 
-    def access_dict(self, d, key):
+    def _access_dict(self, d, key):
         try:
             value = d[key]
             if 'sqft' in value:
@@ -147,28 +148,28 @@ class remax_dot_com():
             return None
 
 
-    def remax_apt(self, soup, content_tag):
-        price = get_price_normal(soup)
-        street, city, state, zipcode = get_address(content_tag)
-        sidict = get_sideinfo(content_tag)
-        listid = access_dict(sidict, 'Listing ID')
-        listtype = access_dict(sidict, 'Listing Type')
-        bedrooms = access_dict(sidict, 'Bedrooms')
-        bathrooms = access_dict(sidict, 'Bathrooms')
-        sqft = access_dict(sidict, 'House Size')
-        lotsf = access_dict(sidict, 'Lot Size')
-        waterfront = access_dict(sidict, 'Waterfront')
-        liststatus = access_dict(sidict, 'Listing Status')
-        yrbuilt = access_dict(sidict, 'Year Built')
-        county = access_dict(sidict, 'County')
-        halfbath = access_dict(sidict, 'Half Bath')
-        subdivision = access_dict(sidict, 'Subdivision')
-        cooling = access_dict(sidict, 'Cooling')
-        ac = access_dict(sidict, 'Air Conditioning')
-        appliances = access_dict(sidict, 'Appliances')
-        rooms = access_dict(sidict, 'Rooms')
-        laundry = access_dict(sidict, 'Laundry')
-        taxes = access_dict(sidict, 'Taxes')
+    def _remax_apt(self, soup, content_tag):
+        price = self._get_price(soup)
+        street, city, state, zipcode = self._get_address(content_tag)
+        sidict = self._get_sideinfo(content_tag)
+        listid = self._access_dict(sidict, 'Listing ID')
+        listtype = self._access_dict(sidict, 'Listing Type')
+        bedrooms = self._access_dict(sidict, 'Bedrooms')
+        bathrooms = self._access_dict(sidict, 'Bathrooms')
+        sqft = self._access_dict(sidict, 'House Size')
+        lotsf = self._access_dict(sidict, 'Lot Size')
+        waterfront = self._access_dict(sidict, 'Waterfront')
+        liststatus = self._access_dict(sidict, 'Listing Status')
+        yrbuilt = self._access_dict(sidict, 'Year Built')
+        county = self._access_dict(sidict, 'County')
+        halfbath = self._access_dict(sidict, 'Half Bath')
+        subdivision = self._access_dict(sidict, 'Subdivision')
+        cooling = self._access_dict(sidict, 'Cooling')
+        ac = self._access_dict(sidict, 'Air Conditioning')
+        appliances = self._access_dict(sidict, 'Appliances')
+        rooms = self._access_dict(sidict, 'Rooms')
+        laundry = self._access_dict(sidict, 'Laundry')
+        taxes = self._access_dict(sidict, 'Taxes')
         luxurious = 'Yes'
 
         unit = [
@@ -200,7 +201,7 @@ class remax_dot_com():
 
         return unit
 
-    def check_lux(self, soup):
+    def _check_lux(self, soup):
         try:
             is_lux = False
             
@@ -219,19 +220,101 @@ class remax_dot_com():
         except:
             return False
 
-    def get_apt_info(self, apt_url):
+    def _get_apt_info(self, apt_url):
         response = requests.get(self._overhead+apt_url)
         results = response.content
         
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
-            is_lux = check_lux(soup)
+            is_lux = self._check_lux(soup)
             if is_lux:
                 content_tag = soup.find('div', class_='property-details--details')
             else:
                 content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
-            apt_info = remax_apt(soup, content_tag)
+            apt_info = self._remax_apt(soup, content_tag)
 
         return apt_info
 
+    def scrape_apt_urls(self, verbose=False):
+        self._apt_urls = self._get_ensemble_apt_urls(verbose)
+
+    def scrape_apt_data(self, apt_urls, verbose=False):
+        apt_all_data = []
+
+        if verbose:
+            print(f'apartments in {len(apt_urls)} addresses to be scraped')
+
+        for i, apt_url in enumerate(apt_urls):
+            apt_all_data += self._get_apt_info(apt_url)
+        
+        self._apt_data = apt_all_data
+
+    @property
+    def apt_urls(self):
+        return self._apt_urls
+    
+    @property
+    def apt_data(self):
+        return self._apt_data
+    
+    if __name__ == '__main__':
+
+        rmdc = remax_dot_com('philadelphia', 'pa')
+
+        rmdc.scrape_apt_urls(verbose=True)
+        urls = rmdc.apt_urls
+
+        urls_chuck = np.array_split(urls, int(len(urls))//20)
+
+        os.chdir('..')
+
+        if not os.path.exists('data'):
+            os.mkdir('data')
+
+        os.chdir('./data')
+        if not os.path.exists('sample'):
+            os.mkdir('sample')
+        os.chdir('sample')
+
+        cols = [
+            'address',
+            'city',
+            'state',
+            'zipcode',
+            'bathrooms',
+            'bedrooms',
+            'rooms',
+            'waterfront',
+            'cooling',
+            'AC',
+            'appliances',
+            'laundry',
+            'sqft',
+            'price',
+            'taxes',
+            'list_type',
+            'list_id',
+            'lot_sqft',
+            'list_status',
+            'year_built',
+            'county',
+            'half_bath',
+            'subdivision',
+            'luxurious',
+        ]
+
+        if not os.path.exists('remax_dot_com.csv'):
+            df = pd.DataFrame([], columns=cols)
+            df.to_csv('./remax_dot_com.csv')
+
+        for i, batch_urls in enumerate(urls_chuck):
+            rmdc.scrape_apt_data(batch_urls, verbose=True)
+            data = rmdc.apt_data
+            df_new = pd.DataFrame(data, column=cols)
+
+            with open('remax_dot_com.csv', 'a') as df_old:
+                df_new.to_csv(df_old, header=False)
+            print(f'batch {i} finished running')
+
+        print('job done!')
 
