@@ -185,6 +185,7 @@ class remax_dot_com:
         rooms = self._access_dict(sidict, 'Rooms')
         laundry = self._access_dict(sidict, 'Laundry')
         taxes = self._access_dict(sidict, 'Taxes')
+        yrtax = self._access_dict(sidict, 'TaxYear')
         possession = self._access_dict(sidict, 'Possession')
 
         unit = [
@@ -204,6 +205,7 @@ class remax_dot_com:
             sqft,
             price,
             taxes,
+            yrtax,
             listtype,
             listid,
             possession,
@@ -314,6 +316,7 @@ if __name__ == '__main__':
         'sqft',
         'price',
         'taxes',
+        'tax_year',
         'list_type',
         'list_id',
         'possession',
