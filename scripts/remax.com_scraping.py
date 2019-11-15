@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 
+""" 
+remax.com_scraping.py : Scrape the apartment rental infomation in remax.com 
+all the users need to do is to specify a city and state (abbreivated) and 
+it will automatically scrape all the details related to all the apartments 
+in the city users are looking at.
+"""
+
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
 __status__ = 'completed'
 
+### packages need to be imported 
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -15,6 +23,7 @@ import os
 
 class remax_dot_com:
 
+    # initialization - users need to specify a city and state 
     def __init__(self, city, state):
         self._city = city
         self._state = state
@@ -24,8 +33,30 @@ class remax_dot_com:
 
     def _get_webpage(self, pg_num):
 
-        city = self._city.strip().lower()
-        state = self._state.strip().lower()
+        """
+        Get the page link with a specific page.
+        
+        Parameters
+        ----------
+        pg_num : int
+            page number of the apartments in a specific city
+
+        Returns
+        -------
+        string 
+            the link of the page, given the page number 
+
+        >>> _get_webpage(1)
+        'remax.com/realestatehomesforsale/philadelphia-pa-p001.html?query=philadelphia,pa-search/newest-sortorder'
+
+        """
+
+        # for city comes with 2 words, replace the space with -
+        # e.g. 'new york' -> 'new-york'
+        city = self._city.strip().lower().replace(' ', '-')
+        state = self._state.strip().lower().replace(' ', '-')
+        # after the overhead, there's a dangle attached with the 
+        # URL of this website 
         dangle = 'realestatehomesforsale'
         overhead = self._overhead
         url = f'{overhead}/{dangle}/{city}-{state}-p{pg_num}.html?query={city},{state}-search/newest-sortorder'
@@ -34,23 +65,65 @@ class remax_dot_com:
 
     def _get_apt_urls_per_page(self, pg_num):
 
+        """
+        Get all the apartment URLs listed in the same page (24 URLs per page)
+
+        Parameters
+        ----------
+        pg_num : int
+            page number of the apartments in a specific city
+
+        Returns:
+        apt_urls : list(str)
+            a list of apartment URLs correspond to different apartments in 
+            a same page 
+
+        """
+
+        # fetch the URL of the webpage given the page number
         webpage = self._get_webpage(pg_num)
+        # send a request to get the HTML content of that page 
         response = requests.get(webpage)
         results = response.content
-        apt_urls = []
+        apt_urls = [] # apartment URLs to be stored 
     
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
+            # locate the tag that contains the bulk of the apartment contents
             apt_sub_tags = soup.find_all('div', class_='listing-pane-details')
             
+            # extract the link to each apartment from all the apartment tags 
             for apt_tag in apt_sub_tags:
                 apt_link_tag = apt_tag.find('a', class_='js-detaillink')
-                url = apt_link_tag['href']
+                url = apt_link_tag['href'] # extract the apartment URL
                 apt_urls.append(url)
             
         return apt_urls
 
     def _get_ensemble_apt_urls(self, verbose=False, test=False):
+
+        """
+        Get all the relevant apartment links in remax.com with a specified city
+
+        Parameters
+        ----------
+        verbose : boolean (optional)
+            since the scraping process takes quite a while, you have the option
+            to monitor the progress by enabling the status updates
+
+        test : boolean (optional)
+            this could be turned on for testing and debugging purposes. When it's
+            turned on, only 50 pages' apartment URLs will be scraped so you have 
+            faster runtime
+
+        Returns
+        -------
+        apt_urls : list(str)
+            a list of apartment URLs corresponding to different apartments in 
+            a same page
+
+        """
+
         test_page = self._get_webpage(1)
         response = requests.get(test_page)
         results = response.content
