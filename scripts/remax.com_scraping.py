@@ -124,35 +124,48 @@ class remax_dot_com:
 
         """
 
+        # at the bottom of every page, there are buttons to let you choose 
+        # which page you want to go, including the last page of the apartments
+        # in this city. We can use it to figure out the max number of pages 
         test_page = self._get_webpage(1)
         response = requests.get(test_page)
         results = response.content
-        apt_ensemble_urls = []
+        # all the apartment URLs go here 
+        apt_ensemble_urls = [] 
         
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
             pg_lst = soup.find_all('li', class_='pages-item')
             try:
+                # extract all the tags related to page number 
                 pg_tags = [pg.find('a', class_='js-pager-item pages-link') for pg in pg_lst]
                 pg_nums = []
                 for pg_tag in pg_tags:
                     if pg_tag:
                         try:
+                            # try to extract all the page number
                             pg_nums.append(int(pg_tag.get_text()))
                         except:
                             continue
+                # find the maximun page number so we know exactly how 
+                # many pages needed to be scraped 
                 max_pg = max(pg_nums)
 
+                # if the test flag is enabled, we use 50 pages 
+                # to reduce runtime 
                 if test:
                     max_pg = 50
 
                 if verbose:
                     print(f'there are {max_pg} apartment URLs to be collected')
             except:
+                # failed to find max number of webpages 
                 max_pg = np.nan
             
             if not max_pg == np.nan:
                 for pg_num in range(1, max_pg+1):
+                    # use an iterative method to scrape all the apartment 
+                    # URLs in every single page
                     apt_ensemble_urls += self._get_apt_urls_per_page(pg_num)
                     if verbose:
                         print(f'page {pg_num} apartment URLs collected')
@@ -163,45 +176,108 @@ class remax_dot_com:
         return apt_ensemble_urls
 
     def _get_price(self, soup):
+
+        """
+        Scrape the price of the apartment given the BeautifulSoup scraper 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a BeautifulSoup scraper object that contains all the elements 
+            in a webpage
+
+        Returns
+        -------
+        price : float
+            the price of the apartment (sell price, not rental price)
+
+        >>> _get_price(soup)
+        114000.0
+
+        """
+
         try:
+            # try to locate the price tag 
             price_tag = soup.find('span', class_='listing-detail-price-amount pad-half-right')
+            # remove punctuation marks 
             price_text = price_tag.get_text()\
                               .replace(',','')\
                               .strip()
+
+            # extract the numerical price value 
             pattern = r'[-+]?\d*\.\d+|\d+'
             price_unit = re.findall(pattern, price_text)[0]
-            price = float(price_unit)
 
+            # convert the price to float 
+            price = float(price_unit)
             return price
+
         except:
             return np.nan
 
 
     def _get_address(self, content_tag):
+
+        """
+        Scrape the address of the apartment given the content tag of 
+        the specific apartment page 
+
+        Parameters
+        ----------
+        content_tag : bs4.element.Tag
+            a beautifulsoup element tag containing the content information
+            of the apartment, including address, bedrooms, area etc. 
+
+        Returns
+        -------
+        (street, city, state, zipcode) : tuple(str)
+
+        >>> _get_address(content_tag)
+        ('767 N 24TH ST', 'Philadelphia', 'PA', '19130')
+
+        """
+
         try:
+            # from the content tag, extract the tag that contains all the address info
             address_tag = content_tag.find('div', class_='listing-detail-address')
+            # street tag
             street_tag = address_tag.find('span', attrs={'itemprop': 'streetAddress'})
+            # street information
             street = street_tag.get_text()\
                                .strip()\
                                .replace(',', '')
+            # city tag       
             city_tag = address_tag.find('span', attrs={'itemprop': 'addressLocality'})
+            # city information
             city = city_tag.get_text()\
                            .strip()\
                            .replace(',', '')\
                            .title()
+            # state tag
             state_tag = address_tag.find('span', attrs={'itemprop': 'addressRegion'})
+            # state information
             state = state_tag.get_text()\
                              .strip()
+            # zipcode tag
             zipcode_tag = address_tag.find('span', attrs={'itemprop': 'postalCode'})
+            # zipcode information
             zipcode = zipcode_tag.get_text()\
                                  .strip()
             
             return street, city, state, zipcode
         
         except:
+            # return None if any of the above parts failed
+            # if there's any part that's missing in the address part,
+            # the whole address becomes useless
             return None, None, None, None
 
     def _get_sideinfo(self, content_tag):
+
+        """
+        
+        """
+        
         sideinfo = {}
         try:
             apt_info_tag = content_tag.find('div', class_='forsalelistingdetail')
