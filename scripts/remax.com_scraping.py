@@ -404,6 +404,34 @@ class remax_dot_com:
 
 
     def _remax_apt(self, soup, content_tag):
+
+        """
+        Scrape all the relavent information of the apartment given 
+        the content tag of the specific apartment page and standardize
+        them into a structured format 
+
+        (private function)
+
+        Parameters
+        ----------
+        content_tag : bs4.element.Tag
+            a beautifulsoup element tag containing the content information
+            of the apartment, including address, bedrooms, area etc. 
+
+        Returns
+        -------
+        list(Object)
+            list that contains features information about an apartment 
+
+        >>> _remax_apt(soup, content_tag)
+        ['767 N 24TH ST', 'Philadelphia', 'PA', '19130', ... , 'Philadelphia', None, 'Fairmount']
+
+        """
+
+        # as dicussed earlier, the best format to store all the information
+        # is by creating dictionaries to store the unstructured information
+        # but here are the features that are common across all aparments and 
+        # I also picked some features I think are important
         price = self._get_price(soup)
         street, city, state, zipcode = self._get_address(content_tag)
         sidict = self._get_sideinfo(content_tag)
@@ -431,6 +459,7 @@ class remax_dot_com:
         yrtax = self._access_dict(sidict, 'TaxYear')
         possession = self._access_dict(sidict, 'Possession')
 
+        # package all the features into a list 
         unit = [
             street,
             city,
@@ -516,12 +545,14 @@ class remax_dot_com:
 
         -------
         
-        In this website, we have two types of apartment, namely, normal apartments and 
-        collection apartments. Normal apartments have a bright blue background which forms
-        the majority the apartments in this website. Collection apartments are luxurious
-        type apartments that have their own specially designed webpages to differentiate 
-        from the normal apartment webpages (dark navy background). We need to identify 
-        these two different types of apartments and handle them differently.   
+        In this website, we have two types of apartment, namely, normal apartments 
+        and collection apartments. Normal apartments have a bright blue background 
+        which forms the majority the apartments in this website. 
+
+        Collection apartments are luxurious type apartments that have their own 
+        specially designed webpages to differentiate from the normal apartment 
+        webpages (dark navy background). We need to identify  these two different 
+        types of apartments and handle them differently.   
 
         Parameters
         ----------
@@ -530,7 +561,7 @@ class remax_dot_com:
 
         Returns
         -------
-        apt_all : list(Object) 
+        apt_all : list(list(Object)) 
             a list of apartment information
 
         >>> _get_apt_info(apt_url)
