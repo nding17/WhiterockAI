@@ -175,6 +175,7 @@ class remax_dot_com:
         liststatus = self._access_dict(sidict, 'Listing Status')
         yrbuilt = self._access_dict(sidict, 'Year Built')
         county = self._access_dict(sidict, 'County')
+        school = self._access_dict(sidict, 'County School District')
         halfbath = self._access_dict(sidict, 'Half Bath')
         subdivision = self._access_dict(sidict, 'Subdivision')
         cooling = self._access_dict(sidict, 'Cooling')
@@ -210,6 +211,7 @@ class remax_dot_com:
             liststatus,
             yrbuilt,
             county,
+            school,
             halfbath,
             subdivision,
         ]
@@ -319,6 +321,7 @@ if __name__ == '__main__':
         'list_status',
         'year_built',
         'county',
+        'county_school_district',
         'half_bath',
         'subdivision',
         'luxurious',
