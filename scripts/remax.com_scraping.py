@@ -35,6 +35,8 @@ class remax_dot_com:
 
         """
         Get the page link with a specific page.
+
+        (private function)
         
         Parameters
         ----------
@@ -67,6 +69,8 @@ class remax_dot_com:
 
         """
         Get all the apartment URLs listed in the same page (24 URLs per page)
+
+        (private function)
 
         Parameters
         ----------
@@ -104,6 +108,8 @@ class remax_dot_com:
 
         """
         Get all the relevant apartment links in remax.com with a specified city
+
+        (private function)
 
         Parameters
         ----------
@@ -180,6 +186,8 @@ class remax_dot_com:
         """
         Scrape the price of the apartment given the BeautifulSoup scraper 
 
+        (private function)
+
         Parameters
         ----------
         soup : bs4.BeautifulSoup
@@ -221,6 +229,8 @@ class remax_dot_com:
         """
         Scrape the address of the apartment given the content tag of 
         the specific apartment page 
+
+        (private function)
 
         Parameters
         ----------
@@ -275,37 +285,121 @@ class remax_dot_com:
     def _get_sideinfo(self, content_tag):
 
         """
-        
+        Scrape all the important information of the apartment given the 
+        content tag of the specific apartment page 
+
+        (private function)
+
+        -------
+
+        After inspection of the webpage, I find out that there are some 
+        features some apartments have, but others don't have. Therefore,
+        it would not be feasible if we want to store all the information 
+        in a structured database. 
+
+        Therefore, I tried my best to pick the common features almost 
+        every apartment should have (list type, bathrooms, bedrooms ...) 
+        and some unique and important features that might be missing 
+        for a lot of other apartments 
+
+        The best way to store all these unstructed information thus 
+        comes to use a dictionary 
+
+        Parameters
+        ----------
+        content_tag : bs4.element.Tag
+            a beautifulsoup element tag containing the content information
+            of the apartment, including address, bedrooms, area etc. 
+
+        Returns
+        -------
+        sideinfo : dict
+            a dictionary that contains all the information that an apartment 
+            could have included in the webpage 
+
+        >>> _get_sideinfo(content_tag)
+
+        {'Listing Type': 'Condo/Townhome', 
+        'Listing ID': 'PAPH848950', 
+        'House Size': '2,159 sqft', 
+        'Lot Size': '1,742.00 sqft'}
+
         """
 
-        sideinfo = {}
+        # dictionary that used to store all the relevant information
+        # regarding an apartment
+        sideinfo = {} 
         try:
+            # main content of all the relavent features 
             apt_info_tag = content_tag.find('div', class_='forsalelistingdetail')
+            # extract the contents as lists
             apt_list_tag = apt_info_tag.find_all('li', class_='listing-detail-stats')
             
             for apt_tag in apt_list_tag:
                 spans = apt_tag.find_all('span')
+                # construct (key, value) pair for the dictionary 
                 key = spans[0].get_text()\
                               .strip()
                 value = spans[1].get_text()\
                                 .strip()
+                # fill in the dictionary
                 sideinfo[key] = value
             return sideinfo
         except:
             return sideinfo
 
     def _access_dict(self, d, key):
+        """
+        Access the dictionary with a known or unknown key without 
+        breaking the program using defensive programming
+
+        Parameters
+        ----------
+        d : dict
+            a dictionary that contains all the features information
+            of an apartment using _get_sideinfo() function
+
+        key : str
+            the key that the users want to extract the value from 
+            the dictionary from  
+
+        Returns
+        -------
+        value : str or float
+            the function will try to identify any numerical value 
+            and convert it to float. If it's supposed to be a string,
+            it will leave it as it is 
+
+        >>> _access_dict('Listing Type')
+        'Condo/Townhome'
+
+        >>> _access_dict('Lot Size')
+        1742.00
+
+        >>> _access_dict('Listing ID')
+        'PAPH848950'
+
+        """
         try:
+            # try to get access to the value by using the key
             value = d[key]
             if 'sqft' in value:
+                # try to format any area related features 
+                # remove punctuation marks and text
                 value = value.replace(',','')\
                              .replace('sqft', '')\
                              .strip()
             try:
+                # try to convert any numerical type features 
+                # into float 
                 return float(value)
             except: 
+                # if this is a text value, leave it as it is 
                 return value
         except:
+            # fail to access the value from the key
+            # namely, the feature does not exist in the 
+            # feature dictionary of a specific apartment
             return None
 
 
@@ -370,18 +464,42 @@ class remax_dot_com:
         return unit
 
     def _check_lux(self, soup):
+
+        """
+        Check the type of the apartment based on the webpage
+
+        (privare funtion)
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a BeautifulSoup scraper object that contains all the elements 
+            in a webpage
+
+        Returns
+        -------
+        is_lux : Boolean
+
+        >>> _check_lux(soup)
+        False
+
+        """
         try:
             is_lux = False
             
+            # if this is a collection apartment
+            # it would have a tag indicating 'luxury home'
             lux_tag = soup.find('span', attrs={
                 'itemprop': 'name',
                 'class': 'js-stateformatted'
             })
             
+            # strip the text out of this tag
             lux = lux_tag.get_text()\
                          .strip()\
                          .lower()
             
+            # check keyword 'luxury'
             if 'luxury' in lux:
                 is_lux = True
             return is_lux
@@ -392,7 +510,9 @@ class remax_dot_com:
 
         """
         Given the apartment URL, scrape the apartment unit's information regardless
-        of what type of apartment it is.
+        of what type of apartment it is. 
+
+        (private function)
 
         -------
         
@@ -414,8 +534,8 @@ class remax_dot_com:
             a list of apartment information
 
         >>> _get_apt_info(apt_url)
-        [['767 N 24TH ST', 'Philadelphia', 'PA', '19130', ..., 'Philadelphia', None, 'Fairmount', 'Yes'],
-         ['1417 N 8TH ST', 'Philadelphia', 'PA', '19122', ..., 'Philadelphia County', None, 'Ludlow', 'Yes']
+        [['767 N 24TH ST', 'Philadelphia', 'PA', '19130', ... , 'Philadelphia', None, 'Fairmount', 'Yes'],
+         ['1417 N 8TH ST', 'Philadelphia', 'PA', '19122', ... , 'Philadelphia County', None, 'Ludlow', 'Yes']
          ...]
         """
 
@@ -424,14 +544,18 @@ class remax_dot_com:
         
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
+            # check what type of apartment this is - normal or collection
             is_lux = self._check_lux(soup)
             lux = 'No'
             if is_lux:
+                # collection / luxury homes
                 content_tag = soup.find('div', class_='property-details--details')
                 lux = 'Yes'
             else:
+                # normal apartment
                 content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
             
+            # append the luxury feature as an additional column
             apt_info = self._remax_apt(soup, content_tag)
             apt_info.append(lux)
 
@@ -441,6 +565,8 @@ class remax_dot_com:
 
         """
         A public function that allows you to call to scrape apartment URLs
+
+        (public function)
 
         Parameters
         ----------
@@ -464,6 +590,8 @@ class remax_dot_com:
 
         """
         A public function that allows you to call to scrape apartment information
+
+        (public function)
 
         Parameters
         ----------
@@ -495,11 +623,13 @@ class remax_dot_com:
 
     @property
     def apt_urls(self):
+        # public attritube 
         # serve as a way to show the apt_urls
         return self._apt_urls
     
     @property
     def apt_data(self):
+        # public attribute 
         # serve as a way to show the apt_data
         return self._apt_data
     
