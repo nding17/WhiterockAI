@@ -168,6 +168,7 @@ class remax_dot_com:
         listtype = self._access_dict(sidict, 'Listing Type')
         bedrooms = self._access_dict(sidict, 'Bedrooms')
         bathrooms = self._access_dict(sidict, 'Bathrooms')
+        interior = self._access_dict(sidict, 'Interior Features')
         sqft = self._access_dict(sidict, 'House Size')
         lotsf = self._access_dict(sidict, 'Lot Size')
         waterfront = self._access_dict(sidict, 'Waterfront')
@@ -177,11 +178,13 @@ class remax_dot_com:
         halfbath = self._access_dict(sidict, 'Half Bath')
         subdivision = self._access_dict(sidict, 'Subdivision')
         cooling = self._access_dict(sidict, 'Cooling')
+        heating = self._access_dict(sidict, 'Heating')
         ac = self._access_dict(sidict, 'Air Conditioning')
         appliances = self._access_dict(sidict, 'Appliances')
         rooms = self._access_dict(sidict, 'Rooms')
         laundry = self._access_dict(sidict, 'Laundry')
         taxes = self._access_dict(sidict, 'Taxes')
+        possession = self._access_dict(sidict, 'Possession')
 
         unit = [
             street,
@@ -190,9 +193,10 @@ class remax_dot_com:
             zipcode,
             bathrooms,
             bedrooms,
+            interior,
             rooms,
-            waterfront,
             cooling,
+            heating,
             ac,
             appliances,
             laundry,
@@ -201,6 +205,7 @@ class remax_dot_com:
             taxes,
             listtype,
             listid,
+            possession,
             lotsf,
             liststatus,
             yrbuilt,
@@ -297,9 +302,10 @@ if __name__ == '__main__':
         'zipcode',
         'bathrooms',
         'bedrooms',
+        'interior_features',
         'rooms',
-        'waterfront',
         'cooling',
+        'heating',
         'AC',
         'appliances',
         'laundry',
@@ -308,6 +314,7 @@ if __name__ == '__main__':
         'taxes',
         'list_type',
         'list_id',
+        'possession',
         'lot_sqft',
         'list_status',
         'year_built',
