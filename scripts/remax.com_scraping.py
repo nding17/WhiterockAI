@@ -324,7 +324,7 @@ if __name__ == '__main__':
         'county_school_district',
         'half_bath',
         'subdivision',
-        'luxurious',
+        'luxury_home',
     ]
 
     if not os.path.exists('remax_dot_com.csv'):
