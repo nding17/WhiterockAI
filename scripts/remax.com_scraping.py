@@ -277,7 +277,7 @@ class remax_dot_com:
         """
         
         """
-        
+
         sideinfo = {}
         try:
             apt_info_tag = content_tag.find('div', class_='forsalelistingdetail')
@@ -389,6 +389,36 @@ class remax_dot_com:
             return False
 
     def _get_apt_info(self, apt_url):
+
+        """
+        Given the apartment URL, scrape the apartment unit's information regardless
+        of what type of apartment it is.
+
+        -------
+        
+        In this website, we have two types of apartment, namely, normal apartments and 
+        collection apartments. Normal apartments have a bright blue background which forms
+        the majority the apartments in this website. Collection apartments are luxurious
+        type apartments that have their own specially designed webpages to differentiate 
+        from the normal apartment webpages (dark navy background). We need to identify 
+        these two different types of apartments and handle them differently.   
+
+        Parameters
+        ----------
+        apt_url : str
+            a specific apartment URL that has a fixed physical address
+
+        Returns
+        -------
+        apt_all : list(Object) 
+            a list of apartment information
+
+        >>> _get_apt_info(apt_url)
+        [['767 N 24TH ST', 'Philadelphia', 'PA', '19130', ..., 'Philadelphia', None, 'Fairmount', 'Yes'],
+         ['1417 N 8TH ST', 'Philadelphia', 'PA', '19122', ..., 'Philadelphia County', None, 'Ludlow', 'Yes']
+         ...]
+        """
+
         response = requests.get(self._overhead+apt_url)
         results = response.content
         
@@ -408,14 +438,56 @@ class remax_dot_com:
         return apt_info
 
     def scrape_apt_urls(self, verbose=False, test=False):
+
+        """
+        A public function that allows you to call to scrape apartment URLs
+
+        Parameters
+        ----------
+        verbose : boolean (optional)
+            a flag you can enable to see the scraping progress
+
+        test : boolean (optional)
+            a flag that allows you to test run your code 
+            with small sample size 
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_urls will be updated
+            and all the apartments URLs will be stored in this field 
+        """
+
         self._apt_urls = self._get_ensemble_apt_urls(verbose=verbose, test=test)
 
     def scrape_apt_data(self, apt_urls, verbose=False):
+
+        """
+        A public function that allows you to call to scrape apartment information
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            a list of apartment URLs that you hope to scrape the apartment 
+            info from
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_data will be updated
+            and all the apartments info will be stored in this field 
+        """
+
         apt_all_data = []
 
         if verbose:
             print(f'{len(apt_urls)} apartments to be scraped')
 
+        # loop through all the apartment URLs and scrape all the apartments
+        # information in each URL
         for i, apt_url in enumerate(apt_urls):
             apt_all_data.append(self._get_apt_info(apt_url)) 
         
@@ -423,31 +495,49 @@ class remax_dot_com:
 
     @property
     def apt_urls(self):
+        # serve as a way to show the apt_urls
         return self._apt_urls
     
     @property
     def apt_data(self):
+        # serve as a way to show the apt_data
         return self._apt_data
     
 if __name__ == '__main__':
 
+    # construct data scraping object, use Philadelphia, PA 
+    # as an example
     rmdc = remax_dot_com('philadelphia', 'pa')
 
+    # scrape all the apartment URLs in Philadelphia
+    # status update enabled
     rmdc.scrape_apt_urls(verbose=True)
     urls = rmdc.apt_urls
 
+    # in order to avoid crashes and loses all your data
+    # divide the list of URLs in batches and keep updating
+    # the csv file once the batch job is finished
     urls_chuck = np.array_split(urls, int(len(urls))//20)
 
+    # try to see if the current directory has a folder 
+    # that you can use to store data 
     os.chdir('..')
 
+    # this could be modified to fit the structure of 
+    # a specific user's directory
     if not os.path.exists('data'):
         os.mkdir('data')
 
+    # sample directory inside your data directory 
+    # used for test run. Of course, this could be 
+    # modified based on the architecture of your 
+    # own data folder 
     os.chdir('./data')
     if not os.path.exists('sample'):
         os.mkdir('sample')
     os.chdir('sample')
 
+    # the column names of the data frame 
     cols = [
         'address',
         'city',
@@ -479,17 +569,23 @@ if __name__ == '__main__':
         'luxury_home',
     ]
 
+    # create an initial empty data file with all 
+    # the features of an apartment
     if not os.path.exists('remax_dot_com.csv'):
         df = pd.DataFrame([], columns=cols)
         df.to_csv('./remax_dot_com.csv')
 
     print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
+    # running the batch and keep saving the intermediary 
+    # results from the data scraping jobs 
+    # each batch contains 10 URLs, but this could be modified
     for i, batch_urls in enumerate(urls_chuck):
         rmdc.scrape_apt_data(batch_urls, verbose=True)
         data = rmdc.apt_data
         df_new = pd.DataFrame(data, columns=cols)
 
+        # append the results from each batch
         with open('remax_dot_com.csv', 'a') as df_old:
             df_new.to_csv(df_old, header=False)
         print(f'batch {i} finished running')
