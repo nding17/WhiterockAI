@@ -17,6 +17,10 @@ import json
 
 class trulia_dot_com:
 
+    ############################
+    # class initiation section #
+    ############################
+
     def __init__(self, city, state):
         self._city = city
         self._state = state
@@ -26,6 +30,10 @@ class trulia_dot_com:
             'sold': [],
         }
         self._overhead = 'https://www.trulia.com'
+
+    #############################
+    # private functions section #
+    #############################
 
     def _get_buy_webpage(self, pg_num, htype):
     
@@ -323,7 +331,6 @@ class trulia_dot_com:
         except:
             return np.nan
 
-
     def _get_floorplans(self, jdict):
         floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
         address_data = list(self._get_address(jdict))
@@ -361,6 +368,9 @@ class trulia_dot_com:
 
         return apt_info_data
 
+    ############################
+    # public functions section #
+    ############################
     def scrape_apt_urls(self, 
                         sales_type,
                         htype=['house', 
