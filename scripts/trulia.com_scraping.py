@@ -250,23 +250,53 @@ class trulia_dot_com:
         except:
             return None
 
-    def scrape_apt_urls(self, sales_type, verbose=False, test=False):
+    def scrape_apt_urls(self, 
+                        sales_type,
+                        htype=['house', 
+                               'multi-family'],
+                        verbose=False, 
+                        test=False):
         
         sales_type = sales_type.lower()
-        self._apt_urls[sales_type] = self._get_apt_urls_ensemble(sales_type, verbose, test)
+        self._apt_urls[sales_type] = self._get_apt_urls_ensemble(sales_type, 
+                                                                 htype, 
+                                                                 verbose, 
+                                                                 test)
+
+    def scrape_apt_images(self, 
+                          sales_type,
+                          data_path,
+                          verbose=False, 
+                          test=False):
+
+        apt_urls = self._apt_urls[sales_type]
+
+        if verbose:
+            print(f'a total number of {len(apt_urls)} to be scraped')
+
+        for i, url in enumerate(apt_urls):
+
+            if test and i == 5:
+                break
+
+            soup = self._get_soup(url)
+            jdict = self._load_json(soup)
+            img_urls = self._get_img_urls(jdict)
+            address = self._get_address(jdict)[0].upper()
+            self._save_images(img_urls, 
+                              data_path, 
+                              sales_type,
+                              address)
+
+            if verbose and i%10==0:
+                print(f'images in {i} apartments have been scraped')
 
 
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
-    urls_all = tdc._get_apt_urls_ensemble('sold', verbose=True, test=True)
-
-    for url in urls_all:
-        soup = tdc._get_soup(url)
-        jdict = tdc._load_json(soup)
-        img_urls = tdc._get_img_urls(jdict)
-        address = tdc._get_address(jdict)[0].upper()
-        data_path = '../data/sample/trulia/imgdata'
-        tdc._save_images(img_urls, data_path, 'sold', address)
+    tdc.scrape_apt_urls('buy', verbose=True, test=True)
+    data_path = '../data/sample/trulia/imgdata'
+    tdc.scrape_apt_images('buy', data_path, verbose=True, test=True)
 
 
