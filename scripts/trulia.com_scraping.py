@@ -20,9 +20,11 @@ class trulia_dot_com:
     def __init__(self, city, state):
         self._city = city
         self._state = state
-        self._apt_urls_buy = []
-        self._apt_urls_rent = []
-        self._apt_urls_sold = []
+        self._apt_urls = {
+            'buy': [],
+            'rent': [],
+            'sold': [],
+        }
         self._overhead = 'https://www.trulia.com'
 
     def _get_buy_webpage(self, pg_num, htype):
@@ -52,7 +54,42 @@ class trulia_dot_com:
         webpage = f'{overhead}/{dangle}/{city},{state}/{houses}_type/{pg_num}_p/'
         return webpage
 
+    def _get_rent_webpage(self, pg_num):
+
+        overhead = self._overhead
+        dangle = 'for_rent'
+
+        city = self._city\
+                   .title()\
+                   .replace(' ', '_')
+        state = self._state\
+                    .upper()
+
+        webpage = f'{overhead}/{dangle}/{city},{state}/{pg_num}_p/'
+        return webpage
+
+    def _get_sold_webpage(self, pg_num):
+
+        overhead = self._overhead
+        dangle = 'sold'
+
+        city = self._city\
+                   .title()\
+                   .replace(' ', '_')
+        state = self._state\
+                    .upper()
+
+        webpage = f'{overhead}/{dangle}/{city},{state}/{pg_num}_p/'
+        return webpage
+
+
     def _get_soup(self, url):
+
+        # Here we added User-Agent to the header of our request 
+        # It is because sometimes the web server will check the
+        # different fields of the header to block robot scrapers
+        # User-Agent is the most common one because it is specific 
+        # to your browser.
         headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
                 AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
         response = requests.get(url, headers=headers)
@@ -61,44 +98,41 @@ class trulia_dot_com:
             soup = BeautifulSoup(results, 'lxml')
         return soup
 
-    def _get_buy_apt_urls_per_page(self,
-                                   pg_num,
-                                   htype=['house', 
-                                          'multi-family']):
+    def _get_apt_urls_per_page(self,
+                               pg_num,
+                               sales_type,
+                               htype=['house', 
+                                      'multi-family']):
 
-        webpage = self._get_buy_webpage(pg_num, htype)
+        if sales_type.lower() == 'buy':
+            webpage = self._get_buy_webpage(pg_num, htype)
+
+        if sales_type.lower() == 'rent':
+            webpage = self._get_rent_webpage(pg_num)
+
+        if sales_type.lower() == 'sold':
+            webpage = self._get_sold_webpage(pg_num)
         
-        # Here we added User-Agent to the header of our request 
-        # It is because sometimes the web server will check the
-        # different fields of the header to block robot scrapers
-        # User-Agent is the most common one because it is specific 
-        # to your browser.
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
-        response = requests.get(webpage, headers=headers)
-        results = response.content
-
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-            
-            apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-0 gsDQZj Box-sc-8ox7qa-0 jIGxjA'
-            apt_tags = soup.find_all('div', class_=apt_class)
-            
-            apt_link_tags = [tag.find('a') for tag in apt_tags]
-            apt_urls = [f"{self._overhead}/{tag['href']}" for tag in apt_link_tags]
+        soup = self._get_soup(webpage)
+        apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-0 gsDQZj Box-sc-8ox7qa-0 jIGxjA'
+        apt_tags = soup.find_all('div', class_=apt_class)
+        
+        apt_link_tags = [tag.find('a') for tag in apt_tags]
+        apt_urls = [f"{self._overhead}{tag['href']}" for tag in apt_link_tags]
         
         return apt_urls
 
-    def _get_buy_apt_urls_ensemble(self,
-                                   htype=['house', 
-                                          'multi-family'],
-                                   verbose=False,
-                                   test=False):
+    def _get_apt_urls_ensemble(self,
+                               sales_type,
+                               htype=['house', 
+                                      'multi-family'],
+                               verbose=False,
+                               test=False):
         stop = False
         urls_ensemble = ['']
         pg_num = 1
         while not stop:
-            urls_per_pg = self._get_buy_apt_urls_per_page(pg_num, htype)
+            urls_per_pg = self._get_apt_urls_per_page(pg_num, sales_type, htype)
             
             if verbose:
                 print(f'apartment URLs in page {pg_num} all done')
@@ -149,11 +183,11 @@ class trulia_dot_com:
             if not os.path.exists(img_type):
                 os.mkdir(img_type)
             os.chdir(img_type)
-            
+
             if not os.path.exists(address):
                 os.mkdir(address)
             os.chdir(address)
-            
+
             for i, img_url in enumerate(img_urls):
                 img_data = requests.get(img_url).content
                 with open(f'img{i}.jpg', 'wb') as handler:
@@ -216,11 +250,16 @@ class trulia_dot_com:
         except:
             return None
 
+    def scrape_apt_urls(self, sales_type, verbose=False, test=False):
+        
+        sales_type = sales_type.lower()
+        self._apt_urls[sales_type] = self._get_apt_urls_ensemble(sales_type, verbose, test)
+
 
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
-    urls_all = tdc._get_buy_apt_urls_ensemble(verbose=True, test=True)
+    urls_all = tdc._get_apt_urls_ensemble('sold', verbose=True, test=True)
 
     for url in urls_all:
         soup = tdc._get_soup(url)
@@ -228,6 +267,6 @@ if __name__ == '__main__':
         img_urls = tdc._get_img_urls(jdict)
         address = tdc._get_address(jdict)[0].upper()
         data_path = '../data/sample/trulia/imgdata'
-        tdc._save_images(img_urls, data_path, 'buy', address)
+        tdc._save_images(img_urls, data_path, 'sold', address)
 
 
