@@ -279,6 +279,88 @@ class trulia_dot_com:
 
         return apt_info_data
 
+    def _get_section_data(self, section):
+        apt_name = section['name']
+                
+        try:
+            bedrooms_text = section['bedrooms']['fullValue']
+            bathrooms_text = section['bathrooms']['fullValue']
+            bedrooms = self._extract_num(bedrooms_text)
+            bathrooms = self._extract_num(bathrooms_text)
+        except:
+            bedrooms, bathrooms = np.nan, np.nan
+
+        try:
+            space = float(section['floorSpace']['max'])
+        except:
+            space = np.nan
+
+        try:
+            price_text = section['priceRange']['formattedPrice']
+            price_text = price_text.replace(',', '') \
+                                   .replace('$', '')
+            price = self._extract_num(price_text)
+        except:
+            price = np.nan
+            
+        section_data = [
+            apt_name,
+            bedrooms,
+            bathrooms,
+            space,
+            price,
+        ]
+        
+        return section_data
+
+    def _extract_num(self, text):
+        try:
+            if 'studio' in text.lower():
+                return 0.0
+            pattern = r'[-+]?\d*\.\d+|\d+'
+            result = re.findall(pattern, text)[0]
+            return float(result)
+        except:
+            return np.nan
+
+
+    def _get_floorplans(self, jdict):
+        floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
+        address_data = list(self._get_address(jdict))
+        rental_data = []
+        
+        for floorplans in floorplans_groups:
+            plans = floorplans['plans']
+            for section in plans:
+                section_data = self._get_section_data(section)
+                rental_data.append(address_data+section_data)
+                units = section['units']
+                for unit in units:
+                    unit_data = self._get_section_data(unit)
+                    rental_data.append(address_data+unit_data)
+        return rental_data
+
+    def _get_rent_apt_data(self, 
+                          apt_urls, 
+                          verbose=False, 
+                          test=False):
+
+        apt_info_data = []
+
+        if verbose:
+            print(f'a total number of {len(apt_urls)} apartments to be scraped')
+
+        for i, apt_url in enumerate(apt_url)s:
+            soup = self._get_soup(apt_url)
+            jdict = self._load_json(soup)
+            floorplan_data = self._get_floorplans(jdict)
+            apt_info_data += floorplan_data
+
+            if test and i==5:
+                break
+
+        return apt_info_data
+
     def scrape_apt_urls(self, 
                         sales_type,
                         htype=['house', 
