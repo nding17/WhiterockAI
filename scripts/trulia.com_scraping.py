@@ -250,6 +250,35 @@ class trulia_dot_com:
         except:
             return None
 
+    def _get_buy_apt_data(self, 
+                          apt_urls, 
+                          verbose=False, 
+                          test=False):
+
+        apt_info_data = []
+
+        for url in apt_urls:
+            soup = self._get_soup(url)
+            jdict = self._load_json(soup)
+            street, city, state, zipcode, neighborhood = self._get_address(jdict)
+            price = self._get_price(jdict)
+            bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
+            features = self._get_apt_features(jdict)
+
+            apt_info_data.append([
+                street, 
+                city, 
+                state, 
+                zipcode, 
+                neighborhood,
+                price,
+                bedrooms, 
+                bathrooms,
+                features,
+            ])
+
+        return apt_info_data
+
     def scrape_apt_urls(self, 
                         sales_type,
                         htype=['house', 
@@ -272,7 +301,7 @@ class trulia_dot_com:
         apt_urls = self._apt_urls[sales_type]
 
         if verbose:
-            print(f'a total number of {len(apt_urls)} to be scraped')
+            print(f'a total number of {len(apt_urls)} apartments to be scraped')
 
         for i, url in enumerate(apt_urls):
 
@@ -296,7 +325,9 @@ if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scrape_apt_urls('buy', verbose=True, test=True)
-    data_path = '../data/sample/trulia/imgdata'
-    tdc.scrape_apt_images('buy', data_path, verbose=True, test=True)
 
+    print(tdc._get_buy_apt_data(tdc._apt_urls['buy'][:3]))
+
+    img_path = '../data/sample/trulia/imgdata'
+    tdc.scrape_apt_images('buy', img_path, verbose=True, test=True)
 
