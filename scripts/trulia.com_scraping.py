@@ -395,16 +395,12 @@ class trulia_dot_com:
         If the condition is not given, returns the first item of
         the iterable.
 
-        Raises 'StopIteration' if no item satysfing the condition is found.
+        Return None if no item satysfing the condition is found.
 
-        >>> first( (1,2,3), condition=lambda x: x % 2 == 0)
+        >>> first((1,2,3), condition=lambda x: x%2 == 0)
         2
         >>> first(range(3, 100))
         3
-        >>> first( () )
-        Traceback (most recent call last):
-        ...
-        StopIteration
         """
         try:
             return next(x for x in iterable if condition(x))
@@ -545,6 +541,13 @@ class trulia_dot_com:
                                                                  htype, 
                                                                  verbose, 
                                                                  test)
+
+    def scrape_apt_data(self, 
+                        apt_urls, 
+                        verbose=False, 
+                        test=False):
+        pass
+
 
     def scrape_apt_images(self, 
                           sales_type,
