@@ -350,7 +350,7 @@ class trulia_dot_com:
         if verbose:
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
 
-        for i, apt_url in enumerate(apt_url)s:
+        for i, apt_url in enumerate(apt_urls):
             soup = self._get_soup(apt_url)
             jdict = self._load_json(soup)
             floorplan_data = self._get_floorplans(jdict)
@@ -406,10 +406,10 @@ class trulia_dot_com:
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scrape_apt_urls('buy', verbose=True, test=True)
+    tdc.scrape_apt_urls('rent', verbose=True, test=True)
 
-    print(tdc._get_buy_apt_data(tdc._apt_urls['buy'][:3]))
+    print(tdc._get_rent_apt_data(tdc._apt_urls['rent'][:3]))
 
     img_path = '../data/sample/trulia/imgdata'
-    tdc.scrape_apt_images('buy', img_path, verbose=True, test=True)
+    tdc.scrape_apt_images('rent', img_path, verbose=True, test=True)
 
