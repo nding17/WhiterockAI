@@ -578,10 +578,10 @@ class trulia_dot_com:
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scrape_apt_urls('buy', verbose=True, test=True)
+    tdc.scrape_apt_urls('sold', verbose=True, test=True)
 
-    print(tdc._get_buy_apt_data(tdc._apt_urls['buy'][:3]))
+    print(tdc._get_sold_apt_data(tdc._apt_urls['sold'][:3]))
 
     img_path = '../data/sample/trulia/imgdata'
-    tdc.scrape_apt_images('buy', img_path, verbose=True, test=True)
+    tdc.scrape_apt_images('sold', img_path, verbose=True, test=True)
 
