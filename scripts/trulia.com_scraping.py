@@ -14,6 +14,7 @@ import numpy as np
 import re
 import os
 import json
+import datetime
 
 class trulia_dot_com:
 
@@ -25,6 +26,11 @@ class trulia_dot_com:
         self._city = city
         self._state = state
         self._apt_urls = {
+            'buy': [],
+            'rent': [],
+            'sold': [],
+        }
+        self._apt_data = {
             'buy': [],
             'rent': [],
             'sold': [],
@@ -240,6 +246,15 @@ class trulia_dot_com:
         except:
             return np.nan, np.nan
 
+    def _get_space(self, jdict): 
+        try:
+            space_dict = jdict['props']['homeDetails']['floorSpace']
+            space_text = space_dict['formattedDimension'].replace(',','')
+            space = self._extract_num(space_text)
+            return space
+        except:
+            return np.nan
+
     def _get_apt_features(self, jdict):
         try:
             fdict_list = jdict['props']['homeDetails']['features']['attributes']
@@ -271,6 +286,7 @@ class trulia_dot_com:
             street, city, state, zipcode, neighborhood = self._get_address(jdict)
             price = self._get_price(jdict)
             bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
+            space = self._get_space(jdict)
             features = self._get_apt_features(jdict)
 
             apt_info_data.append([
@@ -282,6 +298,7 @@ class trulia_dot_com:
                 price,
                 bedrooms, 
                 bathrooms,
+                space,
                 features,
             ])
 
@@ -348,9 +365,9 @@ class trulia_dot_com:
         return rental_data
 
     def _get_rent_apt_data(self, 
-                          apt_urls, 
-                          verbose=False, 
-                          test=False):
+                           apt_urls, 
+                           verbose=False, 
+                           test=False):
 
         apt_info_data = []
 
@@ -368,9 +385,154 @@ class trulia_dot_com:
 
         return apt_info_data
 
+    def _first(self, 
+               iterable, 
+               condition=lambda x: True):
+        """
+        Returns the first item in the 'iterable' that
+        satisfies the 'condition'.
+
+        If the condition is not given, returns the first item of
+        the iterable.
+
+        Raises 'StopIteration' if no item satysfing the condition is found.
+
+        >>> first( (1,2,3), condition=lambda x: x % 2 == 0)
+        2
+        >>> first(range(3, 100))
+        3
+        >>> first( () )
+        Traceback (most recent call last):
+        ...
+        StopIteration
+        """
+        try:
+            return next(x for x in iterable if condition(x))
+        except:
+            return None
+
+    def _get_historical_prices_dict(self, jdict):
+        try:
+            price_history = jdict['props']['homeDetails']['priceHistory']
+            price_sold = self._first(price_history, 
+                               condition=lambda x: x['event'].lower() == 'sold')
+            price_listed = self._first(price_history,
+                                condition=lambda x: x['event'].lower() == 'listed for sale')
+            try:
+                start, end = price_history.index(price_sold), price_history.index(price_listed)
+                price_history = price_history[start:end]
+                price_change = self._first(price_history,
+                                    condition=lambda x: x['event'].lower() == 'price change')
+                return price_sold, price_change, price_listed
+            except:
+                return price_sold, None, price_listed
+        except:
+            return None, None, None
+
+    def _unzip_pdict(self, price_dict):
+        try:
+            price_text = price_dict['price']['formattedPrice'].replace('$', '')\
+                                                              .replace(',', '')
+            price = self._extract_num(price_text)
+            date = price_dict['formattedDate']
+            date_formatted = datetime.datetime\
+                                     .strptime(date, '%m/%d/%Y')\
+                                     .strftime('%Y-%m-%d')
+            return date_formatted, price
+        except:
+            return None, None
+
+    def _get_normal_sold_prices(self, jdict):
+        price_dict = jdict['props']['homeDetails']['price']
+        try:
+            sales_price_text = price_dict['formattedPrice'].replace(',','')\
+                                                           .replace('$', '')
+            sales_price = self._extract_num(sales_price_text)
+            sales_date = price_dict['formattedSoldDate']
+            sales_date_formatted = datetime.datetime\
+                                           .strptime(sales_date, '%b %d, %Y')\
+                                           .strftime('%Y-%m-%d')
+            try:
+                asking_price_text = price_dict['listingPrice']['formattedPrice'].replace(',','')\
+                                                                                .replace('$', '')
+                if 'k' in asking_price_text.lower():
+                    asking_price = self._extract_num(asking_price_text)*1e3
+                elif 'm' in asking_price_text.lower():
+                    asking_price = self._extract_num(asking_price_text)*1e6
+                else:
+                    asking_price = self._extract_num(asking_price_text)
+                return sales_date_formatted, sales_price, asking_price
+            except:
+                return sales_date_formatted, sales_price, np.nan
+        except:
+            return None, None, None
+    
+
+    def _get_important_sold_prices(self, jdict):
+       
+        pdict_s, pdict_c, pdict_l = self._get_historical_prices_dict(jdict)
+        date_s, price_s = self._unzip_pdict(pdict_s)
+        date_c, price_c = self._unzip_pdict(pdict_c)
+        date_l, price_l = self._unzip_pdict(pdict_l)
+        
+        return date_s, price_s, date_c, price_c, date_l, price_l
+
+    def _get_sold_info(self, jdict):
+        street, city, state, zipcode, neighborhood = self._get_address(jdict)
+        bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
+        space = self._get_space(jdict)
+        features = self._get_apt_features(jdict)
+        sales_date, sales_price, ask_price = self._get_normal_sold_prices(jdict)
+        sold_date, sold_price, change_date, change_price, list_date, list_price = self._get_important_sold_prices(jdict)
+        
+        sold_info = [
+            street, 
+            city, 
+            state, 
+            zipcode, 
+            neighborhood,
+            bedrooms, 
+            bathrooms,
+            space,
+            features,
+            sales_date, 
+            sales_price, 
+            ask_price,
+            sold_date, 
+            sold_price, 
+            change_date, 
+            change_price, 
+            list_date, 
+            list_price,
+        ]
+        
+        return sold_info
+
+    def _get_sold_apt_data(self, 
+                           apt_urls, 
+                           verbose=False, 
+                           test=False):
+
+        apt_info_data = []
+
+        if verbose:
+            print(f'a total number of {len(apt_urls)} apartments to be scraped')
+
+        for i, apt_url in enumerate(apt_urls):
+            soup = self._get_soup(apt_url)
+            jdict = self._load_json(soup)
+            sold_data = self._get_sold_info(jdict)
+            apt_info_data += sold_data
+
+            if test and i==5:
+                break
+
+        return apt_info_data
+
     ############################
     # public functions section #
     ############################
+
     def scrape_apt_urls(self, 
                         sales_type,
                         htype=['house', 
@@ -416,10 +578,10 @@ class trulia_dot_com:
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scrape_apt_urls('rent', verbose=True, test=True)
+    tdc.scrape_apt_urls('buy', verbose=True, test=True)
 
-    print(tdc._get_rent_apt_data(tdc._apt_urls['rent'][:3]))
+    print(tdc._get_buy_apt_data(tdc._apt_urls['buy'][:3]))
 
     img_path = '../data/sample/trulia/imgdata'
-    tdc.scrape_apt_images('rent', img_path, verbose=True, test=True)
+    tdc.scrape_apt_images('buy', img_path, verbose=True, test=True)
 
