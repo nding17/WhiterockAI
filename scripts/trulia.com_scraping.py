@@ -567,7 +567,7 @@ class trulia_dot_com:
             soup = self._get_soup(apt_url)
             jdict = self._load_json(soup)
             sold_data = self._get_sold_info(jdict)
-            apt_info_data += sold_data
+            apt_info_data.append(sold_data)
 
             if test and i==5:
                 break
@@ -668,14 +668,17 @@ class trulia_dot_com:
 
 if __name__ == '__main__':
 
+    img_path = '../data/sample/trulia/imgdata'
+    data_path = '../data/sample/trulia/aptdata'
+
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scrape_apt_urls('sold', verbose=True, test=True)
 
     apt_urls = tdc.apt_urls['sold']
 
     tdc.scrape_apt_data(apt_urls, 'sold', verbose=True, test=True)
-    print(tdc.apt_data)
+    data = tdc.apt_data['sold']
+    tdc.write_data('sold', data, data_path)
 
-    img_path = '../data/sample/trulia/imgdata'
     tdc.scrape_apt_images('sold', img_path, verbose=True, test=True)
 
