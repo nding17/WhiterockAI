@@ -698,8 +698,26 @@ class trulia_dot_com:
 
         """
 
-        A function that collects all the data we will need for an 
-        apartment in the buy category
+        A function that collects all the data we will need for an apartment in 
+        the buy category
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        apt_info_data : list
+            all the relevant apartment information data        
 
         """
 
