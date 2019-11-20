@@ -607,11 +607,11 @@ class trulia_dot_com:
 
     def scrape_apt_images(self, 
                           sales_type,
+                          apt_urls,
                           data_path,
                           verbose=False, 
                           test=False):
 
-        apt_urls = self._apt_urls[sales_type]
 
         if verbose:
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
@@ -686,7 +686,7 @@ if __name__ == '__main__':
             data = tdc.apt_data[category]
 
             tdc.write_data(category, data, data_path)
-            tdc.scrape_apt_images(category, img_path, verbose=True)
+            tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
 
         print(f'scraping for category - {category} done!')
 
