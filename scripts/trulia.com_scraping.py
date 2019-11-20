@@ -19,53 +19,52 @@ import datetime
 class CONST:
     OVERHEAD = 'https://www.trulia.com'
 
-    COLNAMES_BUY = [
-        'street', 
-        'city', 
-        'state', 
-        'zipcode', 
-        'neighborhood',
-        'price',
-        'bedrooms', 
-        'bathrooms',
-        'space',
-        'extra_features',
-    ]
-
-    COLNAMES_RENT = [
-        'street', 
-        'city', 
-        'state', 
-        'zipcode', 
-        'neighborhood',
-        'apartment_name',
-        'bedrooms',
-        'bathrooms',
-        'space',
-        'price',
-    ]
-
-    COLNAMES_SOLD = [
-        'street', 
-        'city', 
-        'state', 
-        'zipcode', 
-        'neighborhood',
-        'bedrooms', 
-        'bathrooms',
-        'space',
-        'extra_features',
-        'sales_date', 
-        'sales_price', 
-        'asking_price',
-        'sold_date', 
-        'sold_price', 
-        'change_date', 
-        'change_price', 
-        'listing_date', 
-        'listing_price',
-    ]
-
+    COLNAMES = {
+        'buy': [
+            'street', 
+            'city', 
+            'state', 
+            'zipcode', 
+            'neighborhood',
+            'price',
+            'bedrooms', 
+            'bathrooms',
+            'space',
+            'extra_features',
+        ],
+        'rent': [
+            'street', 
+            'city', 
+            'state', 
+            'zipcode', 
+            'neighborhood',
+            'apartment_name',
+            'bedrooms',
+            'bathrooms',
+            'space',
+            'price',
+        ],
+        'sold': [
+            'street', 
+            'city', 
+            'state', 
+            'zipcode', 
+            'neighborhood',
+            'bedrooms', 
+            'bathrooms',
+            'space',
+            'extra_features',
+            'sales_date', 
+            'sales_price', 
+            'asking_price',
+            'sold_date', 
+            'sold_price', 
+            'change_date', 
+            'change_price', 
+            'listing_date', 
+            'listing_price',
+        ],
+    }
 
 class trulia_dot_com:
 
@@ -633,6 +632,24 @@ class trulia_dot_com:
 
             if verbose and i%10==0:
                 print(f'images in {i} apartments have been scraped')
+
+    def write_data(self,
+                   sales_type,
+                   apt_data, 
+                   data_path):
+
+        current_path = os.getcwd()
+        os.chdir(data_path)
+
+        if not os.path.exists(f'trulia_dot_com_{sales_type}.csv'):
+            df = pd.DataFrame([], columns=CONST.COLNAMES[sales_type])
+            df.to_csv(f'trulia_dot_com_{sales_type}.csv')
+
+        df_new = pd.DataFrame(apt_data, columns=CONST.COLNAMES[sales_type])
+        with open(f'trulia_dot_com_{sales_type}.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        os.chdir(current_path)
 
 
     #####################
