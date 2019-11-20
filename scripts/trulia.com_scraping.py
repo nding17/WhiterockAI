@@ -16,6 +16,7 @@ import os
 import json
 import datetime
 
+### a class that contains all the contants we will be using 
 class CONST:
     OVERHEAD = 'https://www.trulia.com'
 
@@ -66,6 +67,7 @@ class CONST:
         ],
     }
 
+### main class
 class trulia_dot_com:
 
     ############################
@@ -91,6 +93,29 @@ class trulia_dot_com:
     #############################
 
     def _get_buy_webpage(self, pg_num, htype):
+
+        """
+        Get the initial webpage for the buy section apartments. Each webpage
+        would contain about 30 apartments. 
+
+        Parameters
+        ----------
+        pg_num : int
+            since there are multiple webpages, we need to specify which page
+            we need to scrape
+
+        htype : list(str)
+            abbreviation for house type. A list that contains the house types
+            user will be considering 
+
+        Returns
+        -------
+        webpage : str
+            the original webpage for the buy section
+
+        >>> _get_buy_webpage(pg_num, htype)
+        'https://www.trulia.com/for_sale/Philadelphia,PA/SINGLE-FAMILY_HOME,MULTI-FAMILY_type/1_p/'
+        """
     
         overhead = CONST.OVERHEAD
         dangle = 'for_sale'
@@ -119,6 +144,29 @@ class trulia_dot_com:
 
     def _get_rent_webpage(self, pg_num):
 
+        """
+        Get the initial webpage for the rent section apartments. Each webpage
+        would contain roughly 30 apartments. 
+
+        Parameters
+        ----------
+        pg_num : int
+            since there are multiple webpages, we need to specify which page
+            we need to scrape
+
+        htype : list(str)
+            abbreviation for house type. A list that contains the house types
+            user will be considering 
+
+        Returns
+        -------
+        webpage : str
+            the original webpage for the buy section
+
+        >>> _get_rent_webpage(pg_num, htype)
+        'https://www.trulia.com/for_rent/Philadelphia,PA/1_p/'
+        """
+
         overhead = CONST.OVERHEAD
         dangle = 'for_rent'
 
@@ -133,6 +181,29 @@ class trulia_dot_com:
 
     def _get_sold_webpage(self, pg_num):
 
+        """
+        Get the initial webpage for the sold section apartments. Each webpage
+        would contain roughly 30 apartments. 
+
+        Parameters
+        ----------
+        pg_num : int
+            since there are multiple webpages, we need to specify which page
+            we need to scrape
+
+        htype : list(str)
+            abbreviation for house type. A list that contains the house types
+            user will be considering 
+
+        Returns
+        -------
+        webpage : str
+            the original webpage for the buy section
+
+        >>> _get_sold_webpage(pg_num, htype)
+        'https://www.trulia.com/sold/Philadelphia,PA/1_p/'
+        """
+
         overhead = CONST.OVERHEAD
         dangle = 'sold'
 
@@ -142,11 +213,27 @@ class trulia_dot_com:
         state = self._state\
                     .upper()
 
+        # formulate the webpage
         webpage = f'{overhead}/{dangle}/{city},{state}/{pg_num}_p/'
         return webpage
 
 
     def _get_soup(self, url):
+
+        """
+        This is a helper function that will automatically generate a BeautifulSoup
+        object based on the given URL of the apartment webpage
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+        """
 
         # Here we added User-Agent to the header of our request 
         # It is because sometimes the web server will check the
@@ -159,7 +246,7 @@ class trulia_dot_com:
         results = response.content
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
-        return soup
+        return soup # generate a scraper
 
     def _get_apt_urls_per_page(self,
                                pg_num,
@@ -167,7 +254,39 @@ class trulia_dot_com:
                                htype=['house', 
                                       'multi-family']):
 
+        """
+        A helper function that helps the user to scrape all the apartment URLs
+        in the original webpage
+
+        Parameters
+        ----------
+        pg_num : int
+            since there are multiple webpages, we need to specify which page
+            we need to scrape
+        
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        htype : list(str) (optional)
+            abbreviation for house type. A list that contains the house types
+            user will be considering. This will only be activated if sales_type == 'buy'
+            since we don't care about the house type for rent and sold sections
+
+        Returns
+        -------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in particular
+            section
+
+        >>> _get_apt_urls_per_page()
+        ['https://www.trulia.com/p/pa/philadelphia/511-s-13th-st-philadelphia-pa-19147--2090090499',
+         'https://www.trulia.com/p/pa/philadelphia/1311-foulkrod-st-philadelphia-pa-19124--2017208781',
+         ...
+         ]
+        """
+
         if sales_type.lower() == 'buy':
+            # only buy section cares about house type
             webpage = self._get_buy_webpage(pg_num, htype)
 
         if sales_type.lower() == 'rent':
@@ -177,9 +296,11 @@ class trulia_dot_com:
             webpage = self._get_sold_webpage(pg_num)
         
         soup = self._get_soup(webpage)
+        # main content tag
         apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-0 gsDQZj Box-sc-8ox7qa-0 jIGxjA'
         apt_tags = soup.find_all('div', class_=apt_class)
         
+        # scrape all the apartment URLs
         apt_link_tags = [tag.find('a') for tag in apt_tags]
         apt_urls = [f"{CONST.OVERHEAD}{tag['href']}" for tag in apt_link_tags]
         
@@ -191,6 +312,12 @@ class trulia_dot_com:
                                       'multi-family'],
                                verbose=False,
                                test=False):
+
+        """
+
+
+        """
+
         stop = False
         urls_ensemble = ['']
         pg_num = 1
