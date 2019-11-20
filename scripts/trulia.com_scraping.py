@@ -155,6 +155,10 @@ class trulia_dot_com:
         houses = ','.join(aliases)
         
         webpage = f'{overhead}/{dangle}/{city},{state}/{houses}_type/{pg_num}_p/'
+
+        if pg_num == 1:
+            webpage = f'{overhead}/{dangle}/{city},{state}/{houses}_type/'
+
         return webpage
 
     def _get_rent_webpage(self, pg_num):
@@ -192,6 +196,10 @@ class trulia_dot_com:
                     .upper()
 
         webpage = f'{overhead}/{dangle}/{city},{state}/{pg_num}_p/'
+
+        if pg_num == 1:
+            webpage = f'{overhead}/{dangle}/{city},{state}/'
+
         return webpage
 
     def _get_sold_webpage(self, pg_num):
@@ -230,6 +238,10 @@ class trulia_dot_com:
 
         # formulate the webpage
         webpage = f'{overhead}/{dangle}/{city},{state}/{pg_num}_p/'
+
+        if pg_num == 1:
+            webpage = f'{overhead}/{dangle}/{city},{state}/'
+
         return webpage
 
 
@@ -314,7 +326,7 @@ class trulia_dot_com:
         # main content tag
         apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-0 gsDQZj Box-sc-8ox7qa-0 jIGxjA'
         apt_tags = soup.find_all('div', class_=apt_class)
-        
+
         # scrape all the apartment URLs
         apt_link_tags = [tag.find('a') for tag in apt_tags]
         apt_urls = [f"{CONST.OVERHEAD}{tag['href']}" for tag in apt_link_tags]
@@ -1096,7 +1108,7 @@ if __name__ == '__main__':
 
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
-    categories = ['rent', 'sold', 'buy']
+    categories = ['sold', 'rent', 'buy']
     tdc = trulia_dot_com('philadelphia', 'pa')
 
     for category in categories:
