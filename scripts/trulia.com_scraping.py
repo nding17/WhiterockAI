@@ -592,8 +592,8 @@ class trulia_dot_com:
                                                                  test)
 
     def scrape_apt_data(self, 
-                        apt_urls, 
                         sales_type,
+                        apt_urls,
                         verbose=False, 
                         test=False):
 
@@ -663,8 +663,7 @@ class trulia_dot_com:
     @property
     def apt_data(self):
         return self._apt_data
-    
-    
+
 
 if __name__ == '__main__':
 
@@ -682,7 +681,7 @@ if __name__ == '__main__':
 
         for i, url_batch in enumerate(url_batches):
             print(f'batch {i} starts')
-            tdc.scrape_apt_data(url_batch, category, verbose=True)
+            tdc.scrape_apt_data(category, url_batch, verbose=True)
             data = tdc.apt_data[category]
 
             tdc.write_data(category, data, data_path)
