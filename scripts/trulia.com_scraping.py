@@ -1104,10 +1104,10 @@ if __name__ == '__main__':
         tdc.scrape_apt_urls(category, verbose=True)
 
         apt_urls = tdc.apt_urls[category]
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//5)
 
         print(f'a total number of {len(url_batches)} batches')
-        for i, url_batch in enumerate(url_batches[8:]):
+        for i, url_batch in enumerate(url_batches):
             try:
                 print(f'batch {i} starts')
                 print(url_batch)
