@@ -16,6 +16,57 @@ import os
 import json
 import datetime
 
+class CONST:
+    OVERHEAD = 'https://www.trulia.com'
+
+    COLNAMES_BUY = [
+        'street', 
+        'city', 
+        'state', 
+        'zipcode', 
+        'neighborhood',
+        'price',
+        'bedrooms', 
+        'bathrooms',
+        'space',
+        'extra_features',
+    ]
+
+    COLNAMES_RENT = [
+        'street', 
+        'city', 
+        'state', 
+        'zipcode', 
+        'neighborhood',
+        'apartment_name',
+        'bedrooms',
+        'bathrooms',
+        'space',
+        'price',
+    ]
+
+    COLNAMES_SOLD = [
+        'street', 
+        'city', 
+        'state', 
+        'zipcode', 
+        'neighborhood',
+        'bedrooms', 
+        'bathrooms',
+        'space',
+        'extra_features',
+        'sales_date', 
+        'sales_price', 
+        'asking_price',
+        'sold_date', 
+        'sold_price', 
+        'change_date', 
+        'change_price', 
+        'listing_date', 
+        'listing_price',
+    ]
+
+
 class trulia_dot_com:
 
     ############################
@@ -35,7 +86,6 @@ class trulia_dot_com:
             'rent': [],
             'sold': [],
         }
-        self._overhead = 'https://www.trulia.com'
 
     #############################
     # private functions section #
@@ -43,7 +93,7 @@ class trulia_dot_com:
 
     def _get_buy_webpage(self, pg_num, htype):
     
-        overhead = self._overhead
+        overhead = CONST.OVERHEAD
         dangle = 'for_sale'
 
         city = self._city\
@@ -70,7 +120,7 @@ class trulia_dot_com:
 
     def _get_rent_webpage(self, pg_num):
 
-        overhead = self._overhead
+        overhead = CONST.OVERHEAD
         dangle = 'for_rent'
 
         city = self._city\
@@ -84,7 +134,7 @@ class trulia_dot_com:
 
     def _get_sold_webpage(self, pg_num):
 
-        overhead = self._overhead
+        overhead = CONST.OVERHEAD
         dangle = 'sold'
 
         city = self._city\
@@ -132,7 +182,7 @@ class trulia_dot_com:
         apt_tags = soup.find_all('div', class_=apt_class)
         
         apt_link_tags = [tag.find('a') for tag in apt_tags]
-        apt_urls = [f"{self._overhead}{tag['href']}" for tag in apt_link_tags]
+        apt_urls = [f"{CONST.OVERHEAD}{tag['href']}" for tag in apt_link_tags]
         
         return apt_urls
 
@@ -583,6 +633,7 @@ class trulia_dot_com:
 
             if verbose and i%10==0:
                 print(f'images in {i} apartments have been scraped')
+
 
     #####################
     # public attributes #
