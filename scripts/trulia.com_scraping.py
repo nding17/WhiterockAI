@@ -1,10 +1,25 @@
 #!/usr/bin/env python
 
+""" 
+trulia.com_scraping.py : Scrape the apartment rental infomation in trulia.com 
+all the users need to do is to specify a city and state (abbreivated), as well
+as the paths users want to store the actual data and the image data.
+
+It will automatically scrape all the details related to all the apartments 
+in the city users are looking at. Please note that that you need to leave a 
+sufficient amount of disk space and time for this task to finish if you intend 
+to run it on a local machine. 
+
+There are three sections in this website: buy, rent and sold. Each of these 
+sections has been taken care of separately. We would have separate directories
+and data files for these sections. 
+"""
+
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
-__status__ = 'in progress'
+__status__ = 'documentation'
 
 ### packages need to be imported 
 import pandas as pd
@@ -314,19 +329,47 @@ class trulia_dot_com:
                                test=False):
 
         """
+        
+        This is a helper function that will collectively scrape the apartments in 
+        all of the original webpages in which each page contains roughly 30 apartments
 
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+        
+        htype : list(str) (optional)
+            abbreviation for house type. A list that contains the house types
+            user will be considering. This will only be activated if sales_type == 'buy'
+            since we don't care about the house type for rent and sold sections
+        
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        urls_ensemble_cut : list(str)
+            this is a list of URLs for all the apartments that we will ever care 
+            in a section
 
         """
 
-        stop = False
-        urls_ensemble = ['']
+        stop = False # flag to tell the loop when to stop 
+        urls_ensemble = [''] # a list that contains all the URLs
         pg_num = 1
         while not stop:
+            # URLs per page are scraped
             urls_per_pg = self._get_apt_urls_per_page(pg_num, sales_type, htype)
             
             if verbose:
                 print(f'apartment URLs in page {pg_num} all done')
             
+            # if two consecutive lists of URLs are the same, we know 
+            # the end of the loop has been reached
             if urls_per_pg == urls_ensemble[-1]:
                 stop = True
             urls_ensemble.append(urls_per_pg)
@@ -335,6 +378,7 @@ class trulia_dot_com:
             if test and pg_num == 5:
                 break
         
+        # flatten a 2-D list
         def _flatten(lst):
             for el in lst:
                 if isinstance(el, list):
@@ -342,21 +386,63 @@ class trulia_dot_com:
                 else:
                     yield el
         
+        # get rid of the redundant lists
         urls_ensemble_cut = list(_flatten(urls_ensemble[1:-2]))
         if verbose:
             print('last 2 pages removed since they are the same.')
         return urls_ensemble_cut
 
     def _load_json(self, soup):
+
+        """
+        
+        A helper function that find the JSON file inside the HTML file
+        This is an Easter Egg indeed 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries  
+
+        """
+
         jfile = soup.find('script', attrs={
             'id': '__NEXT_DATA__',
             'type': 'application/json',
         }).get_text()
         
-        jdict = json.loads(jfile)
+        # convert text to JSON
+        jdict = json.loads(jfile) 
         return jdict
 
     def _get_img_urls(self, jdict):
+        """
+        Find the image URLs given the JSON file of an apartment
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        >>> _get_img_urls(jdict)
+        ['https://static.trulia-cdn.com/pictures/thumbs_6/zillowstatic/ISvgw4ch9cdv430000000000.jpg',
+         'https://static.trulia-cdn.com/pictures/thumbs_6/zillowstatic/IS7mojyi16a54a1000000000.jpg',
+         ...
+         ]
+        """
+
+        # find photos inside the JSON file
         pics = jdict['props']['homeDetails']['media']['photos']
         urls = [pic['url']['mediumSrc'] for pic in pics]
         return urls
@@ -366,23 +452,61 @@ class trulia_dot_com:
                      data_path, 
                      img_type, 
                      address):
+
+        """
+
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        img_type : str
+            the section of the webpage, namely, 'buy', 'rent' or 'sold'
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
         try:
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
             current_path = os.getcwd()
             os.chdir(data_path)
             
+            # create a folder for the section if it doesn't
+            # exist
             if not os.path.exists(img_type):
                 os.mkdir(img_type)
             os.chdir(img_type)
 
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder 
             if not os.path.exists(address):
                 os.mkdir(address)
             os.chdir(address)
 
+            # write images inside the apartment folder 
             for i, img_url in enumerate(img_urls):
                 img_data = requests.get(img_url).content
                 with open(f'img{i}.jpg', 'wb') as handler:
                     handler.write(img_data)
-                    
+            
+            # go back to the original path before the 
+            # function was initiated 
             os.chdir(current_path)
             return 1
         
@@ -390,7 +514,30 @@ class trulia_dot_com:
             return 0
 
     def _get_address(self, jdict):
+        
+        """
+
+        A helper function that gets the address info of the apartment given 
+        the JSON file
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        tuple
+            address information
+
+        >>> _get_address(jdict)
+        ('302 Carpenter Ln', 'Philadelphia', 'PA', '19119', 'Mount Airy West')
+
+        """
+        
         try:
+            # access the location info dictionary
             loc_dict = jdict['props']['homeDetails']['location']
             state = loc_dict['stateCode']
             city = loc_dict['city']
@@ -405,6 +552,28 @@ class trulia_dot_com:
             return None, None, None, None, None
 
     def _get_price(self, jdict):
+
+        """
+
+        A helper function that gets the price info of the apartment given 
+        the JSON file
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        float
+            price of the apartment
+
+        >>> _get_price(jdict)
+        650000.0
+
+        """
+
         try:
             price_dict = jdict['props']['homeDetails']['price']
             return float(price_dict['price'])
@@ -412,6 +581,28 @@ class trulia_dot_com:
             return None
 
     def _get_bedrooms_bathrooms(self, jdict):
+
+        """
+
+        A helper function that gets the bedroom and bathroom info of the 
+        apartment given the JSON file
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        tuple
+            # of bedrooms and # of bathrooms
+
+        >>> _get_bedrooms_bathrooms(jdict)
+        (5.0, 3.0)
+
+        """
+
         try:
             pattern = r'[-+]?\d*\.\d+|\d+'
             bed_dict = jdict['props']['homeDetails']['bedrooms']
@@ -423,6 +614,28 @@ class trulia_dot_com:
             return np.nan, np.nan
 
     def _get_space(self, jdict): 
+
+        """
+
+        A helper function that gets the square foot of the apartment given 
+        the JSON file
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        float
+            the area of the apartment in square foot 
+
+        >>> _get_space(jdict)
+        3012.0
+
+        """
+
         try:
             space_dict = jdict['props']['homeDetails']['floorSpace']
             space_text = space_dict['formattedDimension'].replace(',','')
@@ -432,10 +645,38 @@ class trulia_dot_com:
             return np.nan
 
     def _get_apt_features(self, jdict):
+
+        """
+
+        A helper function that gets the extra features of the apartment 
+        given the JSON file
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries that contains all 
+            the data you would find in a webpage of the targeted apartment
+
+        Returns
+        -------
+        str
+            we stick all the extra features in a string separted by '|'
+            since each apartment has its unique bonus features, it would 
+            be infeasible to make them into columns
+
+        >>> _get_apt_features(jdict)
+        'Townhouse | $29/sqft | Lot Size:1,035 sqft | Built in 1940 | 6 Rooms | \
+        Rooms:Dining Room | Heating:Forced Air | Heating Fuel:Gas | Cooling System:Central | \
+        Air Conditioning | Great Views | Colonial Architecture | Stories:2 | Exterior:Brick | \
+        Disabled Access'
+        
+        """
+
         try:
             fdict_list = jdict['props']['homeDetails']['features']['attributes']
             features = []
             for fdict in fdict_list:
+                # find the extra features 
                 try:
                     value = fdict['formattedValue']
                     try:
@@ -445,6 +686,7 @@ class trulia_dot_com:
                         features.append(value)
                 except:
                     next
+            # stick all the features together, seperated by |
             return ' | '.join(features)
         except:
             return None
@@ -453,6 +695,13 @@ class trulia_dot_com:
                           apt_urls, 
                           verbose=False, 
                           test=False):
+
+        """
+
+        A function that collects all the data we will need for an 
+        apartment in the buy category
+
+        """
 
         apt_info_data = []
 
