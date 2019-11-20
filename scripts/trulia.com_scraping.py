@@ -630,8 +630,8 @@ class trulia_dot_com:
                               sales_type,
                               address)
 
-            if verbose and i%10==0:
-                print(f'images in {i} apartments have been scraped')
+        if verbose:
+            print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
 
     def write_data(self,
                    sales_type,
@@ -679,6 +679,7 @@ if __name__ == '__main__':
         apt_urls = tdc.apt_urls[category]
         url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
+        print(f'a total number of {len(url_batches)} batches')
         for i, url_batch in enumerate(url_batches):
             print(f'batch {i} starts')
             tdc.scrape_apt_data(category, url_batch, verbose=True)
