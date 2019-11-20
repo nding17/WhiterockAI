@@ -1348,7 +1348,7 @@ if __name__ == '__main__':
     data_path = '../data/sample/trulia/aptdata'
     
     # different sales categories 
-    categories = ['sold', 'buy', 'rent']
+    categories = ['buy', 'sold', 'rent']
     # construct a scraper object
     tdc = trulia_dot_com('philadelphia', 'pa')
 
@@ -1356,7 +1356,7 @@ if __name__ == '__main__':
     # could be optimized by parallel programming 
     for category in categories:
         print(f'scraping for category - {category} starts!')
-        tdc.scrape_apt_urls(category, verbose=True)
+        tdc.scrape_apt_urls(category, verbose=True, test=True)
 
         # divide the apartment URLs list into small batches 
         # in case the program crashes 
@@ -1369,11 +1369,11 @@ if __name__ == '__main__':
             try:
                 print(f'batch {i} starts')
                 print(url_batch)
-                tdc.scrape_apt_data(category, url_batch, verbose=True)
+                tdc.scrape_apt_data(category, url_batch, verbose=True, test=True)
                 data = tdc.apt_data[category]
 
                 tdc.write_data(category, data, data_path)
-                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True, test=True)
             except:
                 print(f'batch {i} failed')
                 print(f'unscraped URLs: {url_batch}')
