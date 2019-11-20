@@ -820,6 +820,23 @@ class trulia_dot_com:
         return section_data
 
     def _extract_num(self, text):
+        """
+        A helper function that extract any number from
+        a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
         try:
             if 'studio' in text.lower():
                 return 0.0
@@ -830,17 +847,36 @@ class trulia_dot_com:
             return np.nan
 
     def _get_floorplans(self, jdict):
+        
+        """
+        This is a helper function that extract the floorplan information of 
+        the rental apartments. The structure is very similar to rent.com
+
+        Parameters
+        ----------
+        jdict : dict
+            a JSON object, a dictionary of dictionaries 
+
+        Returns
+        -------
+        rental_data : list
+            rental data, similar to rent.com
+        """
+        
         try:
             floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
             address_data = list(self._get_address(jdict))
             rental_data = []
             
+            # different floorplans, e.g. studio, 1 bedroom 1 bathroom etc.
             for floorplans in floorplans_groups:
                 plans = floorplans['plans']
                 for section in plans:
+                    # this is the header 
                     section_data = self._get_section_data(section)
                     rental_data.append(address_data+section_data)
                     units = section['units']
+                    # these are all the units under that header 
                     for unit in units:
                         unit_data = self._get_section_data(unit)
                         rental_data.append(address_data+unit_data)
@@ -852,6 +888,11 @@ class trulia_dot_com:
                            apt_urls, 
                            verbose=False, 
                            test=False):
+
+        """
+        This is a helper function that packages all the helper function regarding
+        rental information extraction together 
+        """
 
         apt_info_data = []
 
@@ -896,6 +937,9 @@ class trulia_dot_com:
             return None
 
     def _get_historical_prices_dict(self, jdict):
+        """
+        find the historical price dictionary 
+        """
         try:
             price_history = jdict['props']['homeDetails']['priceHistory']
             price_sold = self._first(price_history, 
@@ -914,6 +958,9 @@ class trulia_dot_com:
             return None, None, None
 
     def _unzip_pdict(self, price_dict):
+        """
+        helper function to unzip the price dictionary in the json file 
+        """
         try:
             price_text = price_dict['price']['formattedPrice'].replace('$', '')\
                                                               .replace(',', '')
@@ -927,6 +974,9 @@ class trulia_dot_com:
             return None, None
 
     def _get_normal_sold_prices(self, jdict):
+        """
+        get the normal price information, for example, sales price and asking price
+        """
         price_dict = jdict['props']['homeDetails']['price']
         try:
             sales_price_text = price_dict['formattedPrice'].replace(',','')\
@@ -953,7 +1003,11 @@ class trulia_dot_com:
     
 
     def _get_important_sold_prices(self, jdict):
-       
+        """
+        Get all the historical price information
+        latest price sold, price change, and price listed 
+        along with the corresponding dates 
+        """
         pdict_s, pdict_c, pdict_l = self._get_historical_prices_dict(jdict)
         date_s, price_s = self._unzip_pdict(pdict_s)
         date_c, price_c = self._unzip_pdict(pdict_c)
@@ -962,6 +1016,9 @@ class trulia_dot_com:
         return date_s, price_s, date_c, price_c, date_l, price_l
 
     def _get_sold_info(self, jdict):
+        """
+        A helper function that packages all the sold apartment information
+        """
         street, city, state, zipcode, neighborhood = self._get_address(jdict)
         bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
         space = self._get_space(jdict)
@@ -997,6 +1054,56 @@ class trulia_dot_com:
                            verbose=False, 
                            test=False):
 
+        """
+        
+        This is a helper function that helps you obtain all the 
+        sold apartments information. Please note that the information
+        we need about the apartments differ when we have different types 
+        of apartments. 
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        apt_info_data : list
+            a list that contains all the information regarding the sold apartments 
+
+        >>> _get_sold_apt_data(apt_urls)
+        [['4419 Wayne Ave',
+         'Philadelphia',
+         'PA',
+         '19140',
+         'Logan',
+         3.0,
+         1.0,
+         1188.0,
+         'Townhouse | $29/sqft | Lot Size:1,035 sqft | Built in 1940 | 6 Rooms \
+                | Rooms:Dining Room | Heating:Forced Air | Heating Fuel:Gas | \
+                Cooling System:Central | Air Conditioning | Great Views | \
+                Colonial Architecture | Stories:2 | Exterior:Brick | Disabled Access',
+         '2019-11-15',
+         35000.0,
+         36000.0,
+         '2019-11-15',
+         35000.0,
+         '2019-10-26',
+         36000.0,
+         '2019-10-10',
+         45000.0], .... ]
+
+        """
+
         apt_info_data = []
 
         if verbose:
@@ -1023,6 +1130,35 @@ class trulia_dot_com:
                                'multi-family'],
                         verbose=False, 
                         test=False):
+
+        """
+        
+        The main function you can use to scarpe the apartment URLs, the users only
+        need to specify what sales_type the apartment is 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        htype : list(str) (optional)
+            abbreviation for house type. A list that contains the house types
+            user will be considering. This will only be activated if sales_type == 'buy'
+            since we don't care about the house type for rent and sold sections
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        None
+            the data will be saved in the private field of this class
+
+        """
         
         sales_type = sales_type.lower()
         self._apt_urls[sales_type] = self._get_apt_urls_ensemble(sales_type, 
@@ -1036,6 +1172,35 @@ class trulia_dot_com:
                         verbose=False, 
                         test=False):
 
+        """
+        
+        The main function you can use to scarpe the apartment data, the users only
+        need to specify what sales_type the apartment is, as well as the apartment URLs
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        None
+            the data will be saved in the private field of this class
+
+        """
+
+        # check which type of sales the user want to scrape 
         if sales_type == 'buy':
             self._apt_data['buy'] = self._get_buy_apt_data(apt_urls, verbose, test)
         if sales_type == 'rent':
@@ -1051,6 +1216,38 @@ class trulia_dot_com:
                           verbose=False, 
                           test=False):
 
+        """
+        
+        Based on the sales type, the scraper will automatically write the images onto 
+        the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        None
+            the images will be saved onto the local machine 
+
+        """
+
 
         if verbose:
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
@@ -1060,10 +1257,11 @@ class trulia_dot_com:
             if test and i == 5:
                 break
 
-            soup = self._get_soup(url)
-            jdict = self._load_json(soup)
-            img_urls = self._get_img_urls(jdict)
-            address = self._get_address(jdict)[0].upper()
+            soup = self._get_soup(url) # get a soup object
+            jdict = self._load_json(soup) # extract the json file 
+            img_urls = self._get_img_urls(jdict) # extract image URLs from the json file
+            address = self._get_address(jdict)[0].upper() # name of the folder 
+            # write images onto the local machine 
             self._save_images(img_urls, 
                               data_path, 
                               sales_type,
@@ -1077,17 +1275,46 @@ class trulia_dot_com:
                    apt_data, 
                    data_path):
 
-        current_path = os.getcwd()
-        os.chdir(data_path)
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
 
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
         if not os.path.exists(f'trulia_dot_com_{sales_type}.csv'):
             df = pd.DataFrame([], columns=CONST.COLNAMES[sales_type])
             df.to_csv(f'trulia_dot_com_{sales_type}.csv')
 
+        # continuously write into the existing data file on the local machine 
         df_new = pd.DataFrame(apt_data, columns=CONST.COLNAMES[sales_type])
         with open(f'trulia_dot_com_{sales_type}.csv', 'a') as df_old:
             df_new.to_csv(df_old, header=False)
 
+        # go back to the path where it is originally located 
         os.chdir(current_path)
 
 
@@ -1097,10 +1324,19 @@ class trulia_dot_com:
 
     @property
     def apt_urls(self):
+        """
+        A public attribute that lets you get access to all
+        of the apartment URLs that need to be scraped. Notice
+        that this is essentially a dictionary
+        """
         return self._apt_urls
 
     @property
     def apt_data(self):
+        """
+        A public attribute that lets you get access to all
+        of the apartment data that need to be scraped.
+        """
         return self._apt_data
 
 
@@ -1111,16 +1347,23 @@ if __name__ == '__main__':
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
     
-    categories = ['sold', 'rent', 'buy']
+    # different sales categories 
+    categories = ['sold', 'buy', 'rent']
+    # construct a scraper object
     tdc = trulia_dot_com('philadelphia', 'pa')
 
+    # scrape different streams of apartments iteratively 
+    # could be optimized by parallel programming 
     for category in categories:
         print(f'scraping for category - {category} starts!')
         tdc.scrape_apt_urls(category, verbose=True)
 
+        # divide the apartment URLs list into small batches 
+        # in case the program crashes 
         apt_urls = tdc.apt_urls[category]
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//5)
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
+        # batch jobs start
         print(f'a total number of {len(url_batches)} batches')
         for i, url_batch in enumerate(url_batches):
             try:
