@@ -748,9 +748,32 @@ class trulia_dot_com:
         return apt_info_data
 
     def _get_section_data(self, section):
+        
+        """
+
+        A helper function to scrape rent apartment data based on the 
+        section dictionary 
+
+        Parameters
+        ----------
+        section : dict
+            A dictionary that contains the floor plan information
+
+        Returns
+        -------
+        section_data : list
+            the apartment unit data
+
+        >>> _get_section_data(section)
+        ['2 Bed/2 Bath-B9', 2.0, 2.0, 1155.0, nan]
+        """
+        
+        # unit number
         apt_name = section['name']
                 
         try:
+            # get the number of bedrooms and bathrooms based 
+            # on the specific section dictionary
             bedrooms_text = section['bedrooms']['fullValue']
             bathrooms_text = section['bathrooms']['fullValue']
             bedrooms = self._extract_num(bedrooms_text)
@@ -759,11 +782,13 @@ class trulia_dot_com:
             bedrooms, bathrooms = np.nan, np.nan
 
         try:
+            # get the square foot area of the unit 
             space = float(section['floorSpace']['max'])
         except:
             space = np.nan
 
         try:
+            # get the rent price of the unit 
             price_text = section['priceRange']['formattedPrice']
             price_text = price_text.replace(',', '') \
                                    .replace('$', '')
@@ -771,6 +796,7 @@ class trulia_dot_com:
         except:
             price = np.nan
             
+        # construct the section data
         section_data = [
             apt_name,
             bedrooms,
@@ -792,20 +818,23 @@ class trulia_dot_com:
             return np.nan
 
     def _get_floorplans(self, jdict):
-        floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
-        address_data = list(self._get_address(jdict))
-        rental_data = []
-        
-        for floorplans in floorplans_groups:
-            plans = floorplans['plans']
-            for section in plans:
-                section_data = self._get_section_data(section)
-                rental_data.append(address_data+section_data)
-                units = section['units']
-                for unit in units:
-                    unit_data = self._get_section_data(unit)
-                    rental_data.append(address_data+unit_data)
-        return rental_data
+        try:
+            floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
+            address_data = list(self._get_address(jdict))
+            rental_data = []
+            
+            for floorplans in floorplans_groups:
+                plans = floorplans['plans']
+                for section in plans:
+                    section_data = self._get_section_data(section)
+                    rental_data.append(address_data+section_data)
+                    units = section['units']
+                    for unit in units:
+                        unit_data = self._get_section_data(unit)
+                        rental_data.append(address_data+unit_data)
+            return rental_data
+        except:
+            return None
 
     def _get_rent_apt_data(self, 
                            apt_urls, 
@@ -818,13 +847,17 @@ class trulia_dot_com:
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
 
         for i, apt_url in enumerate(apt_urls):
-            soup = self._get_soup(apt_url)
-            jdict = self._load_json(soup)
-            floorplan_data = self._get_floorplans(jdict)
-            apt_info_data += floorplan_data
+            try:
+                soup = self._get_soup(apt_url)
+                jdict = self._load_json(soup)
+                floorplan_data = self._get_floorplans(jdict)
+                if floorplan_data:
+                    apt_info_data += floorplan_data
 
-            if test and i==5:
-                break
+                if test and i==5:
+                    break
+            except:
+                continue
 
         return apt_info_data
 
@@ -1063,7 +1096,7 @@ if __name__ == '__main__':
 
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
-    categories = ['buy', 'rent', 'sold']
+    categories = ['rent', 'sold', 'buy']
     tdc = trulia_dot_com('philadelphia', 'pa')
 
     for category in categories:
@@ -1074,13 +1107,19 @@ if __name__ == '__main__':
         url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
         print(f'a total number of {len(url_batches)} batches')
-        for i, url_batch in enumerate(url_batches):
-            print(f'batch {i} starts')
-            tdc.scrape_apt_data(category, url_batch, verbose=True)
-            data = tdc.apt_data[category]
+        for i, url_batch in enumerate(url_batches[8:]):
+            try:
+                print(f'batch {i} starts')
+                print(url_batch)
+                tdc.scrape_apt_data(category, url_batch, verbose=True)
+                data = tdc.apt_data[category]
 
-            tdc.write_data(category, data, data_path)
-            tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                tdc.write_data(category, data, data_path)
+                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
+            except:
+                print(f'batch {i} failed')
+                print(f'unscraped URLs: {url_batch}')
+                continue
 
         print(f'scraping for category - {category} done!')
 
