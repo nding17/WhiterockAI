@@ -1106,8 +1106,8 @@ class trulia_dot_com:
 
 if __name__ == '__main__':
 
-    # users need to specifiy the path where you
-    # want to store the data by changing img_path and data_path
+    # users need to specifiy the path where you want to
+    # store the data by changing img_path and data_path
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
     
