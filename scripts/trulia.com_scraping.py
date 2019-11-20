@@ -670,15 +670,24 @@ if __name__ == '__main__':
 
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
-
+    categories = ['buy', 'rent', 'sold']
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scrape_apt_urls('sold', verbose=True, test=True)
 
-    apt_urls = tdc.apt_urls['sold']
+    for category in categories:
+        print(f'scraping for category - {category} starts!')
+        tdc.scrape_apt_urls(category, verbose=True)
 
-    tdc.scrape_apt_data(apt_urls, 'sold', verbose=True, test=True)
-    data = tdc.apt_data['sold']
-    tdc.write_data('sold', data, data_path)
+        apt_urls = tdc.apt_urls[category]
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
-    tdc.scrape_apt_images('sold', img_path, verbose=True, test=True)
+        for i, url_batch in enumerate(url_batches):
+            print(f'batch {i} starts')
+            tdc.scrape_apt_data(url_batch, category, verbose=True)
+            data = tdc.apt_data[category]
 
+            tdc.write_data(category, data, data_path)
+            tdc.scrape_apt_images(category, img_path, verbose=True)
+
+        print(f'scraping for category - {category} done!')
+
+    print('job done, congratulations!')
