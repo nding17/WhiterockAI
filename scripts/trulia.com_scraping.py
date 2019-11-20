@@ -544,9 +544,16 @@ class trulia_dot_com:
 
     def scrape_apt_data(self, 
                         apt_urls, 
+                        sales_type,
                         verbose=False, 
                         test=False):
-        pass
+
+        if sales_type == 'buy':
+            self._apt_data['buy'] = self._get_buy_apt_data(apt_urls, verbose, test)
+        if sales_type == 'rent':
+            self._apt_data['rent'] = self._get_rent_apt_data(apt_urls, verbose, test)
+        if sales_type == 'sold':
+            self._apt_data['sold'] = self._get_sold_apt_data(apt_urls, verbose, test)
 
 
     def scrape_apt_images(self, 
@@ -577,13 +584,29 @@ class trulia_dot_com:
             if verbose and i%10==0:
                 print(f'images in {i} apartments have been scraped')
 
+    #####################
+    # public attributes #
+    #####################
+
+    @property
+    def apt_urls(self):
+        return self._apt_urls
+
+    @property
+    def apt_data(self):
+        return self._apt_data
+    
+    
 
 if __name__ == '__main__':
 
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scrape_apt_urls('sold', verbose=True, test=True)
 
-    print(tdc._get_sold_apt_data(tdc._apt_urls['sold'][:3]))
+    apt_urls = tdc.apt_urls['sold']
+
+    tdc.scrape_apt_data(apt_urls, 'sold', verbose=True, test=True)
+    print(tdc.apt_data)
 
     img_path = '../data/sample/trulia/imgdata'
     tdc.scrape_apt_images('sold', img_path, verbose=True, test=True)
