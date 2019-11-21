@@ -1356,7 +1356,7 @@ if __name__ == '__main__':
     # could be optimized by parallel programming 
     for category in categories:
         print(f'scraping for category - {category} starts!')
-        tdc.scrape_apt_urls(category, verbose=True, test=True)
+        tdc.scrape_apt_urls(category, verbose=True)
 
         # divide the apartment URLs list into small batches 
         # in case the program crashes 
@@ -1368,12 +1368,11 @@ if __name__ == '__main__':
         for i, url_batch in enumerate(url_batches):
             try:
                 print(f'batch {i} starts')
-                print(url_batch)
-                tdc.scrape_apt_data(category, url_batch, verbose=True, test=True)
+                tdc.scrape_apt_data(category, url_batch, verbose=True)
                 data = tdc.apt_data[category]
 
                 tdc.write_data(category, data, data_path)
-                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True, test=True)
+                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
             except:
                 print(f'batch {i} failed')
                 print(f'unscraped URLs: {url_batch}')
