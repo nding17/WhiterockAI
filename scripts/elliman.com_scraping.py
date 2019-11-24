@@ -90,3 +90,15 @@ class elliman_dot_com:
                 pg_num += 1
         
         return apt_urls
+    
+    def _get_img_urls_per_apt(self, apt_url):
+        soup_apt = get_soup(apt_url)
+        photo_link = soup_apt.find('li', class_='listing_all_photos')\
+                             .find('a')['href']
+        photo_link = f'{CONST.HEADER}{photo_link}'
+        soup_photo = get_soup(photo_link)
+
+        imgs = soup_photo.find('div', class_='w_listitem_left')\
+                         .find_all('img')
+        imgs = [f"{CONST.HEADER}{img['src']}" for img in imgs]
+        return imgs                                
