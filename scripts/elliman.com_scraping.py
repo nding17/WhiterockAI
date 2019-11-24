@@ -1,3 +1,11 @@
+#!/usr/bin/env python
+
+__author__ = 'Naili Ding'
+__email__ = 'nd2588@columbia.edu'
+__maintainer__ = 'Naili Ding'
+__version__ = '1.0.1'
+__status__ = 'in progress'
+
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -7,7 +15,7 @@ import time
 from fake_useragent import UserAgent
 import os
 
-class CONST
+class CONST:
     HEADER = 'https://www.elliman.com'
 
 class elliman_dot_com:
@@ -69,8 +77,8 @@ class elliman_dot_com:
                 attempts = 1
                 while attempts < 5:
                     time.sleep(3)
-                    soup_pg = get_soup(webpage)
-                    apt_urls_pg = get_apt_urls_per_page(soup_pg)
+                    soup_pg = self._get_soup(webpage)
+                    apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
                     more_listings = soup_pg.find('div', class_='_grid33 _alpha')
                     
                     if apt_urls_pg or more_listings:
@@ -101,4 +109,38 @@ class elliman_dot_com:
         imgs = soup_photo.find('div', class_='w_listitem_left')\
                          .find_all('img')
         imgs = [f"{CONST.HEADER}{img['src']}" for img in imgs]
-        return imgs                                
+        return imgs
+
+    def _save_images(self, img_urls, data_path, address):
+        try:
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            if not os.path.exists('Sale'):
+                os.mkdir('Sale')
+            os.chdir('Sale')
+            
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+            
+            for i, img_url in enumerate(img_urls):
+                img_data = requests.get(img_url).content
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    handler.write(img_data)
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            return 0
+
+    def scrape_apt_urls(self, verbose=False, test=False):
+        self._apt_urls = self._get_apt_urls_ensemble(verbose, test)
+
+    def scrape_apt_images(self, verbose=False):
+        pass
+
+if __name__ == '__main__':
+
+    edc = elliman_dot_com()
+    edc._get_apt_urls_ensemble(verbose=True, test=True)
+
