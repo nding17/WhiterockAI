@@ -258,8 +258,28 @@ class elliman_dot_com:
     def scrape_apt_urls(self, verbose=False, test=False):
         self._apt_urls = self._get_apt_urls_ensemble(verbose, test)
 
+    def scrape_apt_data(self, apt_urls, verbose=False, test=False):
+        apt_data = []
+
+        for url in apt_urls:
+            soup = self._get_soup(url)
+            unit = self._get_apt_data(soup)
+            apt_data.append(unit)
+
+        self._apt_data = apt_data
+
     def scrape_apt_images(self, verbose=False):
         pass
+
+    @property
+    def apt_url(self):
+        return self._apt_url
+
+    @property
+    def apt_data(self):
+        return self._apt_data
+    
+    
 
 if __name__ == '__main__':
 
