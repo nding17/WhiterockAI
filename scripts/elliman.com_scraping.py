@@ -133,6 +133,128 @@ class elliman_dot_com:
         except:
             return 0
 
+    def _get_address(self, soup):
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            address = ppt_details.find('li', class_='first listing_address')\
+                                 .get_text()
+
+            addr_pattern = r'([A-Za-z0-9\s\-]+)? - ([A-Za-z0-9\s\-]+)?, ([A-Za-z0-9\s\-]+)?'
+            street, neighborhood, city = re.findall(addr_pattern, address)[0]
+            return street, neighborhood, city
+        except:
+            return None, None, None
+
+    def _extract_num(self, text):
+        """
+        A helper function that extract any number from
+        a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
+        try:
+            pattern = r'[-+]?\d*\.\d+|\d+'
+            result = re.findall(pattern, text)[0]
+            return float(result)
+        except:
+            return np.nan
+
+    def _get_price(self, soup):
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            price = ppt_details.find('li', class_='listing_price')\
+                               .get_text()\
+                               .replace(',','')
+            return self._extract_num(price)
+        except:
+            return None
+
+    def _get_features(self, soup):
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            features = ppt_details.find('li', class_='listing_features')\
+                                  .get_text()\
+                                  .strip()\
+                                  .split(' | ')
+
+            beds, baths, halfbaths = 0, 0, 0
+            for feature in features:
+                if 'beds' in feature.lower():
+                    beds = self._extract_num(feature)
+                if 'baths' in feature.lower():
+                    baths = self._extract_num(feature)
+                if 'half bath' in feature.lower():
+                    halfbaths = self._extract_num(feature)
+
+            return beds, baths, halfbaths
+        except:
+            return None, None, None
+
+    def _get_htype(self, soup):
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            htype = ppt_details.find('li', class_='listing_extras')\
+                               .get_text()\
+                               .strip()
+            return htype
+        except:
+            return None
+
+    def _get_sqft(self, soup):
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            all_props = ppt_details.find_all('li')
+            props_text = [prop.get_text().strip() for prop in all_props]
+            sqft = filter(lambda x: 'Approximate Sq. Feet' in x, props_text)
+            sqft = list(sqft)[0].replace(',','')
+            sqft = self._extract_num(sqft)
+            return sqft
+        except:
+            return None
+
+    def _get_list_id(self, soup):
+        ppt_details = soup.find('div', class_='w_listitem_description')
+        list_id = ppt_details.find('li', class_='listing_id')\
+                             .get_text()\
+                             .replace('Listing ID: ', '')\
+                             .strip()
+        return list_id
+
+    def _get_apt_data(self, soup):
+    
+        street, neighborhood, city = self._get_address(soup)
+        price = self._get_price(soup)
+        beds, baths, halfbaths = self._get_features(soup)
+        htype = self._get_htype(soup)
+        sqft = self._get_sqft(soup)
+        listid = self._get_list_id(soup)
+        
+        unit = [
+            street, 
+            neighborhood, 
+            city,
+            price,
+            beds, 
+            baths, 
+            halfbaths,
+            htype,
+            sqft,
+            listid,
+        ]
+        
+        return unit
+
     def scrape_apt_urls(self, verbose=False, test=False):
         self._apt_urls = self._get_apt_urls_ensemble(verbose, test)
 
