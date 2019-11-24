@@ -52,15 +52,13 @@ class elliman_dot_com:
         apt_urls = []
         
         while not stop:
-            
-            time.sleep(2)
-            
+        
             if test and pg_num == 10:
                 break
             
-            if pg_num%20 == 0:
+            if pg_num%50 == 0:
                 if verbose:
-                    print('20 pages scraped, sleep 15 seconds')
+                    print('50 pages scraped, sleep 15 seconds')
                 time.sleep(15)
                 
             webpage = self._get_webpage(pg_num)
@@ -68,6 +66,22 @@ class elliman_dot_com:
             apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
             more_listings = soup_pg.find('div', class_='_grid33 _alpha')
             if (not apt_urls_pg) and (not more_listings):
+                attempts = 1
+                while attempts < 5:
+                    time.sleep(3)
+                    soup_pg = get_soup(webpage)
+                    apt_urls_pg = get_apt_urls_per_page(soup_pg)
+                    more_listings = soup_pg.find('div', class_='_grid33 _alpha')
+                    
+                    if apt_urls_pg or more_listings:
+                        apt_urls += apt_urls_pg
+                        if verbose:
+                            print(f'apartment URLs in page {pg_num} all scraped')
+                        pg_num += 1
+                        continue
+                    
+                    attempts += 1
+                        
                 stop = True
             else:
                 apt_urls += apt_urls_pg
