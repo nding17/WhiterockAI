@@ -13,7 +13,7 @@ __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
-__status__ = 'documentation'
+__status__ = 'complete'
 
 ### package requirements
 import pandas as pd
@@ -878,7 +878,6 @@ class elliman_dot_com:
 
     @property
     def apt_data(self):
-        apt_data(self):
         """
         A public attribute that lets you get access to all
         of the apartment data that need to be scraped.
@@ -888,16 +887,28 @@ class elliman_dot_com:
 
 if __name__ == '__main__':
 
-    edc = elliman_dot_com()
+    # users need to specifiy the path where you want to
+    # store the data by changing img_path and data_path
+    # these are the only lines that users need to change
+    # the rest will be automatic 
     image_path = '../data/sample/elliman/imgdata'
     data_path = '../data/sample/elliman'
+
+    # time of sleep 
     sleep_secs = 15
+    # construct an elliman_doc_com object to work
+    # on the task
+    edc = elliman_dot_com()
 
+    # scrape all the apartment URLs
+    # notice the test is opted out here
     edc.scrape_apt_urls(verbose=True, test=False)
-    apt_urls = edc.apt_urls
+    apt_urls = edc.apt_urls # fetch the apartment URLs
 
+    # divide the apartment URLs list into small batches 
     url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+    # batch jobs start
     print(f'total number of batches: {len(url_batches)}')
     for i, batch in enumerate(url_batches):
         print(f'batch {i} starts, there are {len(batch)} apartment URLs')
@@ -906,4 +917,5 @@ if __name__ == '__main__':
         apt_data = edc.apt_data
         edc.write_data(apt_data, data_path)
         print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-        time.sleep(15)
+        time.sleep(15) # rest for a few seconds after each batch job done
+    print('job done, congratulations!')
