@@ -294,22 +294,50 @@ class elliman_dot_com:
         return apt_urls
     
     def _get_img_urls_per_apt(self, apt_url):
-        try:
-            soup_apt = self._soup_attempts(apt_url)
 
+        """
+        Find the image URLs given the URL of an apartment
+
+        Parameters
+        ----------
+        apt_url : str
+            the URL of a specific apartment or a general website
+
+        Returns
+        -------
+        imgs_complete : list(str)
+            this is a list of image URLs that you are able to 
+            directly download 
+
+        >>> _get_img_urls_per_apt(apt_url)
+        ['https://www.elliman.com/img/28ea62bf97218c78209c8f817602a278cd375825+440++1',
+         'https://www.elliman.com/img/a1d89f0c403d17c150dec8e213eee8a1c71a67ee+440++1',
+         'https://www.elliman.com/img/21be72cc0dc3df9f33739a88fdb025769b46b6a0+440++1',
+         ..., ]
+        """
+
+        try:
+            # multiple attempts until you get the desired soup for the apartment
+            soup_apt = self._soup_attempts(apt_url)
+            # scrape the gallery link
             photo_link = soup_apt.find('li', class_='listing_all_photos')\
                                  .find('a')['href']
+            # construct the gallery URL
             photo_link = f'{CONST.HEADER}{photo_link}'
+            # try to scrape the contents in the gallery URL
             soup_photo = self._soup_attempts(photo_link)
-
+            # try to find a list of images and their corresponding URLs
             imgs = soup_photo.find('div', class_='w_listitem_left')\
                              .find_all('img')
             imgs_complete = []
 
             for img in imgs:
+                # special image link with complete address
                 if 'http' in img['src']:
                     imgs_complete.append(img['src'])
                 else:
+                    # this is the images that are available from the 
+                    # website server 
                     imgs_complete.append(f"{CONST.HEADER}{img['src']}")
             return imgs_complete
         except:
