@@ -276,12 +276,15 @@ class elliman_dot_com:
             return None
 
     def _get_list_id(self, soup):
-        ppt_details = soup.find('div', class_='w_listitem_description')
-        list_id = ppt_details.find('li', class_='listing_id')\
-                             .get_text()\
-                             .replace('Listing ID: ', '')\
-                             .strip()
-        return list_id
+        try:
+            ppt_details = soup.find('div', class_='w_listitem_description')
+            list_id = ppt_details.find('li', class_='listing_id')\
+                                 .get_text()\
+                                 .replace('Listing ID: ', '')\
+                                 .strip()
+            return list_id
+        except:
+            return None
 
     def _get_apt_data(self, soup):
     
@@ -336,6 +339,7 @@ class elliman_dot_com:
 
                 apt_data.append(unit)
             except:
+                print(soup)
                 raise ValueError(f'FAILED apt url: {url}')
 
         self._apt_data = apt_data
@@ -454,5 +458,5 @@ if __name__ == '__main__':
         edc.scrape_apt_images(batch, image_path, verbose=True)
         apt_data = edc.apt_data
         edc.write_data(apt_data, data_path)
-        print(f'batch {i} done, sleep {sleep_secs} seconds')
+        print(f'batch {i} done, sleep {sleep_secs} seconds\n')
         time.sleep(15)
