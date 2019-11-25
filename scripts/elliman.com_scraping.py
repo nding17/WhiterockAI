@@ -15,14 +15,24 @@ import time
 from fake_useragent import UserAgent
 import os
 
+### a class that contains all the contants we will be using 
+
 class CONST:
     HEADER = 'https://www.elliman.com'
 
 class elliman_dot_com:
 
+    ############################
+    # class initiation section #
+    ############################
+
     def __init__(self):
         self._apt_urls = []
         self._apt_data = []
+
+    #############################
+    # private functions section #
+    #############################
 
     def _random_user_agent(self):
         try:
@@ -260,6 +270,10 @@ class elliman_dot_com:
         
         return unit
 
+    ############################
+    # public functions section #
+    ############################
+
     def scrape_apt_urls(self, 
                         verbose=False, 
                         test=False):
@@ -314,6 +328,10 @@ class elliman_dot_com:
 
         if verbose:
             print('all images scraped')
+
+    #####################
+    # public attributes #
+    #####################
 
     @property
     def apt_urls(self):
