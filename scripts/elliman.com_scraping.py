@@ -1,11 +1,21 @@
 #!/usr/bin/env python
 
+""" 
+elliman.com_scraping.py : Scrape the apartment rental infomation in elliman.com 
+the users only need to specify the paths to the directory they want to store the 
+images as well as the apartment data. 
+
+It will automatically scrape all the details related to all the apartments in the 
+city users are looking at, as well as save all the images in the specified directory.
+"""
+
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
-__status__ = 'in progress'
+__status__ = 'documentation'
 
+### package requirements
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -48,6 +58,24 @@ class elliman_dot_com:
     #############################
 
     def _random_user_agent(self):
+        """
+        A helper function to generate a random header to 
+        avoid getting blocked by the website
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+        a random user agent 
+
+        >>> _random_user_agent()
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/58.0.3029.110 Safari/537.36'
+        """
         try:
             ua = UserAgent()
             return ua.random
@@ -58,9 +86,27 @@ class elliman_dot_com:
             return default_ua
 
     def _get_soup(self, url):
-    
-        headers = {'User-Agent': self._random_user_agent()}
         
+
+        """
+        This is a helper function that will automatically generate a 
+        BeautifulSoup object based on the given URL of the apartment 
+        webpage
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+        """
+
+        # generate a random header 
+        headers = {'User-Agent': self._random_user_agent()}
+        # send a request and get the soup
         response = requests.get(url, headers=headers)
         results = response.content
         if not response.status_code == 404:
@@ -68,41 +114,139 @@ class elliman_dot_com:
         return soup
 
     def _soup_attempts(self, url, total_attempts=5):
+
+        """
+        A helper function that will make several attempts
+        to obtain a soup to avoid getting blocked
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        total_attempts: int
+            the number of attempts you want to try to obtain the 
+            soup before you already give up. Default is 5 attempts
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage        
+
+        """
+
         soup = self._get_soup(url)
+
+        # if we get the soup with the first attempt
         if soup:
             return soup
+        # if we don't get the soup during our first
+        # attempt
         else:
             attempts = 0
             while attempts < total_attempts:
+                # put the program idle to avoid detection
                 time.sleep(3)
                 soup = self._get_soup(url)
                 if soup:
                     return soup
+            # time to give up, try to find what's going on 
             raise ValueError(f'FAILED to get soup for apt url {url}')
 
     def _get_webpage(self, pg_num):
+
+        """
+        Get the initial webpage for the apartments. Each webpage would contain 
+        about 30 apartments. 
+
+        Parameters
+        ----------
+        pg_num : int
+            since there are multiple webpages, we need to specify which page
+            we need to scrape
+
+        Returns
+        -------
+        webpage : str
+            the original webpage for the buy section
+
+        >>> _get_webpage(pg_num)
+        'https://www.elliman.com/search/for-sale/search-2?sdid=1&sid=44458208&sk=1'
+        """
+
         template = f'https://www.elliman.com/search/for-sale/search-{pg_num}?sdid=1&sid=44458208&sk=1'
         return template 
 
     def _get_apt_urls_per_page(self, soup):
+        """
+        
+        A helper function that helps the user to scrape all the apartment URLs
+        in the original webpage
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for the specific apartment page 
+
+        Returns
+        -------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in particular
+            section
+
+        >>> _get_apt_urls_per_page(soup)
+        ['https://wwww.elliman.com/new-york-city/310-east-84th-street-manhattan-pwqwjvr',
+         'https://wwww.elliman.com/new-york-city/250-west-73rd-street-manhattan-effcvao',
+         'https://wwww.elliman.com/new-york-city/448-west-25th-street-manhattan-rdwscgq',
+         ..., ]
+
+        """
+
+        # identify the tag that contains apt URL
         apartments = soup.find_all('li', class_='listing_address first')
         apt_urls = [apt.find('a')['href'] for apt in apartments]
+        # formulate a complete apartment URL
         apt_urls = [f'{CONST.HEADER}{url}' for url in apt_urls]
         return apt_urls
 
     def _get_apt_urls_ensemble(self, 
                                verbose=False, 
                                test=False):
-        pg_num = 1
-        stop = False
-        apt_urls = []
+        """
         
+        This is a helper function that will collectively scrape the apartments in all 
+        of the original webpages in which each page contains roughly 30 apartments. 
+        The function utilizes defensive programming strategy to avoid getting blocked
+        as a bot.
+
+        Parameters
+        ----------
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        apt_urls : list(str)
+            this is a complete list of URLs for all the apartments
+
+        """
+
+        pg_num = 1 # initial page number
+        stop = False # a flag to indicate whether or not to stop 
+        apt_urls = [] # a list that contains a complete set of URLs
+        
+        # keep going until reaching the last page 
         while not stop:
         
             if test and pg_num == 10:
                 break
             
             if pg_num%50 == 0:
+                # sleep 15 seconds for every batch 
                 if verbose:
                     print('50 pages scraped, sleep 15 seconds')
                 time.sleep(15)
@@ -111,29 +255,41 @@ class elliman_dot_com:
             soup_pg = self._soup_attempts(webpage)
             apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
             more_listings = soup_pg.find('div', class_='_grid33 _alpha')
+
+            # try to make sure we reach the last page 
+            # condition 1 - if there're no more contents in regular page
+            # condition 2 - subscriped contents also non-existent 
             if (not apt_urls_pg) and (not more_listings):
-                attempts = 1
+                attempts = 0
                 while attempts < 5:
                     time.sleep(3)
+                    # another 5 attempts to request a soup 
                     soup_pg = self._soup_attempts(webpage)
                     apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
                     more_listings = soup_pg.find('div', class_='_grid33 _alpha')
                     
+                    # if we finally get results
                     if apt_urls_pg or more_listings:
                         apt_urls += apt_urls_pg
                         if verbose:
                             print(f'apartment URLs in page {pg_num} all scraped')
                         pg_num += 1
-                        break
-                    
+                        break # break the loop 
                     attempts += 1
-                        
-                stop = True
+                
+                if pg_num < 470:
+                    # last check - we know the total number of pages is
+                    # greater than 470        
+                    stop = False
+                else: 
+                    # the last page has been reached 
+                    stop = True
             else:
+                # have not reached the end page yet, keep going 
                 apt_urls += apt_urls_pg
                 if verbose:
                     print(f'apartment URLs in page {pg_num} all scraped')
-                pg_num += 1
+                pg_num += 1 # next page 
         
         return apt_urls
     
@@ -446,7 +602,7 @@ if __name__ == '__main__':
     data_path = '../data/sample/elliman'
     sleep_secs = 15
 
-    edc.scrape_apt_urls(verbose=True, test=True)
+    edc.scrape_apt_urls(verbose=True, test=False)
     apt_urls = edc.apt_urls
 
     url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
