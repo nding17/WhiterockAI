@@ -347,17 +347,48 @@ class elliman_dot_com:
                      img_urls, 
                      data_path, 
                      address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
         try:
+            # if address is invalid, discontinue the process
             if not address:
                 return 0
 
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
             current_path = os.getcwd()
             os.chdir(data_path)
             
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
             if not os.path.exists(address):
                 os.mkdir(address)
             os.chdir(address)
-            
+
+            # write images inside the apartment folder
             for i, img_url in enumerate(img_urls):
                 img_data = requests.get(img_url).content
                 with open(f'img{i}.jpg', 'wb') as handler:
@@ -370,12 +401,34 @@ class elliman_dot_com:
             return 0
 
     def _get_address(self, soup):
+
+        """
+        A helper function that gets the address info of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage       
+
+        Returns
+        -------
+        tuple
+            address information, namely, (street, neighborhood, city)
+
+        >>> _get_address(soup)
+        ('35 Sidney Pl', 'Brooklyn Heights', 'New York')
+        """
+
         try:
+            # property detail tag
             ppt_details = soup.find('div', class_='w_listitem_description')
+            # find address tag
             address = ppt_details.find('li', class_='first listing_address')\
                                  .get_text()
-
+            # pattern for the address in this website
             addr_pattern = r'([A-Za-z0-9\s\-\,]+)? - ([A-Za-z0-9\s\-]+)?, ([A-Za-z0-9\s\-]+)?'
+            # scrape out the address information
             street, neighborhood, city = re.findall(addr_pattern, address)[0]
             return street, neighborhood, city
         except:
@@ -383,8 +436,7 @@ class elliman_dot_com:
 
     def _extract_num(self, text):
         """
-        A helper function that extract any number from
-        a text 
+        A helper function that extract any number from a text 
 
         Parameters
         ----------
@@ -400,6 +452,7 @@ class elliman_dot_com:
         1000.0
         """
         try:
+            # pattern to find any number (int or float)
             pattern = r'[-+]?\d*\.\d+|\d+'
             result = re.findall(pattern, text)[0]
             return float(result)
@@ -407,16 +460,59 @@ class elliman_dot_com:
             return np.nan
 
     def _get_price(self, soup):
+
+        """
+        A helper function that gets the price info of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        float
+            price of the apartment
+
+        >>> _get_price(soup)
+        650000.0
+
+        """
+
         try:
+            # property details tag
             ppt_details = soup.find('div', class_='w_listitem_description')
+            # price tag
             price = ppt_details.find('li', class_='listing_price')\
                                .get_text()\
-                               .replace(',','')
-            return self._extract_num(price)
+                               .replace(',','') # clean up the text
+            return self._extract_num(price) # extract number from the text
         except:
             return None
 
     def _get_features(self, soup):
+
+        """
+
+        A helper function that gets the bedroom and bathroom info of the 
+        apartment given the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        tuple
+            # of bedrooms, # of bathrooms and # of half bathrooms
+
+        >>> _get_features(soup)
+        (5.0, 3.0, 0.0)
+
+        """
+
         try:
             ppt_details = soup.find('div', class_='w_listitem_description')
             features = ppt_details.find('li', class_='listing_features')\
@@ -425,6 +521,7 @@ class elliman_dot_com:
                                   .split(' | ')
 
             beds, baths, halfbaths = 0, 0, 0
+            # try to identify the room type
             for feature in features:
                 if 'beds' in feature.lower():
                     beds = self._extract_num(feature)
@@ -438,8 +535,26 @@ class elliman_dot_com:
             return None, None, None
 
     def _get_htype(self, soup):
+        """
+        A helper function that gets listing type of the apartment given the 
+        soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        str
+            the listing type
+
+        >>> _get_htype(soup)
+        'Multi-family'
+        """
         try:
             ppt_details = soup.find('div', class_='w_listitem_description')
+            # housing type tag
             htype = ppt_details.find('li', class_='listing_extras')\
                                .get_text()\
                                .strip()
@@ -448,10 +563,31 @@ class elliman_dot_com:
             return None
 
     def _get_sqft(self, soup):
+        """
+
+        A helper function that gets the square foot of the apartment given the 
+        soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        float
+            the area of the apartment in square foot 
+
+        >>> _get_sqft(soup)
+        3012.0
+
+        """
+
         try:
             ppt_details = soup.find('div', class_='w_listitem_description')
             all_props = ppt_details.find_all('li')
             props_text = [prop.get_text().strip() for prop in all_props]
+            # filter out the element that contains specific text 
             sqft = filter(lambda x: 'Approximate Sq. Feet' in x, props_text)
             sqft = list(sqft)[0].replace(',','')
             sqft = self._extract_num(sqft)
@@ -460,8 +596,30 @@ class elliman_dot_com:
             return None
 
     def _get_list_id(self, soup):
+        """
+
+        A helper function that gets the listing ID of the apartment given the 
+        soup of the specific apartment you are scraping. Please note that the
+        result is a string instead of a number 
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        str
+            the listing ID of the specific apartment 
+
+        >>> _get_list_id(soup)
+        '4008777'
+
+        """
+
         try:
             ppt_details = soup.find('div', class_='w_listitem_description')
+            # find listing ID tag
             list_id = ppt_details.find('li', class_='listing_id')\
                                  .get_text()\
                                  .replace('Listing ID: ', '')\
@@ -471,6 +629,23 @@ class elliman_dot_com:
             return None
 
     def _get_apt_data(self, soup):
+
+        """
+
+        A function that collects all the data we will need for an apartment
+
+        Parameters
+        ----------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        unit : list
+            a list that contains the apartment info data. All the relevant 
+            features are specified with the previous functions      
+
+        """
     
         street, neighborhood, city = self._get_address(soup)
         price = self._get_price(soup)
@@ -479,6 +654,7 @@ class elliman_dot_com:
         sqft = self._get_sqft(soup)
         listid = self._get_list_id(soup)
         
+        # create a list that package all the useful data
         unit = [
             street, 
             neighborhood, 
@@ -502,12 +678,56 @@ class elliman_dot_com:
                         verbose=False, 
                         test=False):
 
+        """
+        A public function that allows you to call to scrape apartment URLs
+
+        Parameters
+        ----------
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_urls will be updated
+            and all the apartments URLs will be stored in this field 
+        """
+
         self._apt_urls = self._get_apt_urls_ensemble(verbose, test)
 
     def scrape_apt_data(self, 
                         apt_urls, 
                         verbose=False, 
                         test=False):
+
+        """
+        A public function that allows you to scrape information for a list
+        of apartments the users specified 
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            a list of apartment URLs that you hope to scrape the apartment 
+            info from
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_data will be updated
+            and all the apartments info will be stored in this field 
+        """
+
         apt_data = []
 
         if verbose:
@@ -518,6 +738,7 @@ class elliman_dot_com:
             if test and i == 10:
                 break
             try:
+                # update apartment info to the list
                 soup = self._soup_attempts(url)
                 unit = self._get_apt_data(soup)
 
@@ -526,6 +747,7 @@ class elliman_dot_com:
                 print(soup)
                 raise ValueError(f'FAILED apt url: {url}')
 
+        # automatically updating the private attribute _apt_data
         self._apt_data = apt_data
 
     def scrape_apt_images(self, 
@@ -533,6 +755,35 @@ class elliman_dot_com:
                           data_path, 
                           verbose=False, 
                           test=False):
+
+        """
+        
+        Based on a list of apartment URLs the users want to scrape their images from, 
+        the scraper will automatically write the images onto the local machine. Please 
+        note that if 'test' is opted out, the size of the images will become significant. 
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        None
+            the images will be saved onto the local machine 
+
+        """
 
         if verbose:
             print(f'images in {len(apt_urls)} apartments to be scraped')
@@ -546,6 +797,9 @@ class elliman_dot_com:
                 imgs = self._get_img_urls_per_apt(url)
                 soup = self._soup_attempts(url)
 
+                # if we don't get any response from the website server
+                # continue to call a few times in order to fetch web
+                # contents. Give up after 5 attempts 
                 if (not imgs) or (not soup):
                     attempts = 0
                     while attempts < 5:
@@ -553,13 +807,15 @@ class elliman_dot_com:
                         imgs = self._get_img_urls_per_apt(url)
                         soup = self._soup_attempts(url)
                         attempts += 1
+                        # if contents are recovered, good to go.
                         if imgs and soup:
                             break
-
+                # street is the name of the image folder 
                 street, _, _ = self._get_address(soup)
-
+                # automatically save images onto the local machine 
                 self._save_images(imgs, data_path, street)
             except:
+                # time to give up and try to find what's going on
                 raise ValueError(f'FAILED apt: {street}, url: {url}')
 
         if verbose:
@@ -577,9 +833,6 @@ class elliman_dot_com:
 
         Parameters
         ----------
-        sales_type : str
-            a handler to tell the function which section you're looking at, e.g. 'buy'
-
         apt_data : list(object)
             this is a list of apartment data in raw format and later on will be used 
             to construct the dataframe 
