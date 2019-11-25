@@ -54,7 +54,9 @@ class elliman_dot_com:
         apt_urls = [f'{CONST.HEADER}{url}' for url in apt_urls]
         return apt_urls
 
-    def _get_apt_urls_ensemble(self, verbose=False, test=False):
+    def _get_apt_urls_ensemble(self, 
+                               verbose=False, 
+                               test=False):
         pg_num = 1
         stop = False
         apt_urls = []
@@ -100,18 +102,21 @@ class elliman_dot_com:
         return apt_urls
     
     def _get_img_urls_per_apt(self, apt_url):
-        soup_apt = get_soup(apt_url)
+        soup_apt = self._get_soup(apt_url)
         photo_link = soup_apt.find('li', class_='listing_all_photos')\
                              .find('a')['href']
         photo_link = f'{CONST.HEADER}{photo_link}'
-        soup_photo = get_soup(photo_link)
+        soup_photo = self._get_soup(photo_link)
 
         imgs = soup_photo.find('div', class_='w_listitem_left')\
                          .find_all('img')
         imgs = [f"{CONST.HEADER}{img['src']}" for img in imgs]
         return imgs
 
-    def _save_images(self, img_urls, data_path, address):
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
         try:
             current_path = os.getcwd()
             os.chdir(data_path)
@@ -139,7 +144,7 @@ class elliman_dot_com:
             address = ppt_details.find('li', class_='first listing_address')\
                                  .get_text()
 
-            addr_pattern = r'([A-Za-z0-9\s\-]+)? - ([A-Za-z0-9\s\-]+)?, ([A-Za-z0-9\s\-]+)?'
+            addr_pattern = r'([A-Za-z0-9\s\-\,]+)? - ([A-Za-z0-9\s\-]+)?, ([A-Za-z0-9\s\-]+)?'
             street, neighborhood, city = re.findall(addr_pattern, address)[0]
             return street, neighborhood, city
         except:
@@ -255,10 +260,16 @@ class elliman_dot_com:
         
         return unit
 
-    def scrape_apt_urls(self, verbose=False, test=False):
+    def scrape_apt_urls(self, 
+                        verbose=False, 
+                        test=False):
+
         self._apt_urls = self._get_apt_urls_ensemble(verbose, test)
 
-    def scrape_apt_data(self, apt_urls, verbose=False, test=False):
+    def scrape_apt_data(self, 
+                        apt_urls, 
+                        verbose=False, 
+                        test=False):
         apt_data = []
 
         if verbose:
@@ -278,8 +289,31 @@ class elliman_dot_com:
 
         self._apt_data = apt_data
 
-    def scrape_apt_images(self, verbose=False):
-        pass
+    def scrape_apt_images(self, 
+                          apt_urls,  
+                          data_path, 
+                          verbose=False, 
+                          test=False):
+
+        if verbose:
+            print(f'images in {len(apt_urls)} apartments to be scraped')
+
+        for i, url in enumerate(apt_urls):
+
+            if test and i==10:
+                break
+
+            if verbose and i%10==0:
+                print('images in 10 apartments have been scraped')
+
+            imgs = self._get_img_urls_per_apt(url)
+            soup = self._get_soup(url)
+            street, neighborhood, city = self._get_address(soup)
+
+            self._save_images(imgs, data_path, street)
+
+        if verbose:
+            print('all images scraped')
 
     @property
     def apt_urls(self):
@@ -293,7 +327,10 @@ class elliman_dot_com:
 if __name__ == '__main__':
 
     edc = elliman_dot_com()
+    image_path = '../data/sample/elliman/imgdata'
+
     edc.scrape_apt_urls(verbose=True, test=True)
     apt_urls = edc.apt_urls
     edc.scrape_apt_data(apt_urls, verbose=True, test=True)
+    edc.scrape_apt_images(apt_urls, image_path, verbose=True, test=True)
 
