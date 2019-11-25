@@ -67,6 +67,19 @@ class elliman_dot_com:
             soup = BeautifulSoup(results, 'lxml')
         return soup
 
+    def _soup_attempts(self, url, total_attempts=5):
+        soup = self._get_soup(url)
+        if soup:
+            return soup
+        else:
+            attempts = 0
+            while attempts < total_attempts:
+                time.sleep(3)
+                soup = self._get_soup(url)
+                if soup:
+                    return soup
+            raise ValueError(f'FAILED to get soup for apt url {url}')
+
     def _get_webpage(self, pg_num):
         template = f'https://www.elliman.com/search/for-sale/search-{pg_num}?sdid=1&sid=44458208&sk=1'
         return template 
@@ -95,14 +108,14 @@ class elliman_dot_com:
                 time.sleep(15)
                 
             webpage = self._get_webpage(pg_num)
-            soup_pg = self._get_soup(webpage)
+            soup_pg = self._soup_attempts(webpage)
             apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
             more_listings = soup_pg.find('div', class_='_grid33 _alpha')
             if (not apt_urls_pg) and (not more_listings):
                 attempts = 1
                 while attempts < 5:
                     time.sleep(3)
-                    soup_pg = self._get_soup(webpage)
+                    soup_pg = self._soup_attempts(webpage)
                     apt_urls_pg = self._get_apt_urls_per_page(soup_pg)
                     more_listings = soup_pg.find('div', class_='_grid33 _alpha')
                     
@@ -126,12 +139,12 @@ class elliman_dot_com:
     
     def _get_img_urls_per_apt(self, apt_url):
         try:
-            soup_apt = self._get_soup(apt_url)
+            soup_apt = self._soup_attempts(apt_url)
 
             photo_link = soup_apt.find('li', class_='listing_all_photos')\
                                  .find('a')['href']
             photo_link = f'{CONST.HEADER}{photo_link}'
-            soup_photo = self._get_soup(photo_link)
+            soup_photo = self._soup_attempts(photo_link)
 
             imgs = soup_photo.find('div', class_='w_listitem_left')\
                              .find_all('img')
@@ -144,7 +157,6 @@ class elliman_dot_com:
                     imgs_complete.append(f"{CONST.HEADER}{img['src']}")
             return imgs_complete
         except:
-            print(photo_link)
             return None
 
     def _save_images(self, 
@@ -319,19 +331,8 @@ class elliman_dot_com:
             if test and i == 10:
                 break
             try:
-                soup = self._get_soup(url)
+                soup = self._soup_attempts(url)
                 unit = self._get_apt_data(soup)
-
-                if (not soup) or (not unit):
-                    attempts = 0
-                    while attempts < 5:
-                        time.sleep(3)
-                        soup = self._get_soup(url)
-                        unit = self._get_apt_data(soup)
-                        attempts += 1
-
-                        if soup and unit:
-                            break
 
                 apt_data.append(unit)
             except:
@@ -355,14 +356,14 @@ class elliman_dot_com:
 
             try:
                 imgs = self._get_img_urls_per_apt(url)
-                soup = self._get_soup(url)
+                soup = self._soup_attempts(url)
 
                 if (not imgs) or (not soup):
                     attempts = 0
                     while attempts < 5:
                         time.sleep(3)
                         imgs = self._get_img_urls_per_apt(url)
-                        soup = self._get_soup(url)
+                        soup = self._soup_attempts(url)
                         attempts += 1
                         if imgs and soup:
                             break
