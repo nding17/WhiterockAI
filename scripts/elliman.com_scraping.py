@@ -19,6 +19,18 @@ import os
 
 class CONST:
     HEADER = 'https://www.elliman.com'
+    COLNAMES = [
+        'ADDRESS', 
+        'NEIGHBORHOOD', 
+        'CITY',
+        'ASKING PRICE',
+        'BEDROOMS', 
+        'BATHROOMS', 
+        'HALF BATHROOMS',
+        'LISTING TYPE',
+        'SF',
+        'LISTING ID',
+    ]
 
 class elliman_dot_com:
 
@@ -329,6 +341,52 @@ class elliman_dot_com:
         if verbose:
             print('all images scraped')
 
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('elliman_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.COLNAMES)
+            df.to_csv('elliman_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.COLNAMES)
+        with open('elliman_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
     #####################
     # public attributes #
     #####################
@@ -346,9 +404,11 @@ if __name__ == '__main__':
 
     edc = elliman_dot_com()
     image_path = '../data/sample/elliman/imgdata'
+    data_path = '../data/sample/elliman'
 
     edc.scrape_apt_urls(verbose=True, test=True)
     apt_urls = edc.apt_urls
     edc.scrape_apt_data(apt_urls, verbose=True, test=True)
     edc.scrape_apt_images(apt_urls, image_path, verbose=True, test=True)
-
+    apt_data = edc.apt_data
+    edc.write_data(apt_data, data_path)
