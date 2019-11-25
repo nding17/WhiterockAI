@@ -261,7 +261,17 @@ class elliman_dot_com:
     def scrape_apt_data(self, apt_urls, verbose=False, test=False):
         apt_data = []
 
-        for url in apt_urls:
+        if verbose:
+            print(f'there are {len(apt_urls)} apartments to be scraped')
+
+        for i, url in enumerate(apt_urls):
+
+            if test and i == 10:
+                break
+
+            if verbose and i%10 == 0:
+                print(f'{i} apartments have been scraped')
+
             soup = self._get_soup(url)
             unit = self._get_apt_data(soup)
             apt_data.append(unit)
@@ -272,17 +282,18 @@ class elliman_dot_com:
         pass
 
     @property
-    def apt_url(self):
-        return self._apt_url
+    def apt_urls(self):
+        return self._apt_urls
 
     @property
     def apt_data(self):
         return self._apt_data
-    
-    
+
 
 if __name__ == '__main__':
 
     edc = elliman_dot_com()
-    edc._get_apt_urls_ensemble(verbose=True, test=True)
+    edc.scrape_apt_urls(verbose=True, test=True)
+    apt_urls = edc.apt_urls
+    edc.scrape_apt_data(apt_urls, verbose=True, test=True)
 
