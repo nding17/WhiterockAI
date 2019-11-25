@@ -19,6 +19,7 @@ import os
 
 class CONST:
     HEADER = 'https://www.elliman.com'
+
     COLNAMES = [
         'ADDRESS', 
         'NEIGHBORHOOD', 
@@ -110,7 +111,7 @@ class elliman_dot_com:
                         if verbose:
                             print(f'apartment URLs in page {pg_num} all scraped')
                         pg_num += 1
-                        continue
+                        break
                     
                     attempts += 1
                         
@@ -124,27 +125,38 @@ class elliman_dot_com:
         return apt_urls
     
     def _get_img_urls_per_apt(self, apt_url):
-        soup_apt = self._get_soup(apt_url)
-        photo_link = soup_apt.find('li', class_='listing_all_photos')\
-                             .find('a')['href']
-        photo_link = f'{CONST.HEADER}{photo_link}'
-        soup_photo = self._get_soup(photo_link)
+        try:
+            soup_apt = self._get_soup(apt_url)
 
-        imgs = soup_photo.find('div', class_='w_listitem_left')\
-                         .find_all('img')
-        imgs = [f"{CONST.HEADER}{img['src']}" for img in imgs]
-        return imgs
+            photo_link = soup_apt.find('li', class_='listing_all_photos')\
+                                 .find('a')['href']
+            photo_link = f'{CONST.HEADER}{photo_link}'
+            soup_photo = self._get_soup(photo_link)
+
+            imgs = soup_photo.find('div', class_='w_listitem_left')\
+                             .find_all('img')
+            imgs_complete = []
+
+            for img in imgs:
+                if 'http' in img['src']:
+                    imgs_complete.append(img['src'])
+                else:
+                    imgs_complete.append(f"{CONST.HEADER}{img['src']}")
+            return imgs_complete
+        except:
+            print(photo_link)
+            return None
 
     def _save_images(self, 
                      img_urls, 
                      data_path, 
                      address):
         try:
+            if not address:
+                return 0
+
             current_path = os.getcwd()
             os.chdir(data_path)
-            if not os.path.exists('Sale'):
-                os.mkdir('Sale')
-            os.chdir('Sale')
             
             if not os.path.exists(address):
                 os.mkdir(address)
@@ -158,6 +170,7 @@ class elliman_dot_com:
             os.chdir(current_path)
             return 1
         except:
+            os.chdir(current_path)
             return 0
 
     def _get_address(self, soup):
@@ -299,19 +312,30 @@ class elliman_dot_com:
         apt_data = []
 
         if verbose:
-            print(f'there are {len(apt_urls)} apartments to be scraped')
+            print(f'data in {len(apt_urls)} apartments to be scraped')
 
         for i, url in enumerate(apt_urls):
 
             if test and i == 10:
                 break
+            try:
+                soup = self._get_soup(url)
+                unit = self._get_apt_data(soup)
 
-            if verbose and i%10 == 0:
-                print(f'{i} apartments have been scraped')
+                if (not soup) or (not unit):
+                    attempts = 0
+                    while attempts < 5:
+                        time.sleep(3)
+                        soup = self._get_soup(url)
+                        unit = self._get_apt_data(soup)
+                        attempts += 1
 
-            soup = self._get_soup(url)
-            unit = self._get_apt_data(soup)
-            apt_data.append(unit)
+                        if soup and unit:
+                            break
+
+                apt_data.append(unit)
+            except:
+                raise ValueError(f'FAILED apt url: {url}')
 
         self._apt_data = apt_data
 
@@ -329,14 +353,25 @@ class elliman_dot_com:
             if test and i==10:
                 break
 
-            if verbose and i%10==0:
-                print('images in 10 apartments have been scraped')
+            try:
+                imgs = self._get_img_urls_per_apt(url)
+                soup = self._get_soup(url)
 
-            imgs = self._get_img_urls_per_apt(url)
-            soup = self._get_soup(url)
-            street, neighborhood, city = self._get_address(soup)
+                if (not imgs) or (not soup):
+                    attempts = 0
+                    while attempts < 5:
+                        time.sleep(3)
+                        imgs = self._get_img_urls_per_apt(url)
+                        soup = self._get_soup(url)
+                        attempts += 1
+                        if imgs and soup:
+                            break
 
-            self._save_images(imgs, data_path, street)
+                street, _, _ = self._get_address(soup)
+
+                self._save_images(imgs, data_path, street)
+            except:
+                raise ValueError(f'FAILED apt: {street}, url: {url}')
 
         if verbose:
             print('all images scraped')
@@ -373,7 +408,6 @@ class elliman_dot_com:
         # this is the path the OS will go back eventually
         current_path = os.getcwd() 
         os.chdir(data_path) # get into the data directory
-
         # check if the data exists, if not, create a new data file
         if not os.path.exists('elliman_dot_com.csv'):
             df = pd.DataFrame([], columns=CONST.COLNAMES)
@@ -405,10 +439,19 @@ if __name__ == '__main__':
     edc = elliman_dot_com()
     image_path = '../data/sample/elliman/imgdata'
     data_path = '../data/sample/elliman'
+    sleep_secs = 15
 
     edc.scrape_apt_urls(verbose=True, test=True)
     apt_urls = edc.apt_urls
-    edc.scrape_apt_data(apt_urls, verbose=True, test=True)
-    edc.scrape_apt_images(apt_urls, image_path, verbose=True, test=True)
-    apt_data = edc.apt_data
-    edc.write_data(apt_data, data_path)
+
+    url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+    print(f'total number of batches: {len(url_batches)}')
+    for i, batch in enumerate(url_batches):
+        print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+        edc.scrape_apt_data(batch, verbose=True)
+        edc.scrape_apt_images(batch, image_path, verbose=True)
+        apt_data = edc.apt_data
+        edc.write_data(apt_data, data_path)
+        print(f'batch {i} done, sleep {sleep_secs} seconds')
+        time.sleep(15)
