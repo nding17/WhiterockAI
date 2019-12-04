@@ -62,9 +62,10 @@ class corcoran_dot_com:
     # class initiation section #
     ############################
 
-    def __init__(self):
+    def __init__(self, chromedriver):
         self._apt_urls = []
         self._apt_data = []
+        self._chromedriver = chromedriver
 
     #############################
     # private functions section #
@@ -303,6 +304,32 @@ class corcoran_dot_com:
         except:
             return None
 
+    def _get_apt_data(self, apt_url):
+        soup_apt = self._soup_attempts(apt_url)
+        address = self._get_apt_address(soup_apt)
+        city, state = 'New York', 'NY'
+        listing_type = self._get_apt_listing_type(soup_apt)
+        web_id = self._get_apt_web_id(soup_apt)
+        beds, baths, floors, units, width, sf = self._get_apt_essentials(soup_apt)
+        price = self._get_apt_price(soup_apt)
+
+        apt_data = [
+            address,
+            city, 
+            state, 
+            listing_type,
+            web_id,
+            beds, 
+            baths, 
+            floors, 
+            units, 
+            width, 
+            sf,
+            price,
+        ]
+
+        return apt_data
+
     def _get_apt_img_urls(self, soup_apt):
         try:
             figure_tags = soup_apt.find_all('figure', class_='getCarouselSlides__SlideFigure-cel6pe-2 jpnhrN')
@@ -312,14 +339,44 @@ class corcoran_dot_com:
         except:
             return None
 
+    ############################
+    # public functions section #
+    ############################
+
+    def scrapt_apt_urls(self, verbose=False, test=False):
+        browser, wait = self._get_browser(self._chromedriver)
+        self._apt_urls = self._get_apt_urls(browser, 
+                                            wait, 
+                                            verbose=verbose, 
+                                            test=test)
+
+    def scrape_apt_data(self, apt_urls, verbose=False):
+
+        results = []
+
+        for apt_url in apt_urls:
+            results.append(self._get_apt_data(apt_url))
+            print(results)
+
+        self._apt_data = results
+
+    #####################
+    # public attributes #
+    #####################
+
+    @property
+    def apt_urls(self):
+        return self._apt_urls
+    
+
+
 if __name__ == '__main__':
     
     chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
 
-    cdc = corcoran_dot_com()
-    browser, wait = cdc._get_browser(chromedriver)
-    cdc._get_apt_urls(browser, 
-                      wait, 
-                      verbose=True, 
-                      test=True)
+    cdc = corcoran_dot_com(chromedriver)
+    cdc.scrapt_apt_urls(verbose=True, test=True)
+    test_urls = cdc.apt_urls
+    cdc.scrape_apt_data(test_urls)
+    print(cdc.apt_data)
 
