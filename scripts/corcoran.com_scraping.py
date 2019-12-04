@@ -199,8 +199,10 @@ class corcoran_dot_com:
             browser.implicitly_wait(5)
             elem_dest = wait.until(EC.presence_of_element_located((By.XPATH, dest)))
             browser.execute_script('arguments[0].scrollIntoView(true)', elem_dest)
+            time.sleep(5)
+            scroll_buffer = self._buffer_page(scroll_pg)
             
-            buffer_dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_pg+5}]"
+            buffer_dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_buffer}]"
             browser.implicitly_wait(5)
             elem_buffer = wait.until(EC.presence_of_element_located((By.XPATH, buffer_dest)))
             browser.execute_script('arguments[0].scrollIntoView(true)', elem_buffer)
@@ -571,4 +573,3 @@ if __name__ == '__main__':
     apt_data = cdc.apt_data
     cdc.write_data(apt_data, data_path)
     cdc.write_images(apt_urls, image_path, verbose=True)
-
