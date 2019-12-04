@@ -565,10 +565,10 @@ if __name__ == '__main__':
     data_path = '../data/sample/corcoran'
 
     cdc = corcoran_dot_com(chromedriver)
-    cdc.scrapt_apt_urls(verbose=True, test=True)
-    test_urls = cdc.apt_urls[:10]
-    cdc.scrape_apt_data(test_urls)
+    cdc.scrapt_apt_urls(verbose=True)
+    apt_urls = cdc.apt_urls
+    cdc.scrape_apt_data(apt_urls)
     apt_data = cdc.apt_data
     cdc.write_data(apt_data, data_path)
-    cdc.write_images(test_urls, image_path, verbose=True)
+    cdc.write_images(apt_urls, image_path, verbose=True)
 
