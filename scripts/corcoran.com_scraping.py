@@ -396,20 +396,52 @@ class corcoran_dot_com:
         return browser, wait
             
     def _scroll_down(self, scroll_pg, browser, wait):
+
+        """
+        This is the trickiest part of the whole program. What it does is it 
+        mimics the scrolling behavior of a real user. It utilizes the maximum
+        amount of apartments we can obtain from each scroll to create a foothold
+        for the next scroll.
+
+        Also, after each scroll, it tries to go ahead a little bit to side load 
+        some more apartments to prevent freezes. However, while most of the time 
+        it works pretty well, it does not always work with high internet traffic 
+        to the website server. 
+
+        Parameters
+        ----------
+        scroll_pg : int
+            the target apartment we aim to scroll down to  
+            
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+            None, but will try to scroll down the webpages as much as it can        
+
+        """
+
         try:
+            # the destination to where we want to scrape to 
             dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_pg}]"
             browser.implicitly_wait(5)
             elem_dest = wait.until(EC.presence_of_element_located((By.XPATH, dest)))
             browser.execute_script('arguments[0].scrollIntoView(true)', elem_dest)
-            time.sleep(5)
-            scroll_buffer = self._buffer_page(scroll_pg)
+            time.sleep(5) # mandatory rest to avoid abusing the server 
+            scroll_buffer = self._buffer_page(scroll_pg) # obtain the buffer page
             
+            # a crucial part of this program to prevent freezes, and make the scraping process so much smoother 
             buffer_dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_buffer}]"
             browser.implicitly_wait(5)
-            elem_buffer = wait.until(EC.presence_of_element_located((By.XPATH, buffer_dest)))
-            browser.execute_script('arguments[0].scrollIntoView(true)', elem_buffer)
+            elem_buffer = wait.until(EC.presence_of_element_located((By.XPATH, buffer_dest))) # create a foothold for the next scroll
+            browser.execute_script('arguments[0].scrollIntoView(true)', elem_buffer) # jump into the buffer page 
         except:
-            print(f'scrolling failed')
+            print(f'scrolling failed') # time to give up...
 
     def _keep_scrolling_down(self, 
                              total_apt_num, 
@@ -418,6 +450,38 @@ class corcoran_dot_com:
                              verbose=False, 
                              test=False):
 
+        """
+        A helper function to continuously scroll down the main webpage in order to load
+        all the contents we are trying to scrape
+
+        Parameters
+        ----------
+        total_apt_num : int
+            total number of pending apartments, this tells us when to stop scrolling 
+        
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+            results: list(str)
+                A list of the apartment URLs we are trying to scrape 
+        """
+
+        # 49 is the magic number of how many apartments we can look ahead 
+        # for each scroll-down, we use it to compute the total number of 
+        # batches 
         nbatches = int((total_apt_num//49)+1)
         results = []
 
@@ -435,11 +499,14 @@ class corcoran_dot_com:
                     print("routine rest, don't worry")
                 time.sleep(10)
 
+            # this is the apartment we are scrolling down to 
             scroll_pg = 49*(i+1)
             self._scroll_down(scroll_pg, browser, wait)
             if verbose:
                 print(f'page {i+1} scrolled')
             
+            # start of the number of the apartment and end of 
+            # the apartment number 
             start, end = 49*i, 49*(i+1)
             if i == 0:
                 start = 1
@@ -457,6 +524,35 @@ class corcoran_dot_com:
                       wait, 
                       verbose=False, 
                       test=False):
+
+        """
+        A helper function to collect all the apartment URLs, leveraging the 
+        output generated by the scrolling actions. 
+        
+        Parameters
+        ----------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+        results_final : list(str)
+            A list of all the apartment URLs we are trying to scrape 
+
+        """
+
+        # first apartment, our initial starting point 
         first_apt_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']"
         first_apt_url = self._get_apt_url(first_apt_path, wait)
         results = [first_apt_url]
