@@ -1,3 +1,22 @@
+#!/usr/bin/env python
+
+""" 
+corcoran.com_scraping.py : Scrape the apartment rental infomation in corcoran.com 
+the users need to specify the paths to the directory they want to store the 
+images as well as the apartment data. In addition, user also need to specify the 
+path to the chromedriver, which could be downloaded in the link below 
+
+chromedriver: https://chromedriver.chromium.org/downloads
+
+The web-scraping package selenium will need the chromedriver in order to perform 
+the task, the version of the chromedriver as well as the the type depends on the
+version of your chrome browser and the OS of your local machine, e.g. Window, 
+macOS, Linux etc. 
+
+It will automatically scrape all the details related to all the apartments in the 
+city users are looking at, as well as save all the images in the specified directory.
+"""
+
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
@@ -21,8 +40,9 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
 ### a class that contains all the contants we will be using 
-
 class CONST:
+
+    # this is a humungous query URL based on the requirements of this task 
     MAIN_QUERY = 'https://www.corcoran.com/nyc-real-estate/for-sale/search?'\
                   'neighborhoods=battery-park-city%2Cbeekman%2Ccentral-park-south'\
                   '%2Cchelsea-hudson-yards%2Cchinatown%2Cclinton%2Ceast-harlem'\
@@ -289,16 +309,17 @@ class corcoran_dot_com:
                              wait, 
                              verbose=False, 
                              test=False):
+
         nbatches = int((total_apt_num//49)+1)
         results = []
+
+        if verbose:
+                print(f'total number of scroll-down actions = {nbatches}')
         
         if test:
             nbatches = 5
         
         for i in range(nbatches):
-
-            if verbose:
-                print(f'total number of scroll-down actions = {nbatches}')
 
             # routine rest, try not to abuse the server 
             if i%5 == 0:
