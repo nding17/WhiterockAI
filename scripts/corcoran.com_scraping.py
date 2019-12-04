@@ -85,6 +85,7 @@ class CONST:
                   '%2Cuniversity-heights%2Cvan-nest%2Cwakefield%2Cwilliamsbridge'\
                   '%2Cwoodlawn&keywordSearch=houses%2Ctownhouses'
 
+    # this is the column names of the data file 
     COLNAMES = [
         'ADDRESS',
         'CITY', 
@@ -100,6 +101,7 @@ class CONST:
         'ASKING PRICE',
     ]
 
+### main class 
 class corcoran_dot_com:
 
     ############################
@@ -744,15 +746,33 @@ class corcoran_dot_com:
 
     @property
     def apt_urls(self):
+        """
+        A public attribute that lets you get access to all
+        of the apartment URLs that need to be scraped. Notice
+        that this is essentially a dictionary
+        """
+
         return self._apt_urls
 
     @property
     def apt_data(self):
+        """
+        A public attribute that lets you get access to all
+        of the apartment data that need to be scraped.
+        """
+
         return self._apt_data
     
     
 if __name__ == '__main__':
     
+    # users need to specifiy the path where you want to
+    # store the data by changing img_path and data_path
+    # in addition, user will need to specify the directory
+    # to the chromedriver. Refer to program specifications
+    # on the top of the program for more details.
+    # these are the only lines that users need to change
+    # the rest will be automatic 
     chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
     image_path = '../data/sample/corcoran/imgdata'
     data_path = '../data/sample/corcoran'
