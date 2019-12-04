@@ -299,6 +299,8 @@ class corcoran_dot_com:
 
             # routine rest, try not to abuse the server 
             if i%5 == 0:
+                if verbose:
+                    print("routine rest, don't worry")
                 time.sleep(10)
 
             scroll_pg = 49*(i+1)
@@ -443,9 +445,9 @@ class corcoran_dot_com:
             directly download 
 
         >>> _get_img_urls_per_apt(soup_apt)
-        ['https://www.elliman.com/img/28ea62bf97218c78209c8f817602a278cd375825+440++1',
-         'https://www.elliman.com/img/a1d89f0c403d17c150dec8e213eee8a1c71a67ee+440++1',
-         'https://www.elliman.com/img/21be72cc0dc3df9f33739a88fdb025769b46b6a0+440++1',
+        ['https://mediarouting.vestahub.com/Media/111071788/box/800x800',
+         'https://mediarouting.vestahub.com/Media/111071762/box/800x800',
+         'https://mediarouting.vestahub.com/Media/111071773/box/800x800',
          ..., ]
         """
 
