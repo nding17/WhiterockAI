@@ -21,7 +21,7 @@ __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
-__status__ = 'documentation'
+__status__ = 'complete'
 
 
 ### package requirements
@@ -215,19 +215,67 @@ class corcoran_dot_com:
 
 
     def _get_apt_url(self, apt_path, wait):
+        """
+        A helper function to get the apartment URL using selenium, basically it 
+        tries to locate where the desired tag is in the html file and access that 
+        element to extract the apartment URL
+
+        Parameters
+        ----------
+        apt_path : str
+            the path in terms of html language of the location of the apartment,
+            usually in the form of siblings 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        apt_url : str
+            the url of the apartment, unique for each apartment 
+
+        >>> _get_apt_url(apt_path, wait)
+        'https://www.corcoran.com/nyc-real-estate/for-sale/murray-hill-kips-bay/110-east-35th-street/5655706'
+        """
         try:
+            # url tag 
             url_path = "a[@class='ListingCard__TopSectionLink-k9s72e-17 icXLMN']"
+            # the full path to getting the URL of the apartment
             full_path = f'{apt_path}/{url_path}'
+            # locate the element 
             element = wait.until(EC.presence_of_element_located((By.XPATH, full_path)))
-            href = element.get_attribute('href')
+            href = element.get_attribute('href') # extract the URL of the apartment 
             return href 
         except:
             print('can not find apartment')
             return None
 
     def _get_apt_url_batches(self, start, end, wait):
+        """
+        A helper function to get the apartment URLs using selenium, basically it tries
+        to extract a large volume of apartment URLs at once 
+
+        Parameters
+        ----------
+        start : int
+            the starting batch number 
+
+        end : int
+            the ending batch number 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        ------- 
+        results_batch : list(str) 
+            a list of apartment URLs 
+        """
         results_batch = []
         for i in range(start, end):
+            # after the contents are loaded, try to identify as many siblings as possible for each scroll down
             sibling_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{i}]"
             href = self._get_apt_url(sibling_path, wait)
             results_batch.append(href)
@@ -259,6 +307,25 @@ class corcoran_dot_com:
             return np.nan
             
     def _get_total_apt_num(self, url):
+        """
+        A helper function to extract the total number of apartments 
+        we will be scraping, just to make sure the exact number of 
+        batches we need to be creating 
+
+        Parameters
+        ----------
+        url : str
+            the original webpage that contains all the apartments, it
+            also tells you how many apartments we will need to scrape 
+
+        Returns
+        -------
+        total_apt_num : int
+            total number of pending apartments 
+
+        >>> _get_total_apt_num(url)
+        1764
+        """
         soup = self._soup_attempts(url)
         header = soup.find('h2')\
                      .get_text()
@@ -266,6 +333,26 @@ class corcoran_dot_com:
         return total_apt_num
 
     def _buffer_page(self, scroll_pg):
+        """
+        This is a helper function to prevent the selenium scraper to 
+        freeze in some heavy internet traffic situation. 
+
+        However, it is very tricky to figure out the exact number of 
+        buffer pages we need to create, so I did a lot of trials and 
+        errors to obtain these magic numbers. 
+
+        Parameters
+        ----------
+        scroll_pg : int
+            the target apartment we aim to scroll down to 
+
+        Returns : int
+            the buffer apartment we later need to use it to prevent the 
+            program from freezing 
+
+        >>> _buffer_page(490)
+        495
+        """
         if scroll_pg <= 10*49:
             scroll_buffer = scroll_pg+5
         elif scroll_pg <= 16*49:
@@ -284,9 +371,28 @@ class corcoran_dot_com:
         return scroll_buffer
 
     def _get_browser(self, chromedriver):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
         browser = webdriver.Chrome(executable_path=chromedriver)
         browser.get(CONST.MAIN_QUERY)
-        wait = WebDriverWait(browser, 20)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
             
     def _scroll_down(self, scroll_pg, browser, wait):
@@ -342,7 +448,7 @@ class corcoran_dot_com:
             if verbose:
                 print(f'results for page {i+1} obtained')
 
-        browser.quit()
+        browser.quit() # scrolling task done, close the browser
                 
         return results
 
@@ -366,6 +472,26 @@ class corcoran_dot_com:
         return results_final
 
     def _get_apt_address(self, soup_apt):
+
+        """
+        A helper function that gets the address info of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for a specified webpage       
+
+        Returns
+        -------
+        tuple
+            address information, namely, street address, we already know the 
+            city is New York and state is NY
+
+        >>> _get_apt_address(soup_apt)
+        '162 East 63rd Street'
+        """
+
         try:
             address = soup_apt.find('div', attrs={'data-name': 'col-md-8'})\
                               .find('h1')\
@@ -375,6 +501,25 @@ class corcoran_dot_com:
             return None
 
     def _get_apt_listing_type(self, soup_apt):
+
+        """
+        A helper function that gets the listing type of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for a specified webpage     
+
+        Returns
+        -------
+        listing_type : str
+            listing type of the apartment
+
+        >>> _get_apt_listing_type(soup_apt)
+        'Townhouse'
+        """
+
         try:
             listing_type = soup_apt.find('div', class_='MainListingInfo__UnitTypeAndStatusContainer-sc-1fxwvn8-9 hnYmAD')\
                                    .get_text()\
@@ -385,6 +530,26 @@ class corcoran_dot_com:
             return None
 
     def _get_apt_web_id(self, soup_apt):
+
+
+        """
+        A helper function that gets the listing ID of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for a specified webpage     
+
+        Returns
+        -------
+        web_id : str
+            listing ID of the apartment
+
+        >>> _get_apt_web_id(soup_apt)
+        '5151565'
+        """
+
         try:
             web_id = soup_apt.find('strong', class_='MainListingInfo__WebId-sc-1fxwvn8-4 haTtwu')\
                              .get_text()\
@@ -395,6 +560,25 @@ class corcoran_dot_com:
             return None
 
     def _get_apt_essentials(self, soup_apt):
+
+        """
+        A helper function that gets the essential features of the apartment 
+        given the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for a specified webpage     
+
+        Returns
+        -------
+        tuple
+            essential features information, namely, # of bathrooms, square feet, etc
+
+        >>> _get_apt_essentials(soup_apt)
+        (None, 0.5, 1.0, 1.0, 99.0, 5000.0)
+        """
+
         beds, baths, floors, units, width, sf = None, None, None, None, None, None
         try:
             essentials_tags = soup_apt.find('ul', class_='Essentials__EssentialsWrapper-sc-1jh003w-0 boWTpJ')\
@@ -420,6 +604,26 @@ class corcoran_dot_com:
             return beds, baths, floors, units, width, sf
 
     def _get_apt_price(self, soup_apt):
+
+        """
+        A helper function that gets the price info of the apartment given 
+        the soup of the specific apartment you are scraping 
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for a specified webpage
+
+        Returns
+        -------
+        price : float
+            price of the apartment
+
+        >>> _get_apt_price(soup_apt)
+        650000.0
+
+        """
+
         try:
             price_text = soup_apt.find('div', attrs={'data-name': 'col-md-4'})\
                                  .get_text()\
@@ -777,9 +981,12 @@ if __name__ == '__main__':
     image_path = '../data/sample/corcoran/imgdata'
     data_path = '../data/sample/corcoran'
 
+    # construct an corcoran_dot_com object to work
+    # on the task
     cdc = corcoran_dot_com(chromedriver)
-    cdc.scrapt_apt_urls(verbose=True)
+    cdc.scrapt_apt_urls(verbose=True) # fetch the apartment URLs
     apt_urls = cdc.apt_urls
+
     # divide the apartment URLs list into small batches 
     url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
@@ -792,7 +999,9 @@ if __name__ == '__main__':
         print(f'batch {i} starts, there are {len(batch)} apartment URLs')
         cdc.scrape_apt_data(batch)
         apt_data = cdc.apt_data
+        # write the data onto the local machine
         cdc.write_data(apt_data, data_path)
+        # write the images onto the local machine 
         cdc.write_images(batch, image_path, verbose=True)
         print(f'batch {i} done, sleep {sleep_secs} seconds\n')
         time.sleep(sleep_secs) # rest for a few seconds after each batch job done
