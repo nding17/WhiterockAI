@@ -1,3 +1,11 @@
+__author__ = 'Naili Ding'
+__email__ = 'nd2588@columbia.edu'
+__maintainer__ = 'Naili Ding'
+__version__ = '1.0.1'
+__status__ = 'documentation'
+
+
+### package requirements
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
@@ -12,6 +20,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 
+### a class that contains all the contants we will be using 
 
 class CONST:
     MAIN_QUERY = 'https://www.corcoran.com/nyc-real-estate/for-sale/search?'\
@@ -87,6 +96,25 @@ class corcoran_dot_com:
     #############################
 
     def _random_user_agent(self):
+        """
+        A helper function to generate a random header to 
+        avoid getting blocked by the website
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+        a random user agent 
+
+        >>> _random_user_agent()
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/58.0.3029.110 Safari/537.36'
+        """
+
         try:
             ua = UserAgent()
             return ua.random
@@ -97,13 +125,91 @@ class corcoran_dot_com:
             return default_ua
 
     def _get_soup(self, url):
+
+        """
+        This is a helper function that will automatically generate a 
+        BeautifulSoup object based on the given URL of the apartment 
+        webpage
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+        """
         
+        # generate a random header 
         headers = {'User-Agent': self._random_user_agent()}
+        # send a request and get the soup
         response = requests.get(url, headers=headers)
         results = response.content
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
         return soup
+
+    def _soup_attempts(self, url, total_attempts=5):
+
+        """
+        A helper function that will make several attempts
+        to obtain a soup to avoid getting blocked
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        total_attempts: int
+            the number of attempts you want to try to obtain the 
+            soup before you already give up. Default is 5 attempts
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage        
+
+        """
+
+        soup = self._get_soup(url)
+
+        # if we get the soup with the first attempt
+        if soup:
+            return soup
+        # if we don't get the soup during our first
+        # attempt
+        else:
+            attempts = 0
+            while attempts < total_attempts:
+                # put the program idle to avoid detection
+                time.sleep(3)
+                soup = self._get_soup(url)
+                if soup:
+                    return soup
+            # time to give up, try to find what's going on
+            raise ValueError(f'FAILED to get soup for apt url {url}')
+
+
+    def _get_apt_url(self, apt_path, wait):
+        try:
+            url_path = "a[@class='ListingCard__TopSectionLink-k9s72e-17 icXLMN']"
+            full_path = f'{apt_path}/{url_path}'
+            element = wait.until(EC.presence_of_element_located((By.XPATH, full_path)))
+            href = element.get_attribute('href')
+            return href 
+        except:
+            print('can not find apartment')
+            return None
+
+    def _get_apt_url_batches(self, start, end, wait):
+        results_batch = []
+        for i in range(start, end):
+            sibling_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{i}]"
+            href = self._get_apt_url(sibling_path, wait)
+            results_batch.append(href)
+        return results_batch 
 
     def _extract_num(self, text):
         """
@@ -129,40 +235,6 @@ class corcoran_dot_com:
             return float(result)
         except:
             return np.nan
-
-    def _soup_attempts(self, url, total_attempts=5):
-
-        soup = self._get_soup(url)
-
-        if soup:
-            return soup
-        else:
-            attempts = 0
-            while attempts < total_attempts:
-                time.sleep(3)
-                soup = self._get_soup(url)
-                if soup:
-                    return soup
-            raise ValueError(f'FAILED to get soup for apt url {url}')
-
-    def _get_apt_url(self, apt_path, wait):
-        try:
-            url_path = "a[@class='ListingCard__TopSectionLink-k9s72e-17 icXLMN']"
-            full_path = f'{apt_path}/{url_path}'
-            element = wait.until(EC.presence_of_element_located((By.XPATH, full_path)))
-            href = element.get_attribute('href')
-            return href 
-        except:
-            print('can not find apartment')
-            return None
-
-    def _get_apt_url_batches(self, start, end, wait):
-        results_batch = []
-        for i in range(start, end):
-            sibling_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{i}]"
-            href = self._get_apt_url(sibling_path, wait)
-            results_batch.append(href)
-        return results_batch 
             
     def _get_total_apt_num(self, url):
         soup = self._soup_attempts(url)
@@ -224,6 +296,11 @@ class corcoran_dot_com:
             nbatches = 5
         
         for i in range(nbatches):
+
+            # routine rest, try not to abuse the server 
+            if i%5 == 0:
+                time.sleep(10)
+
             scroll_pg = 49*(i+1)
             self._scroll_down(scroll_pg, browser, wait)
             if verbose:
@@ -350,6 +427,28 @@ class corcoran_dot_com:
         return apt_data
 
     def _get_img_urls_per_apt(self, soup_apt):
+
+        """
+        Find the image URLs given the URL of an apartment
+
+        Parameters
+        ----------
+        soup_apt : bs4.BeautifulSoup
+            a scraper for the specific apartment page 
+
+        Returns
+        -------
+        img_urls : list(str)
+            this is a list of image URLs that you are able to 
+            directly download 
+
+        >>> _get_img_urls_per_apt(soup_apt)
+        ['https://www.elliman.com/img/28ea62bf97218c78209c8f817602a278cd375825+440++1',
+         'https://www.elliman.com/img/a1d89f0c403d17c150dec8e213eee8a1c71a67ee+440++1',
+         'https://www.elliman.com/img/21be72cc0dc3df9f33739a88fdb025769b46b6a0+440++1',
+         ..., ]
+        """
+
         try:
             figure_tags = soup_apt.find_all('figure', class_='getCarouselSlides__SlideFigure-cel6pe-2 jpnhrN')
             img_urls = [ftag.find('img').get('src') for ftag in figure_tags]
