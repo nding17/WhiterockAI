@@ -182,8 +182,10 @@ class corcoran_dot_com:
             scroll_buffer = scroll_pg+20
         elif scroll_pg <= 31*49:
             scroll_buffer = scroll_pg+25
-        else:
+        elif scroll_pg <= 33*49:
             scroll_buffer = scroll_pg+30
+        else:
+            scroll_buffer = scroll_pg+35
         
         return scroll_buffer
 
@@ -569,7 +571,20 @@ if __name__ == '__main__':
     cdc = corcoran_dot_com(chromedriver)
     cdc.scrapt_apt_urls(verbose=True)
     apt_urls = cdc.apt_urls
-    cdc.scrape_apt_data(apt_urls)
-    apt_data = cdc.apt_data
-    cdc.write_data(apt_data, data_path)
-    cdc.write_images(apt_urls, image_path, verbose=True)
+    # divide the apartment URLs list into small batches 
+    url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+    # time of sleep 
+    sleep_secs = 15
+
+    # batch jobs start
+    print(f'total number of batches: {len(url_batches)}')
+    for i, batch in enumerate(url_batches):
+        print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+        cdc.scrape_apt_data(batch)
+        apt_data = cdc.apt_data
+        cdc.write_data(apt_data, data_path)
+        cdc.write_images(batch, image_path, verbose=True)
+        print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+        time.sleep(sleep_secs) # rest for a few seconds after each batch job done
+    print('job done, congratulations!')
