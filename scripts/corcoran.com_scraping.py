@@ -254,7 +254,7 @@ class corcoran_dot_com:
             scroll_buffer = scroll_pg+20
         elif scroll_pg <= 31*49:
             scroll_buffer = scroll_pg+25
-        elif scroll_pg <= 33*49:
+        elif scroll_pg <= 32*49:
             scroll_buffer = scroll_pg+30
         else:
             scroll_buffer = scroll_pg+35
@@ -297,6 +297,9 @@ class corcoran_dot_com:
         
         for i in range(nbatches):
 
+            if verbose:
+                print(f'total number of scroll-down actions = {nbatches}')
+
             # routine rest, try not to abuse the server 
             if i%5 == 0:
                 if verbose:
@@ -315,6 +318,8 @@ class corcoran_dot_com:
             
             if verbose:
                 print(f'results for page {i+1} obtained')
+
+        browser.quit()
                 
         return results
 
@@ -403,6 +408,24 @@ class corcoran_dot_com:
             return None
 
     def _get_apt_data(self, apt_url):
+
+        """
+
+        A function that collects all the data we will need for an apartment
+
+        Parameters
+        ----------
+        apt_url : str
+            the URL of a specific apartment or a general website 
+
+        Returns
+        -------
+        apt_data : list
+            a list that contains the apartment info data. All the relevant 
+            features are specified with the previous functions      
+
+        """
+
         soup_apt = self._soup_attempts(apt_url)
         address = self._get_apt_address(soup_apt)
         city, state = 'New York', 'NY'
@@ -521,6 +544,26 @@ class corcoran_dot_com:
     ############################
 
     def scrapt_apt_urls(self, verbose=False, test=False):
+
+        """
+        A public function that allows you to call to scrape apartment URLs
+
+        Parameters
+        ----------
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_urls will be updated
+            and all the apartments URLs will be stored in this field 
+        """
+
         browser, wait = self._get_browser(self._chromedriver)
         self._apt_urls = self._get_apt_urls(browser, 
                                             wait, 
@@ -528,6 +571,30 @@ class corcoran_dot_com:
                                             test=test)
 
     def scrape_apt_data(self, apt_urls, verbose=False):
+
+        """
+        A public function that allows you to scrape information for a list
+        of apartments the users specified 
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            a list of apartment URLs that you hope to scrape the apartment 
+            info from
+
+        verbose : boolean
+            a flag you can enable to see the scraping progress
+
+        test : boolean
+            a flag you can toggle in order to run a small sample to avoid
+            runtime issues
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _apt_data will be updated
+            and all the apartments info will be stored in this field 
+        """
 
         results = []
 
