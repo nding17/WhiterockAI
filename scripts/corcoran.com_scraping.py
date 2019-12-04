@@ -56,6 +56,21 @@ class CONST:
                   '%2Cuniversity-heights%2Cvan-nest%2Cwakefield%2Cwilliamsbridge'\
                   '%2Cwoodlawn&keywordSearch=houses%2Ctownhouses'
 
+    COLNAMES = [
+        'ADDRESS',
+        'CITY', 
+        'STATE', 
+        'LISTING TYPE',
+        'LISTING ID',
+        'BEDROOMS', 
+        'BATHROOMS', 
+        'FLOORS', 
+        '# UNITS', 
+        'WIDTH', 
+        'SF',
+        'ASKING PRICE',
+    ]
+
 class corcoran_dot_com:
 
     ############################
@@ -330,7 +345,7 @@ class corcoran_dot_com:
 
         return apt_data
 
-    def _get_apt_img_urls(self, soup_apt):
+    def _get_img_urls_per_apt(self, soup_apt):
         try:
             figure_tags = soup_apt.find_all('figure', class_='getCarouselSlides__SlideFigure-cel6pe-2 jpnhrN')
             img_urls = [ftag.find('img').get('src') for ftag in figure_tags]
@@ -338,6 +353,63 @@ class corcoran_dot_com:
             return img_urls
         except:
             return None
+
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                img_data = requests.get(img_url).content
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    handler.write(img_data)
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
 
     ############################
     # public functions section #
@@ -356,9 +428,122 @@ class corcoran_dot_com:
 
         for apt_url in apt_urls:
             results.append(self._get_apt_data(apt_url))
-            print(results)
 
         self._apt_data = results
+
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('corcoran_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.COLNAMES)
+            df.to_csv('corcoran_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.COLNAMES)
+        with open('corcoran_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+
+    def write_images(self, 
+                     apt_urls,  
+                     data_path, 
+                     verbose=False, 
+                     test=False):
+
+        """
+        
+        Based on a list of apartment URLs the users want to scrape their images from, 
+        the scraper will automatically write the images onto the local machine. Please 
+        note that if 'test' is opted out, the size of the images will become significant. 
+
+        Parameters
+        ----------
+        apt_urls : list(str)
+            this is a list of URLs of the apartments in the original webpage in 
+            particular section
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        verbose : boolean (optional)
+            text update on the process to help grasp what's going on with the scraping 
+
+        test : boolean (optional)
+            a handler for debugging purposes, only allowing a small chunk of data to 
+            be processed to avoid runtime issues
+
+        Returns
+        -------
+        None
+            the images will be saved onto the local machine 
+
+        """
+
+        if verbose:
+            print(f'images in {len(apt_urls)} apartments to be scraped')
+
+        for i, url in enumerate(apt_urls):
+
+            if test and i==10:
+                break
+
+            try:
+                soup = self._soup_attempts(url)
+                imgs = self._get_img_urls_per_apt(soup)
+
+                # if we don't get any response from the website server
+                # continue to call a few times in order to fetch web
+                # contents. Give up after 5 attempts 
+                if (not imgs) or (not soup):
+                    attempts = 0
+                    while attempts < 5:
+                        time.sleep(3)
+                        imgs = self._get_img_urls_per_apt(url)
+                        soup = self._soup_attempts(url)
+                        attempts += 1
+                        # if contents are recovered, good to go.
+                        if imgs and soup:
+                            break
+                # street is the name of the image folder 
+                street = self._get_apt_address(soup)
+                # automatically save images onto the local machine 
+                self._save_images(imgs, data_path, street)
+            except:
+                # time to give up and try to find what's going on
+                raise ValueError(f'FAILED apt: {street}, url: {url}')
+
+        if verbose:
+            print('all images scraped')
 
     #####################
     # public attributes #
@@ -367,16 +552,23 @@ class corcoran_dot_com:
     @property
     def apt_urls(self):
         return self._apt_urls
+
+    @property
+    def apt_data(self):
+        return self._apt_data
     
-
-
+    
 if __name__ == '__main__':
     
     chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
+    image_path = '../data/sample/corcoran/imgdata'
+    data_path = '../data/sample/corcoran'
 
     cdc = corcoran_dot_com(chromedriver)
     cdc.scrapt_apt_urls(verbose=True, test=True)
-    test_urls = cdc.apt_urls
+    test_urls = cdc.apt_urls[:10]
     cdc.scrape_apt_data(test_urls)
-    print(cdc.apt_data)
+    apt_data = cdc.apt_data
+    cdc.write_data(apt_data, data_path)
+    cdc.write_images(test_urls, image_path, verbose=True)
 
