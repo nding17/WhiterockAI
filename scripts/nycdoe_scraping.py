@@ -11,16 +11,19 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+class CONST:
+    DOE_URL = 'https://tools.nycenet.edu/snapshot/2019/'
+
 class nyc_doe:
 
     def __init__(self, chromedriver):
         self._school_names = []
         self._school_data = []
-        self._chromedriver = chromedriver
+        self._browser, self._wait = self._get_browser(chromedriver)
 
-    def _get_browser(self, url, chromedriver):
+    def _get_browser(self, chromedriver):
         browser = webdriver.Chrome(executable_path=chromedriver)
-        browser.get(url)
+        browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
 
@@ -181,9 +184,9 @@ class nyc_doe:
         
         return [es_rating]
 
-    def _get_school_data(self, browser, url, school_name):
+    def _get_school_data(self, browser, school_name):
         # reset browser to the search box 
-        browser.get(url)
+        browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 20)
         input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
         input_box.send_keys(school_name)
@@ -202,11 +205,34 @@ class nyc_doe:
         
         return data
 
-    def _get_all_schools_data(self, browser, url, schools):
+    def _get_all_schools_data(self, browser, schools):
         schools_data = []
         for school_name in schools:
-            data = self._get_school_data(browser, url, school_name)
+            data = self._get_school_data(browser, school_name)
             time.sleep(3)
             schools_data.append(data)
         return schools_data
+
+    def scrape_school_names(self):
+        self._school_names = self._get_schools(self._wait)
+
+    def scrape_school_data(self, school_names):
+        self._school_data = self._get_all_schools_data(self._browser, school_names)
+
+    @property
+    def school_names(self):
+        return self._school_names
+
+    @property
+    def school_data(self):
+        return self._school_data
     
+    
+
+if __name__ == '__main__':
+    chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
+    doe = nyc_doe(chromedriver)
+    doe.scrape_school_names()
+    test_schools = doe.school_names[:5]
+    doe.scrape_school_data(test_schools)
+    print(doe.school_data)
