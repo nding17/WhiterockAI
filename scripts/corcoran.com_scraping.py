@@ -1048,8 +1048,7 @@ class corcoran_dot_com:
     def apt_urls(self):
         """
         A public attribute that lets you get access to all
-        of the apartment URLs that need to be scraped. Notice
-        that this is essentially a dictionary
+        of the apartment URLs that need to be scraped. 
         """
 
         return self._apt_urls

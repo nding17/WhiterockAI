@@ -1,3 +1,12 @@
+#!/usr/bin/env python
+
+__author__ = 'Naili Ding'
+__email__ = 'nd2588@columbia.edu'
+__maintainer__ = 'Naili Ding'
+__version__ = '1.0.1'
+__status__ = 'documentation'
+
+### package requirements
 import re
 import time
 import os
@@ -11,9 +20,12 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 
+### a class that contains all the contants we will be using 
 class CONST:
+    # department of education URL
     DOE_URL = 'https://tools.nycenet.edu/snapshot/2019/'
 
+    # this is the column names of the data file
     COLNAMES = [
         'SCHOOL NAME',
         'ADDRESS', 
@@ -36,12 +48,21 @@ class CONST:
         'TRUST',
     ]
 
+### main class 
 class nyc_doe:
+
+    ############################
+    # class initiation section #
+    ############################
 
     def __init__(self, chromedriver):
         self._school_names = []
         self._school_data = []
         self._browser, self._wait = self._get_browser(chromedriver)
+
+    #############################
+    # private functions section #
+    #############################
 
     def _get_browser(self, chromedriver):
         browser = webdriver.Chrome(executable_path=chromedriver)
@@ -277,6 +298,11 @@ class nyc_doe:
 
         return schools_data
 
+
+    ############################
+    # public functions section #
+    ############################
+
     def scrape_school_names(self):
         self._school_names = self._get_schools(self._wait)
 
@@ -303,9 +329,17 @@ class nyc_doe:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    #####################
+    # public attributes #
+    #####################
 
     @property
     def school_names(self):
+        """
+        A public attribute that lets you get access to all
+        of the school names that need to be scraped. Notice
+        that this is essentially a dictionary
+        """
         return self._school_names
 
     @property
@@ -314,9 +348,12 @@ class nyc_doe:
 
 
 if __name__ == '__main__':
+    # users need to specify the directory to the chromedriver 
+    # and the path to the data directory
     chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
     data_path = '../data/sample/' 
 
+    # construct a scraping object 
     doe = nyc_doe(chromedriver)
     doe.scrape_school_names()
     schools_names = doe.school_names
@@ -329,8 +366,10 @@ if __name__ == '__main__':
     # batch jobs start
     print(f'total number of batches: {len(school_batches)}')
     for i, batch in enumerate(school_batches):
+        # scrape data for a batch of schools
         doe.scrape_school_data(batch)
         school_data = doe.school_data
+        # write data onto the local machine
         doe.write_data(school_data, data_path)
         print(f'batch {i} done, sleep {sleep_secs} seconds')
         time.sleep(sleep_secs) # rest for a few seconds after each batch job done
