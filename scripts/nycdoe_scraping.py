@@ -234,7 +234,7 @@ class nyc_doe:
             data = self._get_school_data(browser, school_name)
             time.sleep(3)
             schools_data.append(data)
-            
+
         browser.quit()
         return schools_data
 
@@ -280,8 +280,19 @@ if __name__ == '__main__':
 
     doe = nyc_doe(chromedriver)
     doe.scrape_school_names()
-    test_schools = doe.school_names[:5]
-    doe.scrape_school_data(test_schools)
-    test_school_data = doe.school_data
+    schools_names = doe.school_names
 
-    doe.write_data(test_school_data, data_path)
+    # divide the school names list into small batches 
+    school_batches = np.array_split(schools_names, int(len(schools_names))//10)
+    # time of sleep 
+    sleep_secs = 15
+
+    # batch jobs start
+    print(f'total number of batches: {len(school_batches)}')
+    for i, batch in enumerate(school_batches):
+        doe.scrape_school_data(batch)
+        school_data = doe.school_data
+        doe.write_data(school_data, data_path)
+        print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+        time.sleep(sleep_secs) # rest for a few seconds after each batch job done
+    print('job done, congratulations!')
