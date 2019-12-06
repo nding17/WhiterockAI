@@ -1,5 +1,28 @@
 #!/usr/bin/env python
 
+"""
+nycdoe_scraping.py : Scrape the data for all the schools in NYC 
+by using Selenium. The program mimics the normal behavior of a 
+human browsing a web
+The fundamental logic works as follows:
+    - click the inital search page, it will pop out a long list
+        of school names. The school names are the keys
+    - scrape all the school names from the drop down menu from 
+        the search box
+    - insert the school name into the search box and you will be 
+        directed to a different page, specific to the school name
+        you put in 
+    - scrape the school data in that particular URL, need to click
+        through different tabs to expand the sections we want 
+    - implement the above steps in batch, and write data onto the
+        local machine after each batch job is finished 
+
+Note: 
+    when running this script, please make sure that your computer
+    does not go into sleep mode. The screen needs to be lit up in
+    order for the browser to work automatically 
+"""
+
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
@@ -65,6 +88,26 @@ class nyc_doe:
     #############################
 
     def _get_browser(self, chromedriver):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+
         browser = webdriver.Chrome(executable_path=chromedriver)
         browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
@@ -153,6 +196,10 @@ class nyc_doe:
         return si
 
     def _get_school_sa_overall(self, wait):
+        """
+        A helper function to extract the overall rating from the student achievement 
+        section 
+        """
         try:
             xpath_sa = "//div[@class='fr-tab-content']/div[@class='element-overall-rating']"
             elem_overall = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sa)))
@@ -162,6 +209,10 @@ class nyc_doe:
             return None
 
     def _get_school_sa_engl(self, wait):
+        """
+        A helper function to extract the English score from the student achievement 
+        section 
+        """
         try:
             value_path = "div[@class='metric-bignum']/div[@class='school-value']"
             xpath_engl = f"//div[@class='metric-group perf'][h3='English']/{value_path}"
@@ -172,6 +223,10 @@ class nyc_doe:
             return None
 
     def _get_school_sa_math(self, wait):
+        """
+        A helper function to extract the math score from the student achievement 
+        section 
+        """
         try:
             value_path = "div[@class='metric-bignum']/div[@class='school-value']"
             xpath_math = f"//div[@class='metric-group perf'][h3='Math']/{value_path}"
@@ -182,6 +237,24 @@ class nyc_doe:
             return None
 
     def _get_school_sa(self, wait):
+        """
+        A helper function to obtain data for the student achievement section, including
+        rating and scores for English and Math subjects 
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        sa : list()
+            data regarding student performance 
+
+        >>> _get_school_sa(wait)
+        ['Excellent', 0.80, 0.91]
+        """
         tab_sa = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-sa']")))
         tab_sa.click()
         
@@ -198,6 +271,26 @@ class nyc_doe:
         return sa
 
     def _get_school_ct(self, wait):
+        """
+        A helper function to obtain the rating for the Collaborative Teachers  
+        section
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        list(1)
+            a list that contains a single item, which is the rating of the 
+            respective section
+
+        >>> _get_school_ct('Eleanor Roosevelt High School - [HS] 02M416')
+        'Good'
+        """
+
         try:
             tab_ct = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-ct']")))
             tab_ct.click()
@@ -211,6 +304,26 @@ class nyc_doe:
             return [None]
 
     def _get_school_se(self, wait):
+        """
+        A helper function to obtain the rating for Strong Family-Community Ties 
+        section
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        list(1)
+            a list that contains a single item, which is the rating of the 
+            respective section
+
+        >>> _get_school_se('Eleanor Roosevelt High School - [HS] 02M416')
+        'Excellent'
+        """
+
         try:
             tab_se = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-se']")))
             tab_se.click()
@@ -224,6 +337,26 @@ class nyc_doe:
             return [None]
 
     def _get_school_sf(self, wait):
+        """
+        A helper function to obtain the rating for Strong Family-Community Ties 
+        section
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        list(1)
+            a list that contains a single item, which is the rating of the 
+            respective section
+
+        >>> _get_school_sf('Eleanor Roosevelt High School - [HS] 02M416')
+        'Excellent'
+        """
+
         try:
             tab_sf = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-sf']")))
             tab_sf.click()
@@ -237,6 +370,25 @@ class nyc_doe:
             return [None]
 
     def _get_school_tr(self, wait):
+        """
+        A helper function to obtain the rating for Trust section
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        list(1)
+            a list that contains a single item, which is the rating of the 
+            respective section
+
+        >>> _get_school_tr('Eleanor Roosevelt High School - [HS] 02M416')
+        'Good'
+        """
+
         try:
             tab_tr = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-tr']")))
             tab_tr.click()
@@ -250,6 +402,25 @@ class nyc_doe:
             return [None]
 
     def _get_school_es(self, wait):
+        """
+        A helper function to obtain the rating for effective school
+        leadership section
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        Returns
+        -------
+        list(1)
+            a list that contains a single item, which is the rating of the 
+            respective section
+
+        >>> _get_school_es('Eleanor Roosevelt High School - [HS] 02M416')
+        'Good'
+        """
         try:
             tab_es = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-es']")))
             tab_es.click()
@@ -263,25 +434,45 @@ class nyc_doe:
             return [None]
 
     def _get_school_data(self, browser, school_name):
+        """
+        A helper function to scrape the data pertained to a specific 
+        school based on its name 
+
+        Parameters
+        ----------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        school_name : str 
+            the school name that you will put into the search box 
+
+        >>> _get_school_data(browser, '333 East 4 Street')
+        ['333 East 4 Street', 'Manhattan', 'New York', 'NY', '10009', 
+          161.0, 0.12, 0.28, 0.55, 0.04, 'Excellent', 0.62, 0.65, 
+          'Excellent', 'Excellent', 'Excellent', 'Excellent', 'Good']
+        """
         try:
             # reset browser to the search box 
             browser.get(CONST.DOE_URL)
             wait = WebDriverWait(browser, 8)
+            # find the input box 
             input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
+            # send the school name to the search box 
             input_box.send_keys(school_name)
+            # wait until the drop down menu appears, means the content has been loaded
             input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
-            input_clickable.click()
+            input_clickable.click() # click the drop down item
 
             sn = [school_name]
-            si = self._get_school_si(wait)
-            sa = self._get_school_sa(wait)
-            ct = self._get_school_ct(wait)
-            se = self._get_school_se(wait)
-            es = self._get_school_es(wait)
-            sf = self._get_school_sf(wait)
-            tr = self._get_school_tr(wait)
+            si = self._get_school_si(wait) # general info
+            sa = self._get_school_sa(wait) # student achievement
+            ct = self._get_school_ct(wait) # teachers
+            se = self._get_school_se(wait) # environment
+            es = self._get_school_es(wait) # leadership
+            sf = self._get_school_sf(wait) # community
+            tr = self._get_school_tr(wait) # trust
             
-            data = sn+si+sa+ct+se+es+sf+tr
+            data = sn+si+sa+ct+se+es+sf+tr # aggregate all the data 
             
             return data
         except:
@@ -289,9 +480,25 @@ class nyc_doe:
             return None
 
     def _get_all_schools_data(self, browser, schools):
+        """
+        A helper function to scrape all the data pertained to a list of 
+        schools user specified 
+
+        Parameters
+        ----------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        schools : list(str) 
+            a list of school names that you will put into the 
+            search box 
+        """
+
         schools_data = []
         for school_name in schools:
+            # scrape the data for each school
             data = self._get_school_data(browser, school_name)
+            # make sure the data contains something 
             if data:
                 schools_data.append(data)
             time.sleep(3)
@@ -304,14 +511,68 @@ class nyc_doe:
     ############################
 
     def scrape_school_names(self):
+        """
+        A public function that allows you to call to scrape school names 
+
+        Parameters
+        ----------
+        None
+            no input parameters are needed 
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _school_names 
+            will be updated and all the school names will be stored 
+            in this field 
+        """
+
         self._school_names = self._get_schools(self._wait)
 
     def scrape_school_data(self, school_names):
+
+        """
+        A public function that allows you to scrape information for a list
+        of schools the users specified 
+
+        Parameters
+        ----------
+        school_names : list(str)
+            a list of school names scraped from the drop down menu of the 
+                search box 
+
+        Returns
+        -------
+        None
+            nothing will be returned, but the attribute _school_data will be updated
+            and all the school info will be stored in this field 
+        """
+
         self._school_data = self._get_all_schools_data(self._browser, school_names)
 
     def write_data(self,
                    school_data, 
                    data_path):
+
+        """
+        
+        The scraper will automatically write the apartment data onto the local machine. 
+
+        Parameters
+        ----------
+        school_data : list(object)
+            this is a list of school data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
 
         # this is the path the OS will go back eventually
         current_path = os.getcwd() 
@@ -337,8 +598,7 @@ class nyc_doe:
     def school_names(self):
         """
         A public attribute that lets you get access to all
-        of the school names that need to be scraped. Notice
-        that this is essentially a dictionary
+        of the school names that need to be scraped.
         """
         return self._school_names
 
