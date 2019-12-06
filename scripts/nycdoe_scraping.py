@@ -235,7 +235,6 @@ class nyc_doe:
             time.sleep(3)
             schools_data.append(data)
 
-        browser.quit()
         return schools_data
 
     def scrape_school_names(self):
