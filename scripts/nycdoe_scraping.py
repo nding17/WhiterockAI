@@ -114,6 +114,22 @@ class nyc_doe:
         return browser, wait
 
     def _get_schools(self, wait):
+        """
+        A crucial helper function to collect a list of school names whose data
+        we will be scraping
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server
+
+        Returns 
+        -------
+        schools : list()
+            A comprehensive list of school names we could obtain from the drop down
+            menu of the search box 
+        """
         input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
         input_box.click()
         elem_schools = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
@@ -121,6 +137,23 @@ class nyc_doe:
         return schools
 
     def _extract_num(self, text):
+        """
+        A helper function that extract any number from a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
+
         try:
             # pattern to find any number (int or float)
             pattern = r'[-+]?\d*\.\d+|\d+'
@@ -130,7 +163,10 @@ class nyc_doe:
             return np.nan
         
     def _get_school_si_gen_info(self, wait):
-        
+        """
+        A helper function to get the diversity info from the general information 
+        section of the school page 
+        """
         enroll, asian, black, hispanic, white = np.nan, np.nan, np.nan, np.nan, np.nan
         try:
             elem_gen_info = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class='metric-group gen']")))
@@ -157,6 +193,10 @@ class nyc_doe:
             return enroll, asian, black, hispanic, white
         
     def _get_school_si_loc(self, wait):
+        """
+        A helper function to get the location info from the general information 
+        section of the school page 
+        """
         address, borough, city, state, zipcode = None, None, 'New York', None, None
         try:
             elem_loc = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@class='metric-group location']")))
@@ -171,6 +211,25 @@ class nyc_doe:
             return address, borough, city, state, zipcode
             
     def _get_school_si(self, wait):
+        """
+        A helper function to collect the school's general information, including
+        ethnicity data, address etc. 
+
+        Parameters
+        ----------
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server
+
+        Returns
+        ------- 
+        si : list()
+            a list that contains the general information data pertained to a school
+
+        >>> _get_school_si(wait)
+        ['333 East 4 Street', 'Manhattan', 'New York', 'NY', 
+            '10009', 161.0, 0.12, 0.28, 0.55, 0.04]
+        """
         tab_info = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-info']")))
         tab_info.click()
         
