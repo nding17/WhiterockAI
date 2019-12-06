@@ -131,23 +131,43 @@ class nyc_doe:
         
         return si
 
+    def _get_school_sa_overall(self, wait):
+        try:
+            xpath_sa = "//div[@class='fr-tab-content']/div[@class='element-overall-rating']"
+            elem_overall = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sa)))
+            overall_rating = elem_overall.find_element_by_class_name('rating-description').text
+            return overall_rating
+        except:
+            return None
+
+    def _get_school_sa_engl(self, wait):
+        try:
+            value_path = "div[@class='metric-bignum']/div[@class='school-value']"
+            xpath_engl = f"//div[@class='metric-group perf'][h3='English']/{value_path}"
+            elem_engl = wait.until(EC.presence_of_element_located((By.XPATH, xpath_engl)))
+            engl_score = self._extract_num(elem_engl.text)/100
+            return engl_score
+        except:
+            return None
+
+    def _get_school_sa_math(self, wait):
+        try:
+            value_path = "div[@class='metric-bignum']/div[@class='school-value']"
+            xpath_math = f"//div[@class='metric-group perf'][h3='Math']/{value_path}"
+            elem_math = wait.until(EC.presence_of_element_located((By.XPATH, xpath_math)))
+            math_score = self._extract_num(elem_math.text)/100
+            return math_score
+        except:
+            return None
+
     def _get_school_sa(self, wait):
         tab_sa = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-sa']")))
         tab_sa.click()
         
-        xpath_sa = "//div[@class='fr-tab-content']/div[@class='element-overall-rating']"
-        elem_overall = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sa)))
-        overall_rating = elem_overall.find_element_by_class_name('rating-description').text
-        
-        value_path = "div[@class='metric-bignum']/div[@class='school-value']"
-        xpath_engl = f"//div[@class='metric-group perf'][h3='English']/{value_path}"
-        elem_engl = wait.until(EC.presence_of_element_located((By.XPATH, xpath_engl)))
-        xpath_math = f"//div[@class='metric-group perf'][h3='Math']/{value_path}"
-        elem_math = wait.until(EC.presence_of_element_located((By.XPATH, xpath_math)))
-        
-        math_score = self._extract_num(elem_math.text)/100
-        engl_score = self._extract_num(elem_engl.text)/100
-        
+        overall_rating = self._get_school_sa_overall(wait)
+        engl_score = self._get_school_sa_engl(wait)
+        math_score = self._get_school_sa_math(wait)
+          
         sa = [
             overall_rating, 
             engl_score, 
@@ -157,76 +177,95 @@ class nyc_doe:
         return sa
 
     def _get_school_ct(self, wait):
-        tab_ct = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-ct']")))
-        tab_ct.click()
-        
-        xpath_ct = "//div[@class='fr-tab-content page-bottom']/div[@class='element-overall-rating']"
-        elem_ct = wait.until(EC.presence_of_element_located((By.XPATH, xpath_ct)))
-        ct_rating = elem_ct.find_element_by_class_name('rating-description').text
-        
-        return [ct_rating]
+        try:
+            tab_ct = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-ct']")))
+            tab_ct.click()
+            
+            xpath_ct = "//div[@class='fr-tab-content page-bottom']/div[@class='element-overall-rating']"
+            elem_ct = wait.until(EC.presence_of_element_located((By.XPATH, xpath_ct)))
+            ct_rating = elem_ct.find_element_by_class_name('rating-description').text
+            
+            return [ct_rating]
+        except:
+            return [None]
 
     def _get_school_se(self, wait):
-        tab_se = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-se']")))
-        tab_se.click()
-        
-        xpath_se = "//div[@class='tab-content print-always']"
-        elem_se = wait.until(EC.presence_of_element_located((By.XPATH, xpath_se)))
-        se_rating = elem_se.find_element_by_class_name('rating-description').text
-        
-        return [se_rating]
+        try:
+            tab_se = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-se']")))
+            tab_se.click()
+            
+            xpath_se = "//div[@class='tab-content print-always']"
+            elem_se = wait.until(EC.presence_of_element_located((By.XPATH, xpath_se)))
+            se_rating = elem_se.find_element_by_class_name('rating-description').text
+            
+            return [se_rating]
+        except:
+            return [None]
 
     def _get_school_sf(self, wait):
-        tab_sf = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-sf']")))
-        tab_sf.click()
-        
-        xpath_sf = "//div[@class='tab-content print-always']"
-        elem_sf = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sf)))
-        sf_rating = elem_sf.find_element_by_class_name('rating-description').text
-        
-        return [sf_rating]
+        try:
+            tab_sf = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-sf']")))
+            tab_sf.click()
+            
+            xpath_sf = "//div[@class='tab-content print-always']"
+            elem_sf = wait.until(EC.presence_of_element_located((By.XPATH, xpath_sf)))
+            sf_rating = elem_sf.find_element_by_class_name('rating-description').text
+            
+            return [sf_rating]
+        except:
+            return [None]
 
     def _get_school_tr(self, wait):
-        tab_tr = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-tr']")))
-        tab_tr.click()
-        
-        xpath_tr = "//div[@class='tab-content print-always']"
-        elem_tr = wait.until(EC.presence_of_element_located((By.XPATH, xpath_tr)))
-        tr_rating = elem_tr.find_element_by_class_name('rating-description').text
-        
-        return [tr_rating]
+        try:
+            tab_tr = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-tr']")))
+            tab_tr.click()
+            
+            xpath_tr = "//div[@class='tab-content print-always']"
+            elem_tr = wait.until(EC.presence_of_element_located((By.XPATH, xpath_tr)))
+            tr_rating = elem_tr.find_element_by_class_name('rating-description').text
+            
+            return [tr_rating]
+        except:
+            return [None]
 
     def _get_school_es(self, wait):
-        tab_es = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-es']")))
-        tab_es.click()
-        
-        xpath_es = "//div[@class='tab-content print-always']"
-        elem_es = wait.until(EC.presence_of_element_located((By.XPATH, xpath_es)))
-        es_rating = elem_es.find_element_by_class_name('rating-description').text
-        
-        return [es_rating]
+        try:
+            tab_es = wait.until(EC.presence_of_element_located((By.XPATH, "//div[@id='tab-button-es']")))
+            tab_es.click()
+            
+            xpath_es = "//div[@class='tab-content print-always']"
+            elem_es = wait.until(EC.presence_of_element_located((By.XPATH, xpath_es)))
+            es_rating = elem_es.find_element_by_class_name('rating-description').text
+            
+            return [es_rating]
+        except:
+            return [None]
 
     def _get_school_data(self, browser, school_name):
-        # reset browser to the search box 
-        browser.get(CONST.DOE_URL)
-        wait = WebDriverWait(browser, 20)
-        input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
-        input_box.send_keys(school_name)
-        input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
-        input_clickable.click()
-        
-        sn = [school_name]
-        si = self._get_school_si(wait)
-        sa = self._get_school_sa(wait)
-        ct = self._get_school_ct(wait)
-        se = self._get_school_se(wait)
-        es = self._get_school_es(wait)
-        sf = self._get_school_sf(wait)
-        tr = self._get_school_tr(wait)
-        
-        data = sn+si+sa+ct+se+es+sf+tr
-        
-        return data
+        try:
+            # reset browser to the search box 
+            browser.get(CONST.DOE_URL)
+            wait = WebDriverWait(browser, 20)
+            input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
+            input_box.send_keys(school_name)
+            input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
+            input_clickable.click()
+            
+            sn = [school_name]
+            si = self._get_school_si(wait)
+            sa = self._get_school_sa(wait)
+            ct = self._get_school_ct(wait)
+            se = self._get_school_se(wait)
+            es = self._get_school_es(wait)
+            sf = self._get_school_sf(wait)
+            tr = self._get_school_tr(wait)
+            
+            data = sn+si+sa+ct+se+es+sf+tr
+            
+            return data
+        except:
+            print(f'fail to get data for school {school_name}')
+            pass
 
     def _get_all_schools_data(self, browser, schools):
         schools_data = []
