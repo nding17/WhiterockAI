@@ -46,7 +46,7 @@ class nyc_doe:
     def _get_browser(self, chromedriver):
         browser = webdriver.Chrome(executable_path=chromedriver)
         browser.get(CONST.DOE_URL)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
         return browser, wait
 
     def _get_schools(self, wait):
@@ -245,7 +245,7 @@ class nyc_doe:
         try:
             # reset browser to the search box 
             browser.get(CONST.DOE_URL)
-            wait = WebDriverWait(browser, 20)
+            wait = WebDriverWait(browser, 8)
             input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
             input_box.send_keys(school_name)
             input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
@@ -327,7 +327,7 @@ if __name__ == '__main__':
 
     # batch jobs start
     print(f'total number of batches: {len(school_batches)}')
-    for i, batch in enumerate(school_batches):
+    for i, batch in enumerate(school_batches[1:]):
         doe.scrape_school_data(batch)
         school_data = doe.school_data
         doe.write_data(school_data, data_path)
