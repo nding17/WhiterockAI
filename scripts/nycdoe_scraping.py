@@ -264,15 +264,16 @@ class nyc_doe:
             
             return data
         except:
-            print(f'fail to get data for school {school_name}')
-            pass
+            print(f'failed to scrape data for school {school_name}')
+            return None
 
     def _get_all_schools_data(self, browser, schools):
         schools_data = []
         for school_name in schools:
             data = self._get_school_data(browser, school_name)
+            if data:
+                schools_data.append(data)
             time.sleep(3)
-            schools_data.append(data)
 
         return schools_data
 
@@ -327,10 +328,10 @@ if __name__ == '__main__':
 
     # batch jobs start
     print(f'total number of batches: {len(school_batches)}')
-    for i, batch in enumerate(school_batches[1:]):
+    for i, batch in enumerate(school_batches[5:]):
         doe.scrape_school_data(batch)
         school_data = doe.school_data
         doe.write_data(school_data, data_path)
-        print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+        print(f'batch {i} done, sleep {sleep_secs} seconds')
         time.sleep(sleep_secs) # rest for a few seconds after each batch job done
     print('job done, congratulations!')
