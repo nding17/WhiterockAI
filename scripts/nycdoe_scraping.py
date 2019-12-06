@@ -27,7 +27,7 @@ __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
 __version__ = '1.0.1'
-__status__ = 'documentation'
+__status__ = 'complete'
 
 ### package requirements
 import re
