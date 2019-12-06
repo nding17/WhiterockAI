@@ -250,7 +250,7 @@ class nyc_doe:
             input_box.send_keys(school_name)
             input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
             input_clickable.click()
-            
+
             sn = [school_name]
             si = self._get_school_si(wait)
             sa = self._get_school_sa(wait)
@@ -328,7 +328,7 @@ if __name__ == '__main__':
 
     # batch jobs start
     print(f'total number of batches: {len(school_batches)}')
-    for i, batch in enumerate(school_batches[5:]):
+    for i, batch in enumerate(school_batches):
         doe.scrape_school_data(batch)
         school_data = doe.school_data
         doe.write_data(school_data, data_path)
