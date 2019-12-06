@@ -53,7 +53,7 @@ class nyc_doe:
         input_box = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'input')))
         input_box.click()
         elem_schools = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
-        schools = list(filter(lambda x: 'Pre-K' not in x, elem_schools.text.split('\n')))
+        schools = list(filter(lambda x: 'pre-k' not in x.lower(), elem_schools.text.split('\n')))
         return schools
 
     def _extract_num(self, text):
