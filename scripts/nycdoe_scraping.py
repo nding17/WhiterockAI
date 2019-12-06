@@ -14,6 +14,28 @@ from selenium.webdriver.common.keys import Keys
 class CONST:
     DOE_URL = 'https://tools.nycenet.edu/snapshot/2019/'
 
+    COLNAMES = [
+        'SCHOOL NAME',
+        'ADDRESS', 
+        'BOROUGH', 
+        'CITY', 
+        'STATE', 
+        'ZIP',
+        'ENROLLMENT', 
+        'ASIAN', 
+        'BLACK', 
+        'LATINO', 
+        'WHITE',
+        'ACHIEVEMENT', 
+        'ENGLISH', 
+        'MATH',
+        'TEACHERS',
+        'ENVIRONMENT',
+        'LEADERSHIP',
+        'COMMUNITY',
+        'TRUST',
+    ]
+
 class nyc_doe:
 
     def __init__(self, chromedriver):
@@ -193,6 +215,7 @@ class nyc_doe:
         input_clickable = wait.until(EC.element_to_be_clickable((By.XPATH, "//li[@id='result-item-0']")))
         input_clickable.click()
         
+        sn = [school_name]
         si = self._get_school_si(wait)
         sa = self._get_school_sa(wait)
         ct = self._get_school_ct(wait)
@@ -201,7 +224,7 @@ class nyc_doe:
         sf = self._get_school_sf(wait)
         tr = self._get_school_tr(wait)
         
-        data = si+sa+ct+se+es+sf+tr 
+        data = sn+si+sa+ct+se+es+sf+tr
         
         return data
 
@@ -211,6 +234,8 @@ class nyc_doe:
             data = self._get_school_data(browser, school_name)
             time.sleep(3)
             schools_data.append(data)
+            
+        browser.quit()
         return schools_data
 
     def scrape_school_names(self):
@@ -219,6 +244,27 @@ class nyc_doe:
     def scrape_school_data(self, school_names):
         self._school_data = self._get_all_schools_data(self._browser, school_names)
 
+    def write_data(self,
+                   school_data, 
+                   data_path):
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('nyc_doe.csv'):
+            df = pd.DataFrame([], columns=CONST.COLNAMES)
+            df.to_csv('nyc_doe.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(school_data, columns=CONST.COLNAMES)
+        with open('nyc_doe.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+
     @property
     def school_names(self):
         return self._school_names
@@ -226,13 +272,16 @@ class nyc_doe:
     @property
     def school_data(self):
         return self._school_data
-    
-    
+
 
 if __name__ == '__main__':
     chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
+    data_path = '../data/sample/' 
+
     doe = nyc_doe(chromedriver)
     doe.scrape_school_names()
     test_schools = doe.school_names[:5]
     doe.scrape_school_data(test_schools)
-    print(doe.school_data)
+    test_school_data = doe.school_data
+
+    doe.write_data(test_school_data, data_path)
