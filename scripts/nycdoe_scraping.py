@@ -42,6 +42,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 
 ### a class that contains all the contants we will be using 
 class CONST:
@@ -78,16 +79,16 @@ class nyc_doe:
     # class initiation section #
     ############################
 
-    def __init__(self, chromedriver):
+    def __init__(self):
         self._school_names = []
         self._school_data = []
-        self._browser, self._wait = self._get_browser(chromedriver)
+        self._browser, self._wait = self._get_browser()
 
     #############################
     # private functions section #
     #############################
 
-    def _get_browser(self, chromedriver):
+    def _get_browser(self):
         """
         A helper function to get the selenium browser in order 
         to perform the scraping tasks 
@@ -108,7 +109,7 @@ class nyc_doe:
 
         """
 
-        browser = webdriver.Chrome(executable_path=chromedriver)
+        browser = webdriver.Chrome(ChromeDriverManager().install())
         browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
         return browser, wait
@@ -669,11 +670,10 @@ class nyc_doe:
 if __name__ == '__main__':
     # users need to specify the directory to the chromedriver 
     # and the path to the data directory
-    chromedriver = '/Users/itachi/Downloads/Chrome/chromedriver'
     data_path = '../data/sample/' 
 
     # construct a scraping object 
-    doe = nyc_doe(chromedriver)
+    doe = nyc_doe()
     doe.scrape_school_names()
     schools_names = doe.school_names
 
