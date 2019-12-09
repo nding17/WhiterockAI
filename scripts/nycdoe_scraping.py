@@ -21,6 +21,9 @@ Note:
     when running this script, please make sure that your computer
     does not go into sleep mode. The screen needs to be lit up in
     order for the browser to work automatically 
+
+    Now you don't need to download chromedriver, it will be done 
+    automatically
 """
 
 __author__ = 'Naili Ding'
