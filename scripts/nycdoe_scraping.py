@@ -103,7 +103,7 @@ class nyc_doe:
 
         Returns
         -------
-        browser : webdriver.Chrome
+        browser : webdriver.Firefox
             a chrome web driver 
 
         wait : WebDriverWait
@@ -507,7 +507,7 @@ class nyc_doe:
 
         Parameters
         ----------
-        browser : webdriver.Chrome
+        browser : webdriver.Firefox
             a chrome web driver 
 
         school_name : str 
@@ -553,7 +553,7 @@ class nyc_doe:
 
         Parameters
         ----------
-        browser : webdriver.Chrome
+        browser : webdriver.Firefox
             a chrome web driver 
 
         schools : list(str) 
