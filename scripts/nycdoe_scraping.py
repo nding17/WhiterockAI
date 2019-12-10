@@ -45,7 +45,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.firefox import GeckoDriverManager
+from webdriver_manager.chrome import ChromeDriverManager
 
 ### a class that contains all the contants we will be using 
 class CONST:
@@ -91,6 +91,34 @@ class nyc_doe:
     # private functions section #
     #############################
 
+    @staticmethod
+    def _build_chrome_options():
+
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.accept_untrusted_certs = True
+        chrome_options.assume_untrusted_cert_issuer = True
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-impl-side-painting")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
+        chrome_options.add_argument("--disable-breakpad")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-cast")
+        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
+        chrome_options.add_argument("--disable-cloud-import")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--disable-session-crashed-bubble")
+        chrome_options.add_argument("--disable-ipv6")
+        chrome_options.add_argument("--allow-http-screen-capture")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--lang=es')
+
+        return chrome_options
+
     def _get_browser(self):
         """
         A helper function to get the selenium browser in order 
@@ -103,7 +131,7 @@ class nyc_doe:
 
         Returns
         -------
-        browser : webdriver.Firefox
+        browser : webdriver.chrome
             a chrome web driver 
 
         wait : WebDriverWait
@@ -111,8 +139,9 @@ class nyc_doe:
             of time since we need some time to listen to the server 
 
         """
+        options = self._build_chrome_options()
 
-        browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
+        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
         return browser, wait
@@ -507,7 +536,7 @@ class nyc_doe:
 
         Parameters
         ----------
-        browser : webdriver.Firefox
+        browser : webdriver.chrome
             a chrome web driver 
 
         school_name : str 
@@ -553,7 +582,7 @@ class nyc_doe:
 
         Parameters
         ----------
-        browser : webdriver.Firefox
+        browser : webdriver.chrome
             a chrome web driver 
 
         schools : list(str) 
