@@ -29,7 +29,7 @@ Note:
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __status__ = 'complete'
 
 ### package requirements
@@ -45,7 +45,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 
 ### a class that contains all the contants we will be using 
 class CONST:
@@ -112,7 +112,7 @@ class nyc_doe:
 
         """
 
-        browser = webdriver.Chrome(ChromeDriverManager().install())
+        browser = webdriver.Firefox(executable_path=GeckoDriverManager().install())
         browser.get(CONST.DOE_URL)
         wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
         return browser, wait
@@ -138,6 +138,10 @@ class nyc_doe:
         input_box.click()
         elem_schools = wait.until(EC.presence_of_element_located((By.TAG_NAME, 'ul')))
         schools = list(filter(lambda x: 'pre-k' not in x.lower(), elem_schools.text.split('\n')))
+
+        # if debug:
+        #     print(f'total number of schools: {len(schools)}')
+
         return schools
 
     def _extract_num(self, text):
