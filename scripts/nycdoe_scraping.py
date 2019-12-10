@@ -93,10 +93,10 @@ class nyc_doe:
 
     @staticmethod
     def _build_chrome_options():
-
         chrome_options = webdriver.ChromeOptions()
         chrome_options.accept_untrusted_certs = True
         chrome_options.assume_untrusted_cert_issuer = True
+        
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
@@ -600,7 +600,6 @@ class nyc_doe:
             time.sleep(3)
 
         return schools_data
-
 
     ############################
     # public functions section #
