@@ -222,6 +222,11 @@ class police:
         with open('police.csv', 'a') as df_old:
             df_new.to_csv(df_old, header=False)
 
+        final_df = pd.read_csv('police.csv')
+        # eliminate the duplicated rows
+        final_df = final_df.drop_duplicates(subset=['CASE NUMBER'], keep=False) 
+        final_df.to_csv('police.csv')
+
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
@@ -265,8 +270,5 @@ if __name__ == '__main__':
     data_path = '../data/sample' 
 
     p = police()
-    p.scrape_map(data_path, left=9, right=14, up=21, down=10)
-    # p.scrape_map(data_path, left=1, right=1, up=1, down=1)
-    final_df = pd.read_csv(f'{data_path}/police.csv')
-    final_df = final_df.drop_duplicates()
-    final_df.to_csv(f'{data_path}/police.csv')
+    # p.scrape_map(data_path, left=9, right=14, up=21, down=10)
+    p.scrape_map(data_path, left=1, right=1, up=1, down=1)
