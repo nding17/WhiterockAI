@@ -20,6 +20,16 @@ class CONST:
                  'Level=16&latitude=39.94761343841498&longitude=-75.15636979615388&days=1,2,3,'\
                  '4,5,6,7&startHour=0&endHour=24&timezone=-05:00'
 
+    COLNAMES = [
+        'CASE NUMBER', 
+        'CRIME TITLE',
+        'ADDRESS',
+        'DATE',
+        'TIME',
+        'AGENCY',
+        'DESCRIPTION',
+    ]
+
 class police:
 
     def __init__(self):
@@ -165,7 +175,47 @@ class police:
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
                         .send_keys(Keys.DOWN)
 
-    def scrape_map(self, left=1, right=1, up=1, down=1):
+    def _write_data(self,
+                    crime_data, 
+                    data_path):
+
+        """
+        
+        The scraper will automatically write the apartment data onto the local machine. 
+
+        Parameters
+        ----------
+        school_data : list(object)
+            this is a list of school data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('police.csv'):
+            df = pd.DataFrame([], columns=CONST.COLNAMES)
+            df.to_csv('police.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(crime_data, columns=CONST.COLNAMES)
+        with open('police.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+    def scrape_map(self, data_path, left=1, right=1, up=1, down=1):
     
         cases = []
         all_case_number = []
@@ -190,11 +240,14 @@ class police:
             cases, all_case_number = self._scrape(cases, all_case_number, browser)
             self._move(browser, 'down', 1)
             time.sleep(5) 
-            
-        return cases, all_case_number
-
+            self._write_data(cases, data_path)
+        
 
 if __name__ == '__main__':
 
+    data_path = '../data/sample/' 
+
     p = police()
-    cases, all_case_number = p.scrape_map(left=2, right=2, up=2, down=2)
+    p.scrape_map(data_path, left=1, right=1, up=1, down=1)
+
+
