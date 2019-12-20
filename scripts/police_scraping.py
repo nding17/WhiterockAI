@@ -12,106 +12,19 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
+class CONST:
+
+    POLICE_URL = 'https://www.cityprotect.com/map/list/incidents?toUpdateDate=12%2F18%2F'\
+                 '2019&fromUpdateDate=11%2F18%2F2019&pageSize=2000&parentIncidentTypeIds='\
+                 '149,150,148,8,97,104,165,98,100,179,178,180,101,99,103,163,168,166,12&zoom'
+                 'Level=16&latitude=39.94761343841498&longitude=-75.15636979615388&days=1,2,3,'
+                 '4,5,6,7&startHour=0&endHour=24&timezone=-05:00'
+
 class police:
 
     def __init__(self):
         self._crime_data = []
         self._browser, _ = self._get_browser()
-
-
-    def _random_user_agent(self):
-    """
-    A helper function to generate a random header to 
-    avoid getting blocked by the website
-
-    Parameters
-    ----------
-    None
-
-    Returns
-    -------
-    str
-    a random user agent 
-
-    >>> _random_user_agent()
-    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                AppleWebKit/537.36 (KHTML, like Gecko) \
-                Chrome/58.0.3029.110 Safari/537.36'
-    """
-    try:
-        ua = UserAgent()
-        return ua.random
-    except:
-        default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                AppleWebKit/537.36 (KHTML, like Gecko) \
-                Chrome/58.0.3029.110 Safari/537.36'
-        return default_ua
-
-    def _get_soup(self, url):
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
-
-    def _soup_attempts(self, url, total_attempts=5):
-
-        """
-        A helper function that will make several attempts
-        to obtain a soup to avoid getting blocked
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        total_attempts: int
-            the number of attempts you want to try to obtain the 
-            soup before you already give up. Default is 5 attempts
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage        
-
-        """
-
-        soup = self._get_soup(url)
-
-        # if we get the soup with the first attempt
-        if soup:
-            return soup
-        # if we don't get the soup during our first
-        # attempt
-        else:
-            attempts = 0
-            while attempts < total_attempts:
-                # put the program idle to avoid detection
-                time.sleep(3)
-                soup = self._get_soup(url)
-                if soup:
-                    return soup
-            # time to give up, try to find what's going on 
-            raise ValueError(f'FAILED to get soup for apt url {url}')
 
     @staticmethod
     def _build_chrome_options():
@@ -250,10 +163,12 @@ class police:
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
                         .send_keys(Keys.DOWN)
 
-    def scrape_map(self, browser, left=1, right=1, up=1, down=1):
+    def scrape_map(self, left=1, right=1, up=1, down=1):
     
         cases = []
         all_case_number = []
+
+        browser = self._browser
         # move to the up-left corner
         self._move(browser, 'left', left)
         self._move(browser, 'up', up)
@@ -275,4 +190,10 @@ class police:
             time.sleep(5) 
             
         return cases, all_case_number
-    
+
+
+    if __name__ == '__main__':
+
+        police_url = CONST.POLICE_URL
+        p = police()
+        cases, all_case_number = p.scrape_map(left=2, right=2, up=2, down=2)
