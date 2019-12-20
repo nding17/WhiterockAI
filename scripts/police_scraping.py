@@ -16,8 +16,8 @@ class CONST:
 
     POLICE_URL = 'https://www.cityprotect.com/map/list/incidents?toUpdateDate=12%2F18%2F'\
                  '2019&fromUpdateDate=11%2F18%2F2019&pageSize=2000&parentIncidentTypeIds='\
-                 '149,150,148,8,97,104,165,98,100,179,178,180,101,99,103,163,168,166,12&zoom'
-                 'Level=16&latitude=39.94761343841498&longitude=-75.15636979615388&days=1,2,3,'
+                 '149,150,148,8,97,104,165,98,100,179,178,180,101,99,103,163,168,166,12&zoom'\
+                 'Level=16&latitude=39.94761343841498&longitude=-75.15636979615388&days=1,2,3,'\
                  '4,5,6,7&startHour=0&endHour=24&timezone=-05:00'
 
 class police:
@@ -54,7 +54,7 @@ class police:
 
         return chrome_options
 
-    def _get_browser(self):
+    def _get_browser(self, police_url):
         """
         A helper function to get the selenium browser in order 
         to perform the scraping tasks 
@@ -77,7 +77,7 @@ class police:
         options = self._build_chrome_options()
 
         browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
-        browser.get(police_url)
+        browser.get(CONST.POLICE_URL)
         wait = WebDriverWait(browser, 10) # maximum wait time is 20 seconds 
         return browser, wait
 
@@ -94,9 +94,11 @@ class police:
         return [case_number, title, address, date, time, agency, description]
 
     def _scrape(self, cases, all_case_number, browser):
-        scrollHeight = browser.execute_script('return document.getElementById("incidentsList").scrollHeight')
-        i=0
         
+        scrollHeight = browser.execute_script('return document.getElementById("incidentsList").scrollHeight')
+
+        i=0
+
         while True:
             # if there's no incidents in the selected area
             # find_element_by_xpath report an error
@@ -139,7 +141,7 @@ class police:
             except:
                 print("Oops! This district has no incident!")
                 break
-
+        
         return cases, all_case_number
 
     def _move(self, browser, direction, times):
@@ -194,6 +196,5 @@ class police:
 
     if __name__ == '__main__':
 
-        police_url = CONST.POLICE_URL
         p = police()
         cases, all_case_number = p.scrape_map(left=2, right=2, up=2, down=2)
