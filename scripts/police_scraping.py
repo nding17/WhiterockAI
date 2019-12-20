@@ -224,7 +224,8 @@ class police:
 
         final_df = pd.read_csv('police.csv')
         # eliminate the duplicated rows
-        final_df = final_df.drop_duplicates(subset=['CASE NUMBER'], keep=False) 
+        final_df = final_df.drop_duplicates(subset=['CASE NUMBER'], keep=False)[CONST.COLNAMES]\
+                           .reset_index()
         final_df.to_csv('police.csv')
 
         # go back to the path where it is originally located 
@@ -270,5 +271,5 @@ if __name__ == '__main__':
     data_path = '../data/sample' 
 
     p = police()
-    # p.scrape_map(data_path, left=9, right=14, up=21, down=10)
-    p.scrape_map(data_path, left=1, right=1, up=1, down=1)
+    p.scrape_map(data_path, left=9, right=14, up=21, down=10)
+    # p.scrape_map(data_path, left=1, right=1, up=1, down=1)
