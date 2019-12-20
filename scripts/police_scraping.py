@@ -54,7 +54,7 @@ class police:
 
         return chrome_options
 
-    def _get_browser(self, police_url):
+    def _get_browser(self):
         """
         A helper function to get the selenium browser in order 
         to perform the scraping tasks 
@@ -194,7 +194,7 @@ class police:
         return cases, all_case_number
 
 
-    if __name__ == '__main__':
+if __name__ == '__main__':
 
-        p = police()
-        cases, all_case_number = p.scrape_map(left=2, right=2, up=2, down=2)
+    p = police()
+    cases, all_case_number = p.scrape_map(left=2, right=2, up=2, down=2)
