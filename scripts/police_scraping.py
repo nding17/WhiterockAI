@@ -1,3 +1,9 @@
+__author__ = 'Naili Ding'
+__email__ = 'nd2588@columbia.edu'
+__maintainer__ = 'Naili Ding'
+__version__ = '1.0.2'
+__status__ = 'complete'
+
 import re
 import time
 import os
@@ -14,12 +20,14 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 class CONST:
 
+    # crime report URL
     POLICE_URL = 'https://www.cityprotect.com/map/list/incidents?toUpdateDate=12%2F18%2F'\
                  '2019&fromUpdateDate=11%2F18%2F2019&pageSize=2000&parentIncidentTypeIds='\
                  '149,150,148,8,97,104,165,98,100,179,178,180,101,99,103,163,168,166,12&zoom'\
                  'Level=16&latitude=39.94761343841498&longitude=-75.15636979615388&days=1,2,3,'\
                  '4,5,6,7&startHour=0&endHour=24&timezone=-05:00'
 
+    # column names 
     COLNAMES = [
         'CASE NUMBER', 
         'CRIME TITLE',
@@ -105,6 +113,7 @@ class police:
 
     def _scrape(self, cases, all_case_number, browser):
         
+        # the height of a full screen
         scrollHeight = browser.execute_script('return document.getElementById("incidentsList").scrollHeight')
 
         i=0
@@ -155,21 +164,22 @@ class police:
         return cases, all_case_number
 
     def _move(self, browser, direction, times):
+        # navigate the map to the left
         if direction == 'left':
             for i in range(500*times):
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
                         .send_keys(Keys.LEFT)
-                
+        # navigate the map to the right
         elif direction == 'right': 
             for i in range(500*times):
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
                         .send_keys(Keys.RIGHT)
-        
+        # navigate the map upwards
         elif direction == 'up':
             for i in range(400*times):
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
                         .send_keys(Keys.UP)   
-        
+        # navigate the map downwards 
         elif direction == 'down':
             for i in range(400*times):
                 browser.find_element_by_xpath("//*[@id='mapMainContainer']/ce-map-wrapper/div/uwm-universal-web-map/div/div[1]/div[1]")\
@@ -185,8 +195,8 @@ class police:
 
         Parameters
         ----------
-        school_data : list(object)
-            this is a list of school data in raw format and later on will be used 
+        crime_data : list(object)
+            this is a list of crime report data in raw format and later on will be used 
             to construct the dataframe 
 
         data_path : str
@@ -231,6 +241,8 @@ class police:
         self._move(browser, 'up', up)
         time.sleep(5)
         
+        # navigate the map following a zigzag route in order to cover a full 
+        # square of the map 
         for i in range(up+down+1):
             if i%2 == 0:
                 for j in range(left+right):
@@ -250,8 +262,11 @@ class police:
 
 if __name__ == '__main__':
 
-    data_path = '../data/sample/' 
+    data_path = '../data/sample' 
 
     p = police()
-    p.scrape_map(data_path, left=6, right=12, up=16, down=11)
-    
+    p.scrape_map(data_path, left=9, right=14, up=21, down=10)
+    # p.scrape_map(data_path, left=1, right=1, up=1, down=1)
+    final_df = pd.read_csv(f'{data_path}/police.csv')
+    final_df = final_df.drop_duplicates()
+    final_df.to_csv(f'{data_path}/police.csv')
