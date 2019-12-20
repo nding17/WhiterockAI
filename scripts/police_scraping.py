@@ -248,6 +248,6 @@ if __name__ == '__main__':
     data_path = '../data/sample/' 
 
     p = police()
-    p.scrape_map(data_path, left=1, right=1, up=1, down=1)
+    p.scrape_map(data_path, left=9, right=9, up=9, down=9)
 
 
