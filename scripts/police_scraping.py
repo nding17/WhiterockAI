@@ -216,6 +216,11 @@ class police:
         os.chdir(current_path)
 
     def scrape_map(self, data_path, left=1, right=1, up=1, down=1):
+        """
+        Interact with the map to move to a specific location in the map
+        in order to load more incidents for scraping. You need to experiment
+        to figure out the boundaries of the city 
+        """
     
         cases = []
         all_case_number = []
@@ -248,6 +253,5 @@ if __name__ == '__main__':
     data_path = '../data/sample/' 
 
     p = police()
-    p.scrape_map(data_path, left=9, right=9, up=9, down=9)
-
-
+    p.scrape_map(data_path, left=6, right=12, up=16, down=11)
+    
