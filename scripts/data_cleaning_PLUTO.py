@@ -4,15 +4,16 @@ if __name__ == '__main__':
 
     def clean_pluto(df):
 
-        df_cleaned =  df.loc[pluto['CONDO COOP']!=1]\
-                        .loc[pluto['GSF']>=800]\
-                        .loc[pluto['# BLDG']!=0]\
-                        .loc[pluto['# FLOORS']!=0]\
-                        .loc[pluto['# UNITS']!=0]\
-                        .loc[(pluto['COMM SF']<=0) & 
-                             (pluto['OFFICE SF']<=0) & 
-                             (pluto['RETAIL SF'])<=0]\
-                        .reset_index()
+        drop_indices = pluto[(pluto['CONDO COOP']==1) |
+                             (pluto['GSF']<800) |
+                             (pluto['# BLDG']==0) |
+                             (pluto['# FLOORS']==0) |
+                             (pluto['# UNITS']==0) |
+                             ((pluto['COMM SF']>0) & 
+                              (pluto['OFFICE SF']>0) & 
+                              (pluto['RETAIL SF']>0))].index
+
+        df_cleaned =  df.drop(drop_indices).reset_index()
 
         return df_cleaned
 
@@ -20,4 +21,4 @@ if __name__ == '__main__':
     pluto = pd.read_csv('../data/project/NPL-001 All_Properties [bylocation;address] PLUTO.csv', index_col=0)
 
     pluto_cleaned = clean_pluto(pluto)
-    pluto_cleaned.to_csv('../data/project/All_Properties PLUTO_New_Data.csv')
+    pluto_cleaned.to_csv('../data/project/All_Properties PLUTO_New_Data.csv', index=False)
