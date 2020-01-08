@@ -1,5 +1,6 @@
 import csv
 import numpy as np
+import pandas as pd
 import os
 from os import listdir
 from os.path import isfile, join
@@ -61,3 +62,9 @@ if __name__ == '__main__':
                     writer = csv.writer(out_file)
                     writer.writerows(columns)
                     writer.writerows(lines)
+
+            pd.read_csv(f'{export_path_year}/{fn}')\
+              .drop_duplicates()\
+              .reset_index()\
+              .loc[df.amount>0]\
+              .to_csv(f'{export_path_year}/{fn}')
