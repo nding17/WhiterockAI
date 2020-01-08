@@ -65,6 +65,6 @@ if __name__ == '__main__':
 
             pd.read_csv(f'{export_path_year}/{fn}')\
               .drop_duplicates()\
-              .reset_index()\
               .query('amount>0')\
+              .reset_index()\
               .to_csv(f'{export_path_year}/{fn}')
