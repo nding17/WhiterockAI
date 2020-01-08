@@ -23,16 +23,16 @@ if __name__ == '__main__':
         'amount',
     ]]
 
-    os.mkdir(export_path)
+    os.makedirs(export_path, exist_ok=True)
 
-    years = listdir(data_path)
+    years = [y for y in listdir(data_path) if '.DS_Store' not in y]
 
     for year in years:
 
         data_path_year = f'{data_path}/{year}'
         export_path_year = f'{export_path}/{year}'
 
-        os.mkdir(export_path_year)
+        os.makedirs(export_path_year, exist_ok=True)
 
         filenames = [f.split('.')[0] for f in listdir(data_path_year) if isfile(join(data_path_year, f)) and 'dates' not in f]
 
