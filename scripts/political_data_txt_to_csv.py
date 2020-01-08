@@ -10,12 +10,7 @@ if __name__ == '__main__':
     data_path = '../data/Political_contributions'
     export_path = '../data/Political_contributions_CSV'
 
-    years = [
-        '2019',
-        '2017-2018',
-        '2015-2016',
-        '2013-2014',
-    ]
+    years = listdir(data_path)
 
     columns = [[
         'election type',
