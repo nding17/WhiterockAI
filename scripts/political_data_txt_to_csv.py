@@ -61,5 +61,17 @@ if __name__ == '__main__':
             pd.read_csv(f'{export_path_year}/{fn}.csv', index_col=0)\
               .drop_duplicates()\
               .query('amount>0')\
+              .astype({
+                  'election type': str,
+                  'entity': str,
+                  'donor': str,
+                  'city': str,
+                  'state': str,
+                  'zip code': str,
+                  'recipient': str,
+                  'recipient type': str,
+                  'date': str,
+                  'amount': np.float16,
+               })\
               .reset_index()\
               .to_csv(f'{export_path_year}/{fn}.csv', index=False)
