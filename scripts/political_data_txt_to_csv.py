@@ -58,12 +58,15 @@ if __name__ == '__main__':
                     writer.writerows(columns)
                     writer.writerows(lines)
 
-            pd.read_csv(f'{export_path_year}/{fn}.csv', index_col=0)\
+            pd.read_csv(f'{export_path_year}/{fn}.csv', 
+                        index_col=0, 
+                        dtype='unicode', 
+                        error_bad_lines=False)\
               .drop_duplicates()\
-              .query('amount>0')\
               .astype(dtype={
                       'zip code': str,
                       'amount': float,
                }, errors='ignore')\
+              .query('amount>0')\
               .reset_index()\
               .to_csv(f'{export_path_year}/{fn}.csv', index=False)

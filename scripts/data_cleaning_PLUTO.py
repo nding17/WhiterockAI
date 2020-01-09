@@ -13,7 +13,10 @@ if __name__ == '__main__':
                               (pluto['OFFICE SF']>0) & 
                               (pluto['RETAIL SF']>0))].index
 
-        df_cleaned =  df.drop(drop_indices).reset_index()
+        df_cleaned =  df.drop(drop_indices)\
+                        .astype(dtype={'ZIP': str}, 
+                                errors='ignore')\
+                        .reset_index()
 
         return df_cleaned
 
