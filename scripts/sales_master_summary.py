@@ -62,4 +62,4 @@ if __name__ == '__main__':
     export_path = '../data/project/sales_summary'
 
     df_sales = pd.read_csv(data_path, index_col=0)
-    export_sales_summary(df_sales, '../data/project/sales_summary')
+    export_sales_summary(df_sales, export_path)
