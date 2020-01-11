@@ -53,7 +53,9 @@ if __name__ == '__main__':
 		for submarket in submarkets:
 			df_sub = full_data[full_data.submarket==submarket]
 			df_corr = df_sub.corr()
-			df_corr.to_csv(f'{export_path}/{submarket}_corr_matrix.csv')
+			filename = submarket.replace(' ', '_')\
+								.replace('/', '_')
+			df_corr.to_csv(f'{export_path}/{filename}_corr_matrix.csv')
 
 	sales_dir_path = '../data/project/sales_summary'
 	donations_dir_path = '../data/project/Political_contributions_summary'
