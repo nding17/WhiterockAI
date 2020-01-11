@@ -31,12 +31,12 @@ if __name__ == '__main__':
 
     def group_sales(period, df):
         df_sales_p = df[df['period']==period]
-        df_sales_p = df.drop_duplicates(keep='first')\
-                       .reset_index(drop=True)\
-                       .groupby(['ZIP'])\
-                       .agg({'SALE PRICE': ['mean', 
-                                            'median', 
-                                            'count']})
+        df_sales_p = df_sales_p.drop_duplicates(keep='first')\
+                               .reset_index(drop=True)\
+                               .groupby(['ZIP'])\
+                               .agg({'SALE PRICE': ['mean', 
+                                                    'median', 
+                                                    'count']})
 
         df_sales_p.columns = [f"average sales price {dict_p[period]}", 
                               f"median sales price {dict_p[period]}", 
