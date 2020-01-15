@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from datetime import datetime
 
 class clean_instructions: 
 
@@ -305,6 +306,35 @@ class clean_instructions:
         'added_columns': added_columns,
         'rename_dict': rename_dict,
     }
+
+class cleaning_pipline:
+
+    def __init__(self):
+        pass
+
+    def pre_clean_df(self, df, instructions):
+        added_columns = instructions['added_columns']
+        rename_dict = instructions['rename_dict']
+        orig_columns = list(instructions['rename_dict'].keys())
+        df_new = df.copy()[orig_columns]
+        
+        for column in orig_columns:
+            if rename_dict[column]['delete'] == 1:
+                df_new = df_new.drop([column], axis=1)
+            if rename_dict[column]['delete'] == 0:
+                df_new = df_new.rename(columns={column: rename_dict[column]['new_name']})
+        
+        df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1)\
+                       .astype(dtype={'SALE DATE': str})
+        
+        df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'], errors='coerce')
+    
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)\
+                       .drop(df_new[df_new['SALE DATE']==pd.NaT].index)\
+                       .reset_index(drop=True)
+        
+        return df_new
+
 
 
 if __name__ == '__main__':
