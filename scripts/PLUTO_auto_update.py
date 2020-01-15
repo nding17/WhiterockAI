@@ -21,6 +21,7 @@ class clean_instructions:
     ]
 
     ### OVERWRITE instructions for the original data file
+    ### these instructions could be manually altered  
     rename_dict = {
         'number_of_rooms': {
             'delete': 0,
@@ -89,7 +90,7 @@ class clean_instructions:
             'new_name': 'LOT FRONTAGE',
         },
         'fuel': {
-            'delele': 1,
+            'delete': 1,
         },
         'garage_spaces': {
             'delete': 0,
@@ -298,6 +299,11 @@ class clean_instructions:
             'delete': 0,
             'new_name': 'LONGITUDE',
         },
+    }
+
+    instructions = {
+        'added_columns': added_columns,
+        'rename_dict': rename_dict,
     }
 
 
