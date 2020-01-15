@@ -6,6 +6,21 @@ class clean_instructions:
     def __init__(self):
         pass
 
+    ### new columns
+    added_columns = [
+        '# UNITS',
+        'REIS Submarket',
+        'CITY',
+        'STATE',
+        'RESI',
+        'CONDO',
+        'UNIT',
+        'COMM',
+        'TOT ASSD $',
+        'RE TAXES',
+    ]
+
+    ### OVERWRITE instructions for the original data file
     rename_dict = {
         'number_of_rooms': {
             'delete': 0,
@@ -90,8 +105,207 @@ class clean_instructions:
         'geographic_ward': {
             'delete': 1,
         },
-        ''
+        'homestead_exemption': {
+            'delete': 0,
+            'new_name': 'homestead_exemption',
+        },
+        'house_extension': {
+            'delete': 1,
+        },
+        'house_number': {
+            'delete': 1,
+        },
+        'interior_condition': {
+            'delete': 0,
+            'new_name': 'INT CONDITION',
+        },
+        'location': {
+            'delete': 0,
+            'new_name': 'ADDRESS',
+        },
+        'mailing_address_1': {
+            'delete': 1,
+        },
+        'mailing_address_2': {
+            'delete': 1,
+        },
+        'mailing_care_of': {
+            'delete': 1,
+        },
+        'mailing_city_state': {
+            'delete': 0,
+            'new_name': 'OWNER CITY',
+        },
+        'mailing_street': {
+            'delete': 0,
+            'new_name': 'OWNER ADDRESS',
+        },
+        'mailing_zip': {
+            'delete': 0,
+            'new_name': 'OWNER ZIP',
+        },
+        'market_value': {
+            'delete': 0,
+            'new_name': 'MARKET VALUE',
+        },
+        'market_value_date': {
+            'delete': 1,
+        },
+        'number_of_bathrooms': {
+            'delete': 0,
+            'new_name': '# BATH',
+        },
+        'number_of_bedrooms': {
+            'delete': 0,
+            'new_name': '# BED',
+        },
+        'basements': {
+            'delete': 0,
+            'new_name': 'BASEMENT',
+        },
+        'number_stories': {
+            'delete': 0,
+            'new_name': '# FLOORS',
+        },
+        'off_street_open': {
+            'delete': 0,
+            'new_name': 'off_street_open'
+        },
+        'other_building': {
+            'delete': 0,
+            'new_name': 'BUILDING',
+        },
+        'owner_1': {
+            'delete': 0,
+            'new_name': 'OWNER',
+        },
+        'owner_2': {
+            'delete': 1,
+        },
+        'parcel_number': {
+            'delete': 0,
+            'new_name': 'PARCEL ID',
+        },
+        'parcel_shape': {
+            'delete': 0,
+            'new_name': 'PARCEL SHAPE',
+        },
+        'quality_grade': {
+            'delete': 1
+        },
+        'recording_date': {
+            'delete': 0,
+            'new_name': 'RECORDING DATE',
+        },
+        'registry_number': {
+            'delete': 1
+        },
+        'sale_date': {
+            'delete': 0,
+            'new_name': 'SALE DATE',
+        },
+        'sale_price': {
+            'delete': 0,
+            'new_name': 'SALE PRICE',
+        },
+        'separate_utilities': {
+            'delete': 1,
+        },
+        'sewer': {
+            'delete': 1,
+        },
+        'site_type': {
+            'delete': 1,
+        },
+        'state_code': {
+            'delete': 1,
+        },
+        'street_code': {
+            'delete': 1,
+        },
+        'street_designation': {
+            'delete': 1,
+        },
+        'street_direction': {
+            'delete': 1,
+        },
+        'street_name': {
+            'delete': 1,
+        },
+        'suffix': {
+            'delete': 1,
+        },
+        'taxable_building': {
+            'delete': 0,
+            'new_name': 'BLDG ASSD $',
+        },
+        'taxable_land': {
+            'delete': 0,
+            'new_name': 'LAND ASSD $',
+        },
+        'topography': {
+            'delete': 0,
+            'new_name': 'TOPOGRAPHY',
+        },
+        'total_area': {
+            'delete': 0,
+            'new_name': 'LAND SF',
+        },
+        'total_livable_area': {
+            'delete': 0,
+            'new_name': 'GSF',
+        },
+        'type_heater': {
+            'delete': 1,
+        },
+        'unfinished': {
+            'delete': 1,
+        },
+        'unit': {
+            'delete': 0,
+            'new_name': 'UNIT #',
+        },
+        'utility': {
+            'delete': 1,
+        },
+        'view_type': {
+            'delete': 0,
+            'new_name': 'VIEW',
+        },
+        'year_built': {
+            'delete': 0,
+            'new_name': 'YEAR BUILT',
+        },
+        'year_built_estimate': {
+            'delete': 1,
+        },
+        'zip_code': {
+            'delete': 0,
+            'new_name': 'ZIP',
+        },
+        'zoning': {
+            'delete': 0,
+            'new_name': 'ZONING',
+        },
+        'objectid': {
+            'delete': 1,
+        },
+        'lat': {
+            'delete': 0,
+            'new_name': 'LATITUDE',
+        },
+        'lng': {
+            'delete': 0,
+            'new_name': 'LONGITUDE',
+        },
     }
+
+
+if __name__ == '__main__':
+
+    ci = clean_instructions()
+    print(ci.added_columns)
+    print(ci.rename_dict)
 
 
 
