@@ -364,7 +364,7 @@ class cleaning_pipline:
                             .values.tolist()
                 original = pluto[pluto['ADDRESS']==address]['PARCEL ID']\
                             .values.tolist()
-                
+
                 # address in the PLUTO whose data need to be updated 
                 if set(added) == set(original):
                     pluto_update.at[
@@ -387,18 +387,19 @@ class cleaning_pipline:
                                   .values\
                                   .tolist()
                     
-                    # to account for the addresses that have multiple properties
-                    added_rows = df_sub.loc[(df_sub['ADDRESS']==address) &
-                                            (df_sub['PARCEL ID'].isin(list(diffs)))]
-                    for i in range(added_rows.shape[0]):
-                        df_added = df_added.append(added_rows.iloc[i], 
-                                                   ignore_index=True)
+                    # make sure that the set is not empty
+                    if not diffs:
+                        # to account for the addresses that have multiple properties
+                        added_rows = df_sub.loc[(df_sub['ADDRESS']==address) &
+                                                (df_sub['PARCEL ID'].isin(list(diffs)))]
+                        for i in range(added_rows.shape[0]):
+                            df_added = df_added.append(added_rows.iloc[i], 
+                                                       ignore_index=True)
             else:
                 added_row = df_sub.loc[df_sub['ADDRESS']==address]
                 df_added = df_added.append(added_row, ignore_index=True)
         
         df_added = df_added[pluto_update.columns]
-        
         pluto_final = pd.concat([pluto_update, df_added],
                                 ignore_index=True)\
                         .sort_values(by='SALE DATE',
