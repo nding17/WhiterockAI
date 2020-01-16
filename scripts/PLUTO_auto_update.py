@@ -392,6 +392,7 @@ class cleaning_pipline:
                         # to account for the addresses that have multiple properties
                         added_rows = df_sub.loc[(df_sub['ADDRESS']==address) &
                                                 (df_sub['PARCEL ID'].isin(list(diffs)))]
+                                                
                         for i in range(added_rows.shape[0]):
                             df_added = df_added.append(added_rows.iloc[i], 
                                                        ignore_index=True)
@@ -400,6 +401,7 @@ class cleaning_pipline:
                 df_added = df_added.append(added_row, ignore_index=True)
         
         df_added = df_added[pluto_update.columns]
+
         pluto_final = pd.concat([pluto_update, df_added],
                                 ignore_index=True)\
                         .sort_values(by='SALE DATE',
