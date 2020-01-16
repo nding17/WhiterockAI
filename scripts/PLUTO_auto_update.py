@@ -350,7 +350,7 @@ class cleaning_pipline:
                        .reset_index(drop=True)
         return df_sub
 
-    def update_PLUTO(pluto, df_sub):
+    def update_PLUTO(self, pluto, df_sub):
         pluto_addresses = pluto['ADDRESS'].tolist()
         sub_addresses = df_sub['ADDRESS'].tolist()
         pluto_update = pluto.copy()
@@ -361,6 +361,7 @@ class cleaning_pipline:
                     pluto_update[pluto_update['ADDRESS']==address].index,
                     ['GSF', 'SALE PRICE', 'SALE DATE']
                 ] = df_sub.loc[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']]\
+                          .values\
                           .tolist()
             else:
                 added_row = df_sub.loc[df_sub['ADDRESS']==address]
