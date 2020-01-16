@@ -354,20 +354,57 @@ class cleaning_pipline:
         pluto_addresses = pluto['ADDRESS'].tolist()
         sub_addresses = df_sub['ADDRESS'].tolist()
         pluto_update = pluto.copy()
-        
+        df_added = pd.DataFrame(columns=pluto.columns)
+            
+        ### loop through all the addresses in the new data 
+        ### to match the addresses in the PLUTO dataset 
         for address in sub_addresses:
             if address in pluto_addresses:
-                pluto_update.at[
-                    pluto_update[pluto_update['ADDRESS']==address].index,
-                    ['GSF', 'SALE PRICE', 'SALE DATE']
-                ] = df_sub.loc[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']]\
+                added = df_sub[df_sub['ADDRESS']==address]['PARCEL ID']\
+                            .values.tolist()
+                original = pluto[pluto['ADDRESS']==address]['PARCEL ID']\
+                            .values.tolist()
+                
+                # address in the PLUTO whose data need to be updated 
+                if added == original:
+                    pluto_update.at[
+                        pluto_update[pluto_update['ADDRESS']==address].index,
+                        ['GSF', 'SALE PRICE', 'SALE DATE']
+                    ] = df_sub[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']]\
                           .values\
                           .tolist()
+                else:
+                    commons = set(added).intersection(set(original))
+                    diffs = set(added) - set(original)
+                    
+                    for pid in list(commons):
+                        pluto_update.at[
+                            pluto_update[(pluto_update['ADDRESS']==address) & 
+                                         (pluto_update['PARCEL ID']==pid)].index,
+                            ['GSF', 'SALE PRICE', 'SALE DATE']
+                        ] = df_sub[(df_sub['ADDRESS']==address) & 
+                                   (df_sub['PARCEL ID']==pid)][['GSF', 
+                                                                'SALE PRICE', 
+                                                                'SALE DATE']]\
+                                  .values\
+                                  .tolist()
+                    
+                    # to account for the addresses that have multiple properties
+                    added_rows = df_sub.loc[(df_sub['ADDRESS']==address) &
+                                            (df_sub['PARCEL ID'].isin(diffs))]
+                    for i in range(added_rows.shape[0]):
+                        df_added = df_added.append(added_rows.iloc[i], 
+                                                   ignore_index=True)
             else:
                 added_row = df_sub.loc[df_sub['ADDRESS']==address]
-                pluto_update = pluto_update.append(added_row, ignore_index=True)
+                df_added = df_added.append(added_row, ignore_index=True)
         
-        return pluto_update
+        df_added = df_added[pluto_update.columns]
+        pluto_final = pd.concat([pluto_update, df_added],
+                                ignore_index=True)\
+                        .reset_index(drop=True)
+        
+        return pluto_final
 
 
 if __name__ == '__main__':
