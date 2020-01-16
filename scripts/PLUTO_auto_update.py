@@ -366,7 +366,7 @@ class cleaning_pipline:
                             .values.tolist()
                 
                 # address in the PLUTO whose data need to be updated 
-                if added == original:
+                if set(added) == set(original):
                     pluto_update.at[
                         pluto_update[pluto_update['ADDRESS']==address].index,
                         ['GSF', 'SALE PRICE', 'SALE DATE']
@@ -398,6 +398,7 @@ class cleaning_pipline:
                 df_added = df_added.append(added_row, ignore_index=True)
         
         df_added = df_added[pluto_update.columns]
+        
         pluto_final = pd.concat([pluto_update, df_added],
                                 ignore_index=True)\
                         .sort_values(by='SALE DATE',
@@ -414,6 +415,3 @@ if __name__ == '__main__':
     ci = clean_instructions()
     print(ci.added_columns)
     print(ci.rename_dict)
-
-
-
