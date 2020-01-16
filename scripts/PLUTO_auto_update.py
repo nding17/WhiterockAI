@@ -345,11 +345,27 @@ class cleaning_pipline:
 
         keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
                             (df_new['SALE DATE']<=latest_date)].index
-                            
+
         df_sub = df_new.iloc[keep_index]\
                        .reset_index(drop=True)
         return df_sub
 
+    def update_PLUTO(self, pluto, df_sub):
+        pluto_addresses = pluto['ADDRESS'].tolist()
+        sub_addresses = df_sub['ADDRESS'].tolist()
+        pluto_update = pluto.copy()
+        
+        for address in sub_addresses:
+            if address in pluto_addresses:
+                pluto_update.at[
+                    pluto_update[pluto_update['ADDRESS']==address].index,
+                    ['GSF', 'SALE PRICE', 'SALE DATE']
+                ] = df_sub.loc[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']]
+            else:
+                added_row = df_sub.loc[df_sub['ADDRESS']==address]
+                pluto_update = pluto_update.append(added_row, ignore_index=True)
+        
+        return pluto_update
 
 
 if __name__ == '__main__':
