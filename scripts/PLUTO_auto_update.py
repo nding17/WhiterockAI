@@ -383,9 +383,7 @@ class cleaning_pipline:
                                          (pluto_update['PARCEL ID']==pid)].index,
                             ['GSF', 'SALE PRICE', 'SALE DATE']
                         ] = df_sub[(df_sub['ADDRESS']==address) & 
-                                   (df_sub['PARCEL ID']==pid)][['GSF', 
-                                                                'SALE PRICE', 
-                                                                'SALE DATE']]\
+                                   (df_sub['PARCEL ID']==pid)][['GSF', 'SALE PRICE', 'SALE DATE']]\
                                   .values\
                                   .tolist()
                     
@@ -403,7 +401,9 @@ class cleaning_pipline:
         pluto_final = pd.concat([pluto_update, df_added],
                                 ignore_index=True)\
                         .sort_values(by='SALE DATE',
-                                     ascending=False)
+                                     ascending=False)\
+                        .drop_duplicates(subset='PARCEL ID',
+                                         keep='first')\
                         .reset_index(drop=True)
         
         return pluto_final
