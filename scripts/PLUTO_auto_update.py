@@ -328,12 +328,27 @@ class cleaning_pipline:
                        .astype(dtype={'SALE DATE': str})
         
         df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'], errors='coerce')
-    
+
         df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)\
                        .drop(df_new[df_new['SALE DATE']==pd.NaT].index)\
                        .reset_index(drop=True)
         
         return df_new
+
+
+    def subset_df_date(self, df_new, deltadays):
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)
+
+        delta = pd.Timedelta(deltadays)
+        latest_date = df_new['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+
+        keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
+                            (df_new['SALE DATE']<=latest_date)].index
+                            
+        df_sub = df_new.iloc[keep_index]\
+                       .reset_index(drop=True)
+        return df_sub
 
 
 
