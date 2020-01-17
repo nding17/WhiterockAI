@@ -581,5 +581,12 @@ class cleaning_pipline:
 
 if __name__ == '__main__':
 
+    pluto_path = '../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
+    export_path = '../data/project'
+
     ci = clean_instructions()
     instructions = ci.instructions
+
+    cp = cleaning_pipline()
+    cp.pipeline(pluto_path, export_path, instructions)
+
