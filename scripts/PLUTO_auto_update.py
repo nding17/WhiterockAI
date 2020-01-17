@@ -1,6 +1,8 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+import warnings
+warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class clean_instructions: 
 
@@ -365,10 +367,22 @@ class clean_instructions:
         }
     }
 
+    log_dict = {
+        'download_df': 'downloading new data... (takes a while, please be patient)',
+        'pre_clean_df': 'pre-process the downloaded data (delete redundant columns, rename some columns)',
+        'subset_df_date': 'subset recent data from the downloaded data',
+        'load_old_PLUTO': 'loading old PLUTO data...',
+        'update_PLUTO': 'update PLUTO with the new data, data merging... (takes a while, please be patient)',
+        'process_PLUTO': 'final step: process the new pluto, almost ready',
+        'export_new_PLUTO': 'exporting PLUTO, job done!',
+    }
+
+
     instructions = {
         'added_columns': added_columns,
         'rename_dict': rename_dict,
         'process_dict': process_dict,
+        'log_dict': log_dict,
     }
 
 class cleaning_pipline:
@@ -504,6 +518,7 @@ class cleaning_pipline:
 
     def process_PLUTO(self, pluto_update, instructions):
         pluto_loc = self.fill_loc(pluto_update)
+
         drop_index = pluto_loc[pluto_loc['BLDG CAT']=='Commercial'].index.tolist() + \
                      pluto_loc[pluto_loc['BLDG CAT']=='Industrial'].index.tolist() + \
                      pluto_loc[pluto_loc['BLDG CAT']=='Vacant Land'].index.tolist() + \
