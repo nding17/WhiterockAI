@@ -544,6 +544,40 @@ class cleaning_pipline:
         
         return pluto_process.reset_index(drop=True)
 
+    def load_old_PLUTO(self, pluto_path):
+        pluto = pd.read_csv(pluto_path)
+        return pluto
+
+    def export_new_PLUTO(self, pluto_process, exp_path):
+        pluto_process.to_csv(f'{exp_path}/PLUTO_monthly_update.csv')
+        
+    def logger(self, func, instructions):
+        func_name = func.__name__
+        log_dict = instructions['log_dict']
+        print(log_dict[func_name])
+        
+    def pipeline(self, pluto_path, export_path, instructions):
+        self.logger(self.download_df, instructions)
+        df = self.download_df()
+        
+        self.logger(self.pre_clean_df, instructions)
+        df_new = self.pre_clean_df(df, instructions)
+        
+        self.logger(self.subset_df_date, instructions)
+        df_sub = self.subset_df_date(df_new, '40 days')
+        
+        self.logger(self.load_old_PLUTO, instructions)
+        pluto = self.load_old_PLUTO(pluto_path)
+        
+        self.logger(self.update_PLUTO, instructions)
+        p = self.update_PLUTO(pluto, df_sub)
+        
+        self.logger(self.process_PLUTO, instructions)
+        pnew = self.process_PLUTO(p, instructions)
+        
+        self.logger(export_new_PLUTO, instructions)
+        self.export_new_PLUTO(pnew, export_path)
+
 
 if __name__ == '__main__':
 
