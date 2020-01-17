@@ -327,35 +327,33 @@ class cleaning_pipline:
         df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1)\
                        .astype(dtype={'SALE DATE': str})
         
-        df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'], errors='coerce')
-
+        df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
         df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)\
-                       .drop(df_new[df_new['SALE DATE']==pd.NaT].index)\
                        .reset_index(drop=True)
         
         return df_new
 
-
     def subset_df_date(self, df_new, deltadays):
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)
-
         delta = pd.Timedelta(deltadays)
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)
         latest_date = df_new['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
-
         keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
                             (df_new['SALE DATE']<=latest_date)].index
-
         df_sub = df_new.iloc[keep_index]\
                        .reset_index(drop=True)
         return df_sub
 
     def update_PLUTO(self, pluto, df_sub):
+        pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
+        pluto = pluto.sort_values(by=['SALE DATE'], ascending=False)
+
         pluto_addresses = pluto['ADDRESS'].tolist()
         sub_addresses = df_sub['ADDRESS'].tolist()
         pluto_update = pluto.copy()
         df_added = pd.DataFrame(columns=pluto.columns)
-            
+        df_sub = df_sub[pluto.columns]
+
         ### loop through all the addresses in the new data 
         ### to match the addresses in the PLUTO dataset 
         for address in sub_addresses:
@@ -364,7 +362,7 @@ class cleaning_pipline:
                             .values.tolist()
                 original = pluto[pluto['ADDRESS']==address]['PARCEL ID']\
                             .values.tolist()
-
+                
                 # address in the PLUTO whose data need to be updated 
                 if set(added) == set(original):
                     pluto_update.at[
@@ -376,7 +374,7 @@ class cleaning_pipline:
                 else:
                     commons = set(added).intersection(set(original))
                     diffs = set(added) - set(original)
-                    
+
                     for pid in list(commons):
                         pluto_update.at[
                             pluto_update[(pluto_update['ADDRESS']==address) & 
@@ -386,31 +384,34 @@ class cleaning_pipline:
                                    (df_sub['PARCEL ID']==pid)][['GSF', 'SALE PRICE', 'SALE DATE']]\
                                   .values\
                                   .tolist()
-                    
-                    # make sure that the set is not empty
+
                     if not diffs:
                         # to account for the addresses that have multiple properties
                         added_rows = df_sub.loc[(df_sub['ADDRESS']==address) &
                                                 (df_sub['PARCEL ID'].isin(list(diffs)))]
-                                                
                         for i in range(added_rows.shape[0]):
                             df_added = df_added.append(added_rows.iloc[i], 
                                                        ignore_index=True)
             else:
-                added_row = df_sub.loc[df_sub['ADDRESS']==address]
+                added_row = df_sub[df_sub['ADDRESS']==address]
                 df_added = df_added.append(added_row, ignore_index=True)
         
-        df_added = df_added[pluto_update.columns]
-
-        pluto_final = pd.concat([pluto_update, df_added],
-                                ignore_index=True)\
-                        .sort_values(by='SALE DATE',
-                                     ascending=False)\
-                        .drop_duplicates(subset='PARCEL ID',
-                                         keep='first')\
-                        .reset_index(drop=True)
+        pluto_conc = pd.concat([pluto_update, df_added], ignore_index=True)
         
-        return pluto_final
+        def int_to_datetime(date):
+            if type(date) == int:
+                return pd.to_datetime(date)
+            elif type(date) == pd._libs.tslibs.timestamps.Timestamp:
+                return date
+            else:
+                return 'nan'
+        
+        pluto_conc['SALE DATE'] = pluto_conc['SALE DATE'].apply(lambda x: int_to_datetime(x))
+        
+        pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False)\
+                               .reset_index(drop=True)
+
+        return pluto_conc
 
 
 if __name__ == '__main__':
