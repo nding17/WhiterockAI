@@ -302,9 +302,73 @@ class clean_instructions:
         },
     }
 
+    process_dict = {
+        'APT 2-4 UNITS': {
+            '# UNITS': 3,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0
+        },
+        'APTS 100+ UNITS': {
+            '# UNIT': np.nan,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0,
+        },
+        'APTS 51-100 UNITS': {
+            '# UNIT': np.nan,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0,
+        },
+        'APTS 5-50 UNITS': {
+            '# UNIT': np.nan,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0,
+        },
+        'DET CONV APT': {
+            '# UNIT': np.nan,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 1,
+        },
+        'DETACHED SINGLE FAM': {
+            '# UNIT': 1,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 1,
+        },
+        'ROW CONV/APT': {
+            '# UNIT': 2,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0,
+        },
+        'ROW SINGLE FAM': {
+            '# UNIT': 1,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 1,
+        },
+        'S/D APT': {
+            '# UNIT': np.nan,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 0,
+        },
+        'S-DETACHED SINGLE FAM': {
+            '# UNIT': 1,
+            'CONDO': 0,
+            'BUILDING': 1,
+            'UNIT': 1,
+        }
+    }
+
     instructions = {
         'added_columns': added_columns,
         'rename_dict': rename_dict,
+        'process_dict': process_dict,
     }
 
 class cleaning_pipline:
