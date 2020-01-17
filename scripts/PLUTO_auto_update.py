@@ -413,9 +413,33 @@ class cleaning_pipline:
 
         return pluto_conc
 
+    ### fill in missed location data into the merged PLUTO
+    def fill_loc(self, pluto_update):
+        d_subm = dict(zip(pluto_update['ADDRESS'], pluto_update['REIS Submarket']))
+        d_city = dict(zip(pluto_update['ADDRESS'], pluto_update['CITY']))
+        d_state = dict(zip(pluto_update['ADDRESS'], pluto_update['STATE']))
+        d_zip = dict(zip(pluto_update['ADDRESS'], pluto_update['ZIP']))
+        
+        p_subm = pd.DataFrame(d_subm.items(), columns=['ADDRESS', 'REIS Submarket'])
+        p_city = pd.DataFrame(d_city.items(), columns=['ADDRESS', 'CITY'])
+        p_state = pd.DataFrame(d_state.items(), columns=['ADDRESS', 'STATE'])
+        p_zip = pd.DataFrame(d_zip.items(), columns=['ADDRESS', 'ZIP'])
+        
+        p_all = p_subm
+        
+        ps = [p_city, p_state, p_zip]
+        for p_one in ps:
+            p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
+        
+        valid_cols = pluto_update.columns.difference(['REIS Submarket', 'CITY', 'STATE', 'ZIP'])
+        pluto_loc_updated = pluto_update[valid_cols]
+        
+        pluto_loc_updated = pd.merge(pluto_loc_updated, p_all, on='ADDRESS', how='left')
+        
+        return pluto_loc_updated
+
 
 if __name__ == '__main__':
 
     ci = clean_instructions()
-    print(ci.added_columns)
-    print(ci.rename_dict)
+    instructions = ci.instructions
