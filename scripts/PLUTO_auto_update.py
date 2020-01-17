@@ -426,8 +426,8 @@ class cleaning_pipline:
         p_zip = pd.DataFrame(d_zip.items(), columns=['ADDRESS', 'ZIP'])
         
         p_all = p_subm
-        
         ps = [p_city, p_state, p_zip]
+        
         for p_one in ps:
             p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
         
