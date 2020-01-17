@@ -491,7 +491,7 @@ class cleaning_pipline:
         
         p_all = p_subm
         ps = [p_city, p_state, p_zip]
-        
+
         for p_one in ps:
             p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
         
@@ -501,6 +501,33 @@ class cleaning_pipline:
         pluto_loc_updated = pd.merge(pluto_loc_updated, p_all, on='ADDRESS', how='left')
         
         return pluto_loc_updated
+
+    def process_PLUTO(self, pluto_update, instructions):
+        pluto_loc = self.fill_loc(pluto_update)
+        drop_index = pluto_loc[pluto_loc['BLDG CAT']=='Commercial'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CAT']=='Industrial'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CAT']=='Vacant Land'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CODE']=='RESI CONDO'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CODE']=='ROW W/OFF STORE'].index.tolist() + \
+                     pluto_loc[pluto_loc['LAND SF']==0].index.tolist() + \
+                     pluto_loc[pluto_loc['GSF']<800].index.tolist() + \
+                     pluto_loc[pluto_loc['SALE PRICE']<25000].index.tolist()
+        
+        process_dict = instructions['process_dict']
+        
+        pluto_process = pluto_loc.drop(drop_index)\
+                                 .reset_index(drop=True)
+        
+        
+        mod_keys = list(process_dict.keys())
+        
+        for key in mod_keys:
+            mod = process_dict[key]
+            pluto_process.at[pluto_process[pluto_process['BLDG CODE']==key].index, 
+                             ['# UNITS', 'CONDO', 'BUILDING', 'UNIT']] \
+                        = [mod['# UNITS'], mod['CONDO'], mod['BUILDING'], mod['UNIT']]
+        
+        return pluto_process.reset_index(drop=True)
 
 
 if __name__ == '__main__':
