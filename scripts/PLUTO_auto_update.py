@@ -2,7 +2,6 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import warnings
-warnings.simplefilter(action='ignore', category=FutureWarning)
 
 class clean_instructions: 
 
@@ -544,6 +543,13 @@ class cleaning_pipline:
         
         return pluto_process.reset_index(drop=True)
 
+    def download_df(self):
+        url = 'https://phl.carto.com/api/v2/sql?q=SELECT+*,+ST_Y(the_geom)+AS+lat,'\
+              '+ST_X(the_geom)+AS+lng+FROM+opa_properties_public&filename=opa_properties_public'\
+              '&format=csv&skipfields=cartodb_id,the_geom,the_geom_webmercator'
+        df = pd.read_csv(url)
+        return df
+
     def load_old_PLUTO(self, pluto_path):
         pluto = pd.read_csv(pluto_path)
         return pluto
@@ -557,6 +563,8 @@ class cleaning_pipline:
         print(log_dict[func_name])
         
     def pipeline(self, pluto_path, export_path, instructions):
+        warnings.simplefilter(action='ignore')
+
         self.logger(self.download_df, instructions)
         df = self.download_df()
         
@@ -575,7 +583,7 @@ class cleaning_pipline:
         self.logger(self.process_PLUTO, instructions)
         pnew = self.process_PLUTO(p, instructions)
         
-        self.logger(export_new_PLUTO, instructions)
+        self.logger(self.export_new_PLUTO, instructions)
         self.export_new_PLUTO(pnew, export_path)
 
 
@@ -589,4 +597,3 @@ if __name__ == '__main__':
 
     cp = cleaning_pipline()
     cp.pipeline(pluto_path, export_path, instructions)
-
