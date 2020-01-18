@@ -369,13 +369,13 @@ class clean_instructions:
 
     ### some log instructions - status update messages 
     log_dict = {
-        'download_df': '==>downloading new data... (takes a while, please be patient)',
-        'pre_clean_df': '==>pre-process the downloaded data (delete redundant columns, rename some columns)',
-        'subset_df_date': '==>subset recent data from the downloaded data',
-        'load_old_PLUTO': '==>loading old PLUTO data...',
-        'update_PLUTO': '==>update PLUTO with the new data, data merging... (takes a while, please be patient)',
-        'process_PLUTO': '==>final step: process the new pluto, almost ready',
-        'export_new_PLUTO': '==>exporting PLUTO, job done!',
+        'download_df': '==>Downloading new data... (takes a while, please be patient)',
+        'pre_clean_df': '==>Pre-processing the downloaded data (delete redundant columns, rename some columns)',
+        'subset_df_date': '==>Subsetting recent data from the downloaded data',
+        'load_old_PLUTO': '==>Loading old PLUTO data...',
+        'update_PLUTO': '==>Merging PLUTO with the new data... (takes a while, please be patient)',
+        'process_PLUTO': '==>Final step: process the new pluto, almost ready',
+        'export_data': '==>Exporting data',
     }
 
     ### package all the instructions
@@ -565,8 +565,8 @@ class cleaning_pipline:
         pluto = pd.read_csv(pluto_path)
         return pluto
 
-    def export_new_PLUTO(self, pluto_process, exp_path):
-        pluto_process.to_csv(f'{exp_path}/PLUTO_monthly_update.csv')
+    def export_data(self, pluto_process, exp_path, file_name):
+        pluto_process.to_csv(f'{exp_path}/{file_name}')
         
     def logger(self, func, instructions):
         func_name = func.__name__
@@ -585,6 +585,9 @@ class cleaning_pipline:
         
         self.logger(self.subset_df_date, instructions)
         df_sub = self.subset_df_date(df_new, '40 days')
+
+        self.logger(self.export_data, instructions)
+        self.export_data(df_sub, export_path, 'PLUTO_monthly_1.18.2020.csv')
         
         self.logger(self.load_old_PLUTO, instructions)
         pluto = self.load_old_PLUTO(pluto_path)
@@ -596,7 +599,7 @@ class cleaning_pipline:
         pnew = self.process_PLUTO(p, instructions)
         
         self.logger(self.export_new_PLUTO, instructions)
-        self.export_new_PLUTO(pnew, export_path)
+        self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
 
 
 if __name__ == '__main__':
