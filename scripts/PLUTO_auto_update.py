@@ -303,6 +303,7 @@ class clean_instructions:
         },
     }
 
+    ### special instructions for data processing
     process_dict = {
         'APT 2-4 UNITS': {
             '# UNITS': 3,
@@ -366,6 +367,7 @@ class clean_instructions:
         }
     }
 
+    ### some log instructions - status update messages 
     log_dict = {
         'download_df': '==>downloading new data... (takes a while, please be patient)',
         'pre_clean_df': '==>pre-process the downloaded data (delete redundant columns, rename some columns)',
@@ -376,7 +378,7 @@ class clean_instructions:
         'export_new_PLUTO': '==>exporting PLUTO, job done!',
     }
 
-
+    ### package all the instructions
     instructions = {
         'added_columns': added_columns,
         'rename_dict': rename_dict,
@@ -389,6 +391,8 @@ class cleaning_pipline:
     def __init__(self):
         pass
 
+    ### delete redundant columns and rename some columns 
+    ### to match the names of the PLUTO data
     def pre_clean_df(self, df, instructions):
         added_columns = instructions['added_columns']
         rename_dict = instructions['rename_dict']
@@ -410,6 +414,8 @@ class cleaning_pipline:
         
         return df_new
 
+    ### subset the most recent data from the downloaded data based on 
+    ### the order of date
     def subset_df_date(self, df_new, deltadays):
         delta = pd.Timedelta(deltadays)
         df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)
@@ -421,6 +427,8 @@ class cleaning_pipline:
                        .reset_index(drop=True)
         return df_sub
 
+    ### update the PLUTO data, replace pre-existed record and 
+    ### fill in new downloaded data
     def update_PLUTO(self, pluto, df_sub):
         pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
         pluto = pluto.sort_values(by=['SALE DATE'], ascending=False)
@@ -473,8 +481,10 @@ class cleaning_pipline:
                 added_row = df_sub[df_sub['ADDRESS']==address]
                 df_added = df_added.append(added_row, ignore_index=True)
         
+        # concatenate modified pluto and the added data
         pluto_conc = pd.concat([pluto_update, df_added], ignore_index=True)
         
+        ### handle datetime exceptions
         def int_to_datetime(date):
             if type(date) == int:
                 return pd.to_datetime(date)
@@ -515,6 +525,7 @@ class cleaning_pipline:
         
         return pluto_loc_updated
 
+    ### do all the data processing for PLUTO
     def process_PLUTO(self, pluto_update, instructions):
         pluto_loc = self.fill_loc(pluto_update)
 
@@ -561,7 +572,8 @@ class cleaning_pipline:
         func_name = func.__name__
         log_dict = instructions['log_dict']
         print(log_dict[func_name])
-        
+    
+    ### all-in-one pipeline function to handle all the processing tasks
     def pipeline(self, pluto_path, export_path, instructions):
         warnings.simplefilter(action='ignore')
 
@@ -589,6 +601,8 @@ class cleaning_pipline:
 
 if __name__ == '__main__':
 
+    ### these are the only two lines of code the users need to specify based on their
+    ### own machine's configuration
     pluto_path = '../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
     export_path = '../data/project'
 
