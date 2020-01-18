@@ -565,8 +565,8 @@ class cleaning_pipline:
         pluto = pd.read_csv(pluto_path)
         return pluto
 
-    def export_data(self, pluto_process, exp_path, file_name):
-        pluto_process.to_csv(f'{exp_path}/{file_name}')
+    def export_data(self, data, exp_path, file_name):
+        data.to_csv(f'{exp_path}/{file_name}')
         
     def logger(self, func, instructions):
         func_name = func.__name__
@@ -598,7 +598,7 @@ class cleaning_pipline:
         self.logger(self.process_PLUTO, instructions)
         pnew = self.process_PLUTO(p, instructions)
         
-        self.logger(self.export_new_PLUTO, instructions)
+        self.logger(self.export_data, instructions)
         self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
 
 
