@@ -613,9 +613,6 @@ class PicDownloader:
         urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
 
     def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
-        # fov控制镜头缩进，数值越小图片越大，最大为120
-        # heading控制朝向，0为北，90为东，180为南
-        # pitch控制向上的仰视的角度
         x, y = size
         lat, lng = geom
         return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
@@ -625,7 +622,10 @@ class PicDownloader:
 
     def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
         x, y = size
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx%s&location=%s&fov=%s&pitch=%s&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" % (x, y, address, fov, pitch)
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx"\
+                "%s&location=%s&fov=%s&pitch=%s"\
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, address, fov, pitch)
 
 
 if __name__ == '__main__':
