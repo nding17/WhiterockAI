@@ -18,7 +18,6 @@ class PicDownloader:
 
     def searching_from_pluto(self, pluto, address, target):
         return pluto[pluto['ADDRESS'] == address][target].values[0]
-
         
     def download(self, url, name):
         urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
@@ -29,11 +28,17 @@ class PicDownloader:
         # pitch控制向上的仰视的角度
         x, y = size
         lat, lng = geom
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx%s&location=%s,%s&fov=%s&heading=%s&pitch=%s&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" % (x, y, lat, lng, fov, heading, pitch)
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s"\
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, lat, lng, fov, heading, pitch)
 
     def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
         x, y = size
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx%s&location=%s&fov=%s&pitch=%s&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" % (x, y, address, fov, pitch)
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx"\
+                "%s&location=%s&fov=%s&pitch=%s"\
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, address, fov, pitch)
 
 PD = PicDownloader()
 
@@ -58,7 +63,7 @@ for city in files_name.keys():
         if n >= 10000:
             break
         
-        zipcode = self.searching_from_pluto(file, address, 'ZIP')
+        zipcode = PD.searching_from_pluto(file, address, 'ZIP')
         try:
             new_addr = '_'.join(address.split('/')) + ', ' + city
             if not os.path.exists(f'../pictures/Brick/{new_addr}.png'):

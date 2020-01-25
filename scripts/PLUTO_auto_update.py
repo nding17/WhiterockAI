@@ -601,6 +601,32 @@ class cleaning_pipline:
         self.logger(self.export_data, instructions)
         self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
 
+class PicDownloader:
+
+    def __init__(self):
+        self.key  = "AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE"
+
+    def searching_from_pluto(self, pluto, address, target):
+        return pluto[pluto['ADDRESS'] == address][target].values[0]
+        
+    def download(self, url, name):
+        urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
+
+    def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
+        # fov控制镜头缩进，数值越小图片越大，最大为120
+        # heading控制朝向，0为北，90为东，180为南
+        # pitch控制向上的仰视的角度
+        x, y = size
+        lat, lng = geom
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s"\
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, lat, lng, fov, heading, pitch)
+
+    def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
+        x, y = size
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx%s&location=%s&fov=%s&pitch=%s&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" % (x, y, address, fov, pitch)
+
 
 if __name__ == '__main__':
 
