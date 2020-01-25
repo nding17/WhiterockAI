@@ -35,11 +35,10 @@ class PicDownloader:
 
 PD = PicDownloader()
 
-data_path = 'D:/PHL/master_data/'
+data_path = '../data/project'
 files_name = {}
-pluto = pd.read_csv(data_path+'PHLPL-001 All_Properties [byaddress;location] PLUTO.csv', index_col = 0)
-#files_name['NY'] = ['NMA-001 Rent_Master_Unique [bylocation;addresses].csv', 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv']
-files_name['PHL'] = ['PHLPL-001 All_Properties [byaddress;location] PLUTO.csv']
+pluto = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col = 0)
+files_name['PHL'] = ['PLUTO_monthly_1.18.2020.csv']
 
 for city in files_name.keys():
     names = files_name[city]

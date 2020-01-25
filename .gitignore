@@ -25,6 +25,7 @@ wheels/
 *.egg
 MANIFEST
 data/*
+pictures/*
 
 .DS_Store
 ./data/.DS_Store
