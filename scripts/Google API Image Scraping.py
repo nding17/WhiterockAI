@@ -68,7 +68,7 @@ for city in files_name.keys():
                                 new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
                                 
                                 url = PD.gen_url_by_string(new_addr_pic)
-                                saving_path = "../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/"+new_addr
+                                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
                                 PD.download(url, saving_path)
                                 time.sleep(5)
                                 n+=1
@@ -76,16 +76,16 @@ for city in files_name.keys():
             print(e)
             time.sleep(15)
             new_addr = '_'.join(address.split('/')) + ', ' + city
-            if not os.path.exists("../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Brick/"+new_addr+".png"):
-                if not os.path.exists("../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Glass/"+new_addr+".png"):
-                    if not os.path.exists("../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Limestone/"+new_addr+".png"):
-                        if not os.path.exists("../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Wood Panels/"+new_addr+".png"):
-                            if not os.path.exists("../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Other/"+new_addr+".png"):
+            if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Brick/{new_addr}.png'):
+                if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Glass/{new_addr}.png'):
+                    if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Limestone/{new_addr}.png'):
+                        if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Wood Panels/{new_addr}.png'):
+                            if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Other/{new_addr}.png'):
                                 print(address_list.index(address))
                                 new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
                                 
                                 url = PD.gen_url_by_string(new_addr_pic)
-                                saving_path = "../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/"+new_addr
+                                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
                                 PD.download(url, saving_path)
                                 time.sleep(5)
                                 n+=1
@@ -119,11 +119,11 @@ for address in sale_address_list:
         #PD.download(url, saving_path)
         #time.sleep(5)
         
-        if not os.path.exists("../pictures/Brick/"+new_addr+".png"):
-            if not os.path.exists("../pictures/Glass/"+new_addr+".png"):
-                if not os.path.exists("../pictures/Limestone/"+new_addr+".png"):
-                    if not os.path.exists("../pictures/Wood Panels/"+new_addr+".png"):
-                        if not os.path.exists("../pictures/Other/"+new_addr+".png"):
+        if not os.path.exists(f'../pictures/Brick/{new_addr}.png'):
+            if not os.path.exists(f'../pictures/Glass/{new_addr}.png'):
+                if not os.path.exists(f'../pictures/Limestone/{new_addr}.png'):
+                    if not os.path.exists(f'../pictures/Wood Panels/{new_addr}.png'):
+                        if not os.path.exists(f'../pictures/Other/{new_addr}.png'):
                             if new_addr[0].isnumeric():
                                 url = PD.gen_url_by_string(new_addr)
                                 saving_path = "../pictures"+new_addr
