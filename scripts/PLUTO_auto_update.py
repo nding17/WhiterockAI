@@ -615,15 +615,15 @@ class PicDownloader:
     def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
         x, y = size
         lat, lng = geom
-        return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
-                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s"\
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s" \
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s" \
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, lat, lng, fov, heading, pitch)
 
     def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
         x, y = size
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx"\
-                "%s&location=%s&fov=%s&pitch=%s"\
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx" \
+                "%s&location=%s&fov=%s&pitch=%s" \
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, address, fov, pitch)
 

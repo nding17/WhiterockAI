@@ -40,6 +40,16 @@ class PicDownloader:
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, address, fov, pitch)
 
+    def address_checker(self, address, pic_path, folders):
+
+        addr_exist = False
+
+        for folder in folders:
+            if os.path.exists(f'{pic_path}/{folder}/{address}.png'):
+                addr_exist = True
+
+        return addr_exist
+
 PD = PicDownloader()
 
 data_path = '../data/project'
@@ -56,6 +66,7 @@ for city in files_name.keys():
         address_list.extend(list(set(list(file.dropna(subset=['ADDRESS'])['ADDRESS'].values))))
     
     address_list = list(set(address_list))
+    folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
     
     n = 0
     
@@ -66,86 +77,56 @@ for city in files_name.keys():
         zipcode = PD.searching_from_pluto(file, address, 'ZIP')
         try:
             new_addr = '_'.join(address.split('/')) + ', ' + city
-            if not os.path.exists(f'../pictures/Brick/{new_addr}.png'):
-                if not os.path.exists(f'../pictures/Glass/{new_addr}.png'):
-                    if not os.path.exists(f'../pictures/Limestone/{new_addr}.png'):
-                        if not os.path.exists(f'../pictures/Wood Panels/{new_addr}.png'):
-                            if not os.path.exists(f'../pictures/Other/{new_addr}.png'):
-                                print(address_list.index(address))
-                                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
-                                
-                                url = PD.gen_url_by_string(new_addr_pic)
-                                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
-                                PD.download(url, saving_path)
-                                time.sleep(5)
-                                n+=1
+            addr_exist = PD.address_checker(new_addr, '../pictures', folders)
+            if not addr_exist:
+                print(address_list.index(address))
+                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
+                
+                url = PD.gen_url_by_string(new_addr_pic)
+                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
+                PD.download(url, saving_path)
+                time.sleep(5)
+                n+=1
         except Exception as e:
             print(e)
             time.sleep(15)
             new_addr = '_'.join(address.split('/')) + ', ' + city
-            if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Brick/{new_addr}.png'):
-                if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Glass/{new_addr}.png'):
-                    if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Limestone/{new_addr}.png'):
-                        if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Wood Panels/{new_addr}.png'):
-                            if not os.path.exists(f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/Other/{new_addr}.png'):
-                                print(address_list.index(address))
-                                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
-                                
-                                url = PD.gen_url_by_string(new_addr_pic)
-                                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
-                                PD.download(url, saving_path)
-                                time.sleep(5)
-                                n+=1
+            addr_exist = PD.address_checker(new_addr, '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures', folders)
+            if not addr_exist:
+                print(address_list.index(address))
+                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
+                
+                url = PD.gen_url_by_string(new_addr_pic)
+                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
+                PD.download(url, saving_path)
+                time.sleep(5)
+                n+=1
         
-
-#%%
 property_for_sale = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv',index_col = 0)
-# property_for_sale = pd.read_csv(data_path+'PHL New Sales.csv')
 
 city = 'PHL'
 sale_address_list = list(set(list(property_for_sale.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
 
 for address in sale_address_list:
-    #zipcode = property_for_sale[property_for_sale['ADDRESS'] == address]['ZIP'].values[0]
-    #try:
-    #    zipcode = int(zipcode)
-    #except:
-    #    zipcode = np.nan
-    #if np.isnan(zipcode):
-    #    try:
-    #        zipcode = int(searching_from_pluto(pluto,address,'ZIP'))
-    #    except:
-    #        zipcode = 0
-    #zipcode = int(zipcode)   
+
     try:
-        print(str(sale_address_list.index(address)))#+' '+str(zipcode))
+        print(str(sale_address_list.index(address)))
         new_addr = '_'.join(address.split('/')) + ', ' + city
-        new_addr_pic = '_'.join(address.split('/')) #+ ', ' + str(zipcode)
-        #url = PD.gen_url_by_string(new_addr_pic)
-        #saving_path = "D:/PHL/pics/"+new_addr
-        #PD.download(url, saving_path)
-        #time.sleep(5)
+        new_addr_pic = '_'.join(address.split('/'))
         
-        if not os.path.exists(f'../pictures/Brick/{new_addr}.png'):
-            if not os.path.exists(f'../pictures/Glass/{new_addr}.png'):
-                if not os.path.exists(f'../pictures/Limestone/{new_addr}.png'):
-                    if not os.path.exists(f'../pictures/Wood Panels/{new_addr}.png'):
-                        if not os.path.exists(f'../pictures/Other/{new_addr}.png'):
-                            if new_addr[0].isnumeric():
-                                url = PD.gen_url_by_string(new_addr)
-                                saving_path = "../pictures"+new_addr
-                                PD.download(url, saving_path)
-                                time.sleep(5)
+        addr_exist = PD.address_checker(new_addr, '../pictures', folders)    
+
+        if not addr_exits and new_addr[0].isnumeric():
+            url = PD.gen_url_by_string(new_addr)
+            saving_path = "../pictures"+new_addr
+            PD.download(url, saving_path)
+            time.sleep(5)
         
     except Exception as e:
         print(e)
-        print(str(sale_address_list.index(address)))#+' '+str(zipcode))
+        print(str(sale_address_list.index(address)))
         new_addr = '_'.join(address.split('/')) + ', ' + city
-        new_addr_pic = '_'.join(address.split('/')) #+ ', ' + str(zipcode)
-        #url = PD.gen_url_by_string(new_addr_pic)
-        #saving_path = "D:/PHL/pics/"+new_addr
-        #PD.download(url, saving_path)
-        #time.sleep(5)
+        new_addr_pic = '_'.join(address.split('/'))
         pass
         
 
