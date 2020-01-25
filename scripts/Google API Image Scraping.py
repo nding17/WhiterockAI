@@ -11,12 +11,14 @@ import numpy as np
 import time
 import os
 
-def searching_from_pluto(pluto, address, target):
-    return pluto[pluto['ADDRESS'] == address][target].values[0]
-
 class PicDownloader:
+
     def __init__(self):
         self.key  = "AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE"
+
+    def searching_from_pluto(self, pluto, address, target):
+        return pluto[pluto['ADDRESS'] == address][target].values[0]
+
         
     def download(self, url, name):
         urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
@@ -56,7 +58,7 @@ for city in files_name.keys():
         if n >= 10000:
             break
         
-        zipcode = searching_from_pluto(file, address, 'ZIP')
+        zipcode = self.searching_from_pluto(file, address, 'ZIP')
         try:
             new_addr = '_'.join(address.split('/')) + ', ' + city
             if not os.path.exists(f'../pictures/Brick/{new_addr}.png'):
