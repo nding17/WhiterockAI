@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 from datetime import datetime
 import warnings
+import urllib
+import os
 
 class clean_instructions: 
 
