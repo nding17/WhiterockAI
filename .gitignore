@@ -1,3 +1,4 @@
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
@@ -26,6 +27,7 @@ wheels/
 MANIFEST
 data/*
 pictures/*
+Whiterock Database/*
 
 .DS_Store
 ./data/.DS_Store
