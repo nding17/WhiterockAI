@@ -603,6 +603,7 @@ class cleaning_pipline:
         self.logger(self.export_data, instructions)
         self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
 
+### Google API image downloading class
 class PicDownloader:
 
     def __init__(self):
@@ -617,18 +618,53 @@ class PicDownloader:
     def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
         x, y = size
         lat, lng = geom
-        return "https://maps.googleapis.com/maps/api/streetview?size=%s" \
-                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s" \
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s"\
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, lat, lng, fov, heading, pitch)
 
     def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
         x, y = size
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx" \
-                "%s&location=%s&fov=%s&pitch=%s" \
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx"\
+                "%s&location=%s&fov=%s&pitch=%s"\
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, address, fov, pitch)
 
+    def address_checker(self, address, pic_path, folders):
+
+        addr_exist = False
+
+        for folder in folders:
+            if os.path.exists(f'{pic_path}/{folder}/{address}.png'):
+                addr_exist = True
+
+        return addr_exist
+
+    def export_addr_img(self, data, pic_path, saving_dir, folders):
+
+        city = 'PHL'
+        address_list = list(set(list(data.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
+
+        for address in address_list:
+            try:
+                print(str(address_list.index(address)))
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                
+                addr_exist = self.address_checker(new_addr, pic_path, folders)    
+
+                if not addr_exist and new_addr[0].isnumeric():
+                    url = self.gen_url_by_string(new_addr)
+                    saving_path = f'{saving_dir}/{new_addr}'
+                    self.download(url, saving_path)
+                    time.sleep(5)
+                
+            except Exception as e:
+                print(e)
+                print(str(address_list.index(address)))
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                pass
 
 if __name__ == '__main__':
 
@@ -642,3 +678,12 @@ if __name__ == '__main__':
 
     cp = cleaning_pipline()
     cp.pipeline(pluto_path, export_path, instructions)
+
+    PD = PicDownloader()
+    data_path = '../data/project'
+    data = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
+    pic_path = '../pictures'
+    saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
+    folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
+    print('==>Exporting images for each address')
+    PD.export_addr_img(data, pic_path, saving_dir, folders)

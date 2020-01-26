@@ -23,9 +23,6 @@ class PicDownloader:
         urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
 
     def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
-        # fov控制镜头缩进，数值越小图片越大，最大为120
-        # heading控制朝向，0为北，90为东，180为南
-        # pitch控制向上的仰视的角度
         x, y = size
         lat, lng = geom
         return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
@@ -50,83 +47,116 @@ class PicDownloader:
 
         return addr_exist
 
-PD = PicDownloader()
+    def export_addr_img(self, data, pic_path, saving_dir, folders):
 
-data_path = '../data/project'
-files_name = {}
-pluto = pd.read_csv(f'{data_path}/PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv', index_col = 0)
-files_name['PHL'] = ['PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv']
+        city = 'PHL'
+        address_list = list(set(list(data.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
 
-for city in files_name.keys():
-    names = files_name[city]
-    address_list = []
-    file = ''
-    for file_name in names:
-        file = pd.read_csv(f'{data_path}/{file_name}', index_col = 0)
-        address_list.extend(list(set(list(file.dropna(subset=['ADDRESS'])['ADDRESS'].values))))
-    
-    address_list = list(set(address_list))
+        for address in address_list:
+            try:
+                print(str(address_list.index(address)))
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                
+                addr_exist = self.address_checker(new_addr, pic_path, folders)    
+
+                if not addr_exist and new_addr[0].isnumeric():
+                    url = self.gen_url_by_string(new_addr)
+                    saving_path = f'{saving_dir}/{new_addr}'
+                    self.download(url, saving_path)
+                    time.sleep(5)
+                
+            except Exception as e:
+                print(e)
+                print(str(address_list.index(address)))
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                pass
+
+if __name__ == '__main__':
+    PD = PicDownloader()
+    data_path = '../data/project'
+    data = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
+    pic_path = '../pictures'
+    saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
     folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
+    PD.export_addr_img(data, pic_path, saving_dir, folders)
+
+# data_path = '../data/project'
+# files_name = {}
+# pluto = pd.read_csv(f'{data_path}/PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv', index_col = 0)
+# files_name['PHL'] = ['PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv']
+
+# for city in files_name.keys():
+#     names = files_name[city]
+#     address_list = []
+#     file = ''
+#     for file_name in names:
+#         file = pd.read_csv(f'{data_path}/{file_name}', index_col = 0)
+#         address_list.extend(list(set(list(file.dropna(subset=['ADDRESS'])['ADDRESS'].values))))
     
-    n = 0
+#     address_list = list(set(address_list))
+#     folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
     
-    for address in address_list[10000:]:
-        if n >= 10000:
-            break
+#     n = 0
+    
+#     for address in address_list[10000:]:
+#         if n >= 10000:
+#             break
         
-        zipcode = PD.searching_from_pluto(file, address, 'ZIP')
-        try:
-            new_addr = '_'.join(address.split('/')) + ', ' + city
-            addr_exist = PD.address_checker(new_addr, '../pictures', folders)
-            if not addr_exist:
-                print(address_list.index(address))
-                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
+#         zipcode = PD.searching_from_pluto(file, address, 'ZIP')
+#         try:
+#             new_addr = '_'.join(address.split('/')) + ', ' + city
+#             addr_exist = PD.address_checker(new_addr, '../pictures', folders)
+#             if not addr_exist:
+#                 print(address_list.index(address))
+#                 new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
                 
-                url = PD.gen_url_by_string(new_addr_pic)
-                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
-                PD.download(url, saving_path)
-                time.sleep(5)
-                n+=1
-        except Exception as e:
-            print(e)
-            time.sleep(15)
-            new_addr = '_'.join(address.split('/')) + ', ' + city
-            addr_exist = PD.address_checker(new_addr, '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures', folders)
-            if not addr_exist:
-                print(address_list.index(address))
-                new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
+#                 url = PD.gen_url_by_string(new_addr_pic)
+#                 saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
+#                 PD.download(url, saving_path)
+#                 time.sleep(5)
+#                 n+=1
+#         except Exception as e:
+#             print(e)
+#             time.sleep(15)
+#             new_addr = '_'.join(address.split('/')) + ', ' + city
+#             addr_exist = PD.address_checker(new_addr, '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures', folders)
+#             if not addr_exist:
+#                 print(address_list.index(address))
+#                 new_addr_pic = '_'.join(address.split('/')) + ', ' + str(zipcode)
                 
-                url = PD.gen_url_by_string(new_addr_pic)
-                saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
-                PD.download(url, saving_path)
-                time.sleep(5)
-                n+=1
+#                 url = PD.gen_url_by_string(new_addr_pic)
+#                 saving_path = f'../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures/{new_addr}'
+#                 PD.download(url, saving_path)
+#                 time.sleep(5)
+#                 n+=1
         
-property_for_sale = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv',index_col = 0)
+# property_for_sale = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
 
-city = 'PHL'
-sale_address_list = list(set(list(property_for_sale.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
+# city = 'PHL'
+# sale_address_list = list(set(list(property_for_sale.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
 
-for address in sale_address_list:
+# for address in sale_address_list:
 
-    try:
-        print(str(sale_address_list.index(address)))
-        new_addr = '_'.join(address.split('/')) + ', ' + city
-        new_addr_pic = '_'.join(address.split('/'))
+#     try:
+#         print(str(sale_address_list.index(address)))
+#         new_addr = '_'.join(address.split('/')) + ', ' + city
+#         new_addr_pic = '_'.join(address.split('/'))
         
-        addr_exist = PD.address_checker(new_addr, '../pictures', folders)    
+#         addr_exist = PD.address_checker(new_addr, '../pictures', folders)    
 
-        if not addr_exits and new_addr[0].isnumeric():
-            url = PD.gen_url_by_string(new_addr)
-            saving_path = "../pictures"+new_addr
-            PD.download(url, saving_path)
-            time.sleep(5)
+#         if not addr_exits and new_addr[0].isnumeric():
+#             url = PD.gen_url_by_string(new_addr)
+#             saving_path = "../pictures"+new_addr
+#             PD.download(url, saving_path)
+#             time.sleep(5)
         
-    except Exception as e:
-        print(e)
-        print(str(sale_address_list.index(address)))
-        new_addr = '_'.join(address.split('/')) + ', ' + city
-        new_addr_pic = '_'.join(address.split('/'))
-        pass
+#     except Exception as e:
+#         print(e)
+#         print(str(sale_address_list.index(address)))
+#         new_addr = '_'.join(address.split('/')) + ', ' + city
+#         new_addr_pic = '_'.join(address.split('/'))
+#         pass
         
 
