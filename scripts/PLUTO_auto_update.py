@@ -641,9 +641,8 @@ class PicDownloader:
 
         return addr_exist
 
-    def export_addr_img(self, data, pic_path, saving_dir, folders):
+    def export_addr_img(self, city, data, pic_path, saving_dir, folders):
 
-        city = 'PHL'
         address_list = list(set(list(data.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
 
         for address in address_list:
@@ -685,5 +684,6 @@ if __name__ == '__main__':
     pic_path = '../pictures'
     saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
     folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
+    city = 'PHL'
     print('==>Exporting images for each address')
-    PD.export_addr_img(data, pic_path, saving_dir, folders)
+    PD.export_addr_img(city, data, pic_path, saving_dir, folders)
