@@ -648,7 +648,6 @@ class PicDownloader:
 
         for address in address_list:
             try:
-                print(str(address_list.index(address)))
                 new_addr = '_'.join(address.split('/')) + ', ' + city
                 new_addr_pic = '_'.join(address.split('/'))
                 
