@@ -154,19 +154,26 @@ if __name__ == '__main__':
         def get_windows_df(column_name, windows_range):
             columns_name = []
             for i in range(len(windows_range)-1):
-                columns_name.append('-'.join([str(windows_range[i]),str(windows_range[i+1])]))
-            df = pd.DataFrame(data = get_windows_value(column_name,windows_range),
-                index=['AD / AE DIFF STD','AD / AF DIFF STD','AE / AF DIFF STD',
-                       'AD / AE DIFF AVG','AD / AF DIFF AVG','AE / AF DIFF AVG',
-                       'AD / AE DIFF MEDIAN','AD / AF DIFF MEDIAN','AE / AF DIFF MEDIAN'],
-                columns = columns_name)
+                columns_name.append('-'.join([str(windows_range[i]), str(windows_range[i+1])]))
+
+            df = pd.DataFrame(data=get_windows_value(column_name, windows_range),
+                              index=['AD / AE DIFF STD',
+                                     'AD / AF DIFF STD', 
+                                     'AE / AF DIFF STD',
+                                     'AD / AE DIFF AVG', 
+                                     'AD / AF DIFF AVG', 
+                                     'AE / AF DIFF AVG',
+                                     'AD / AE DIFF MEDIAN', 
+                                     'AD / AF DIFF MEDIAN', 
+                                     'AE / AF DIFF MEDIAN'],
+                              columns = columns_name)
             return df
 
         ## Generate the windows range for each column type
         year_range = [i for i in range(1850,2040,20)]
         gsf_range= [i for i in range(500,10200,200)]
         units_range = [i for i in range(1,25,1)]
-        units_range+=[25,50,100,np.inf]
+        units_range+=[25, 50, 100, np.inf]
         
         ## Get the dataframe and save as Excel SpreadSheet
         ## Each sheet represent a certain column type
