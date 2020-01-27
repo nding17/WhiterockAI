@@ -547,7 +547,6 @@ class cleaning_pipline:
         pluto_process = pluto_loc.drop(drop_index) \
                                  .reset_index(drop=True)
         
-        
         mod_keys = list(process_dict.keys())
         
         for key in mod_keys:
