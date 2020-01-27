@@ -129,9 +129,9 @@ if __name__ == '__main__':
         return name
 
     ## Pass the dataframe from above as argument
-    def price_diff_analysis_part2(df_name, excel_root):
+    def price_diff_analysis_part2(root, df_name, excel_root):
         
-        df = pd.read_csv(df_name)
+        df = pd.read_csv(f'{root}/{df_name}')
 
         ## Calculate the std, average, median value for each window range
         def get_windows_value(column_name, windows_range):
@@ -197,4 +197,4 @@ if __name__ == '__main__':
 
     # root of the excel sheets, might be a different root directory
     excel_root = '../data/project'
-    price_diff_analysis_part2(df_name, excel_root)
+    price_diff_analysis_part2(root, df_name, excel_root)
