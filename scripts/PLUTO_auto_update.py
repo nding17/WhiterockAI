@@ -379,6 +379,7 @@ class clean_instructions:
         'update_PLUTO': '==>Merging PLUTO with the new data... (takes a while, please be patient)',
         'process_PLUTO': '==>Final step: process the new pluto, almost ready',
         'export_data': '==>Exporting data',
+        'export_addr_img': '==>Exporting images for each address',
     }
 
     ### package all the instructions
@@ -669,6 +670,7 @@ if __name__ == '__main__':
 
     ### these are the only two lines of code the users need to specify based on their
     ### own machine's configuration
+
     pluto_path = '../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
     export_path = '../data/project'
 
@@ -678,6 +680,8 @@ if __name__ == '__main__':
     cp = cleaning_pipline()
     cp.pipeline(pluto_path, export_path, instructions)
 
+    ### Download images from Google API
+
     PD = PicDownloader()
     data_path = '../data/project'
     data = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
@@ -685,5 +689,6 @@ if __name__ == '__main__':
     saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
     folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
     city = 'PHL'
-    print('==>Exporting images for each address')
+    
+    cp.logger(PD.export_addr_img, instructions)
     PD.export_addr_img(city, data, pic_path, saving_dir, folders)
