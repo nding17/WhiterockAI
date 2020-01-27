@@ -409,11 +409,11 @@ class cleaning_pipline:
             if rename_dict[column]['delete'] == 0:
                 df_new = df_new.rename(columns={column: rename_dict[column]['new_name']})
         
-        df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1)\
+        df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1) \
                        .astype(dtype={'SALE DATE': str})
         
         df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)\
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False) \
                        .reset_index(drop=True)
         
         return df_new
@@ -427,7 +427,7 @@ class cleaning_pipline:
         earliest_date = latest_date-delta
         keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
                             (df_new['SALE DATE']<=latest_date)].index
-        df_sub = df_new.iloc[keep_index]\
+        df_sub = df_new.iloc[keep_index] \
                        .reset_index(drop=True)
         return df_sub
 
@@ -447,9 +447,9 @@ class cleaning_pipline:
         ### to match the addresses in the PLUTO dataset 
         for address in sub_addresses:
             if address in pluto_addresses:
-                added = df_sub[df_sub['ADDRESS']==address]['PARCEL ID']\
+                added = df_sub[df_sub['ADDRESS']==address]['PARCEL ID'] \
                             .values.tolist()
-                original = pluto[pluto['ADDRESS']==address]['PARCEL ID']\
+                original = pluto[pluto['ADDRESS']==address]['PARCEL ID'] \
                             .values.tolist()
                 
                 # address in the PLUTO whose data need to be updated 
@@ -457,7 +457,7 @@ class cleaning_pipline:
                     pluto_update.at[
                         pluto_update[pluto_update['ADDRESS']==address].index,
                         ['GSF', 'SALE PRICE', 'SALE DATE']
-                    ] = df_sub[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']]\
+                    ] = df_sub[df_sub['ADDRESS']==address][['GSF', 'SALE PRICE', 'SALE DATE']] \
                           .values\
                           .tolist()
                 else:
@@ -470,7 +470,7 @@ class cleaning_pipline:
                                          (pluto_update['PARCEL ID']==pid)].index,
                             ['GSF', 'SALE PRICE', 'SALE DATE']
                         ] = df_sub[(df_sub['ADDRESS']==address) & 
-                                   (df_sub['PARCEL ID']==pid)][['GSF', 'SALE PRICE', 'SALE DATE']]\
+                                   (df_sub['PARCEL ID']==pid)][['GSF', 'SALE PRICE', 'SALE DATE']] \
                                   .values\
                                   .tolist()
 
@@ -499,7 +499,7 @@ class cleaning_pipline:
         
         pluto_conc['SALE DATE'] = pluto_conc['SALE DATE'].apply(lambda x: int_to_datetime(x))
         
-        pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False)\
+        pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False) \
                                .reset_index(drop=True)
 
         return pluto_conc
@@ -544,7 +544,7 @@ class cleaning_pipline:
         
         process_dict = instructions['process_dict']
         
-        pluto_process = pluto_loc.drop(drop_index)\
+        pluto_process = pluto_loc.drop(drop_index) \
                                  .reset_index(drop=True)
         
         
@@ -559,8 +559,8 @@ class cleaning_pipline:
         return pluto_process.reset_index(drop=True)
 
     def download_df(self):
-        url = 'https://phl.carto.com/api/v2/sql?q=SELECT+*,+ST_Y(the_geom)+AS+lat,'\
-              '+ST_X(the_geom)+AS+lng+FROM+opa_properties_public&filename=opa_properties_public'\
+        url = 'https://phl.carto.com/api/v2/sql?q=SELECT+*,+ST_Y(the_geom)+AS+lat,' \
+              '+ST_X(the_geom)+AS+lng+FROM+opa_properties_public&filename=opa_properties_public' \
               '&format=csv&skipfields=cartodb_id,the_geom,the_geom_webmercator'
         df = pd.read_csv(url)
         return df
@@ -620,15 +620,15 @@ class PicDownloader:
     def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
         x, y = size
         lat, lng = geom
-        return "https://maps.googleapis.com/maps/api/streetview?size=%s"\
-                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s"\
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s" \
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s" \
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, lat, lng, fov, heading, pitch)
 
     def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
         x, y = size
-        return "https://maps.googleapis.com/maps/api/streetview?size=%sx"\
-                "%s&location=%s&fov=%s&pitch=%s"\
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx" \
+                "%s&location=%s&fov=%s&pitch=%s" \
                 "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
                 % (x, y, address, fov, pitch)
 
@@ -689,6 +689,6 @@ if __name__ == '__main__':
     saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
     folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
     city = 'PHL'
-    
+
     cp.logger(PD.export_addr_img, instructions)
     PD.export_addr_img(city, data, pic_path, saving_dir, folders)
