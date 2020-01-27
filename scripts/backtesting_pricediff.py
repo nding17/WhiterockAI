@@ -70,7 +70,7 @@ if __name__ == '__main__':
         testdf = testdf.reindex(columns=df2.columns)
         testdf = testdf.drop(['Unnamed: 35','Unnamed: 36'], axis=1)
         # Save the new dataframe as cvs file
-        testdf.to_csv('PHL Sold Assets Backtesting.csv')
+        testdf.to_csv(f'{root}/PHL Sold Assets Backtesting.csv')
 
     ## The file path where you store the Excel spreadsheets
     ## Remeber to change when testing
@@ -125,7 +125,7 @@ if __name__ == '__main__':
         # Save the new dataframe as cvs file 
         d = date.today().strftime("%m-%d-%Y")
         name = 'PHL Sold Assets Backtesting {}.csv'.format(d)
-        testdf.to_csv(name)
+        testdf.to_csv(f'{root}/{name}')
         return name
 
     ## Pass the dataframe from above as argument
