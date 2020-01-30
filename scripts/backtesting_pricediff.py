@@ -37,6 +37,7 @@ if __name__ == '__main__':
         df2 = pd.read_csv('/'.join([root, 'PHL New Sales Backtesting.csv']))
 
         content_list = get_content_list(root)
+        print(content_list)
 
         ## Calculate the price difference and stroe in a new dataframe
         price_diff = []
@@ -98,7 +99,8 @@ if __name__ == '__main__':
             try:
                 ## Check whether the zip code matc
                 if str(df1[df1['ADDRESS']== prop[0]]['zip_code'].values[0])[:5]==prop[1]:
-                    price_diff.append([prop[0],df1[df1['ADDRESS']==prop[0]]['zip_code'].values[0],
+                    price_diff.append([prop[0],
+                                       df1[df1['ADDRESS']==prop[0]]['zip_code'].values[0],
                                        prop[2], 
                                        prop[3],
                                        1-prop[2]/df2[df2['ADDRESS']==prop[0]]['SALE PRICE'].values[0],
@@ -107,7 +109,7 @@ if __name__ == '__main__':
                 else:
                     print(prop[0]+"zip code does not match the one in PHL New Sales File")
             except:
-                print(prop[0]+' does not in the PHL New Sales File')
+                print(prop[0]+' does not exist in the PHL New Sales File')
 
         # Merging the dataframe to PHL New Sales Backtesting 
         temp_df = pd.DataFrame(price_diff, columns=['ADDRESS', 
@@ -196,5 +198,6 @@ if __name__ == '__main__':
     df_name = price_diff_analysis_part1(root)
 
     # root of the excel sheets, might be a different root directory
+    # here is where you store the excel spreadsheet windows_value.xlsx
     excel_root = '../data/project'
     price_diff_analysis_part2(root, df_name, excel_root)
