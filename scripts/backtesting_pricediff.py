@@ -37,7 +37,6 @@ if __name__ == '__main__':
         df2 = pd.read_csv('/'.join([root, 'PHL New Sales Backtesting.csv']))
 
         content_list = get_content_list(root)
-        print(content_list)
 
         ## Calculate the price difference and stroe in a new dataframe
         price_diff = []
