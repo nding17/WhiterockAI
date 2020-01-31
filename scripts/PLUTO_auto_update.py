@@ -430,12 +430,13 @@ class cleaning_pipline:
         df_sub = df_new.iloc[keep_index] \
                        .reset_index(drop=True)
 
-        drop_index = pluto_loc[pluto_loc['BLDG CAT']=='Commercial'].index.tolist() + \
-                     pluto_loc[pluto_loc['BLDG CAT']=='Industrial'].index.tolist() + \
-                     pluto_loc[pluto_loc['BLDG CAT']=='Vacant Land'].index.tolist() + \
-                     pluto_loc[pluto_loc['LAND SF']==0].index.tolist() + \
-                     pluto_loc[pluto_loc['GSF']<800].index.tolist() + \
-                     pluto_loc[pluto_loc['SALE PRICE']<25000].index.tolist()
+        # drop the properties that are not good for backtesting
+        drop_index = df_sub[df_sub['BLDG CAT']=='Commercial'].index.tolist() + \
+                     df_sub[df_sub['BLDG CAT']=='Industrial'].index.tolist() + \
+                     df_sub[df_sub['BLDG CAT']=='Vacant Land'].index.tolist() + \
+                     df_sub[df_sub['LAND SF']==0].index.tolist() + \
+                     df_sub[df_sub['GSF']<800].index.tolist() + \
+                     df_sub[df_sub['SALE PRICE']<25000].index.tolist()
 
         df_sub = df_sub.drop(drop_index) \
                        .reset_index(drop=True)
