@@ -481,9 +481,17 @@ class cleaning_pipline:
                         for i in range(added_rows.shape[0]):
                             df_added = df_added.append(added_rows.iloc[i], 
                                                        ignore_index=True)
+
+                        new_addrs = added_rows['ADDRESS'].values
+                        if not new_addrs:
+                            print(f'\tadded address: {new_addrs[0]}')
             else:
                 added_row = df_sub[df_sub['ADDRESS']==address]
                 df_added = df_added.append(added_row, ignore_index=True)
+
+                new_addrs = added_row['ADDRESS'].values
+                if not new_addrs:
+                    print(f'\tadded address: {new_addrs[0]}')
         
         # concatenate modified pluto and the added data
         pluto_conc = pd.concat([pluto_update, df_added], ignore_index=True)
