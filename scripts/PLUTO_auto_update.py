@@ -429,6 +429,17 @@ class cleaning_pipline:
                             (df_new['SALE DATE']<=latest_date)].index
         df_sub = df_new.iloc[keep_index] \
                        .reset_index(drop=True)
+
+        drop_index = pluto_loc[pluto_loc['BLDG CAT']=='Commercial'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CAT']=='Industrial'].index.tolist() + \
+                     pluto_loc[pluto_loc['BLDG CAT']=='Vacant Land'].index.tolist() + \
+                     pluto_loc[pluto_loc['LAND SF']==0].index.tolist() + \
+                     pluto_loc[pluto_loc['GSF']<800].index.tolist() + \
+                     pluto_loc[pluto_loc['SALE PRICE']<25000].index.tolist()
+
+        df_sub = df_sub.drop(drop_index) \
+                       .reset_index(drop=True)
+
         return df_sub
 
     ### update the PLUTO data, replace pre-existed record and 
