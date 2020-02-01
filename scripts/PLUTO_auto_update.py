@@ -617,9 +617,11 @@ class cleaning_pipline:
         
         self.logger(self.update_PLUTO, instructions)
         p = self.update_PLUTO(pluto, df_sub)
+        print(f'\t->pre-processed PLUTO df shape: {p.shape}')
         
         self.logger(self.process_PLUTO, instructions)
         pnew = self.process_PLUTO(p, instructions)
+        print(f'\t->post-processed PLUTO df shape: {pnew.shape}')
         
         self.logger(self.export_data, instructions)
         self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
