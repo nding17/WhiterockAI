@@ -674,7 +674,7 @@ class PicDownloader:
                 
                 addr_exist = self.address_checker(new_addr, pic_path, folders)    
 
-                if not addr_exist and new_addr[0].isnumeric():
+                if (not addr_exist) and new_addr[0].isnumeric():
                     url = self.gen_url_by_string(new_addr)
                     saving_path = f'{saving_dir}/{new_addr}'
                     self.download(url, saving_path)
