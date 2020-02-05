@@ -38,6 +38,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 
 ### a class that contains all the contants we will be using 
 class CONST:
@@ -145,6 +146,34 @@ class corcoran_dot_com:
                     AppleWebKit/537.36 (KHTML, like Gecko) \
                     Chrome/58.0.3029.110 Safari/537.36'
             return default_ua
+
+    @staticmethod
+    def _build_chrome_options():
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.accept_untrusted_certs = True
+        chrome_options.assume_untrusted_cert_issuer = True
+        
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-impl-side-painting")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
+        chrome_options.add_argument("--disable-breakpad")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-cast")
+        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
+        chrome_options.add_argument("--disable-cloud-import")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--disable-session-crashed-bubble")
+        chrome_options.add_argument("--disable-ipv6")
+        chrome_options.add_argument("--allow-http-screen-capture")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--lang=es')
+
+        return chrome_options
 
     def _get_soup(self, url):
 
@@ -390,7 +419,8 @@ class corcoran_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        browser = webdriver.Chrome(executable_path=chromedriver)
+        options = self._build_chrome_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
         browser.get(CONST.MAIN_QUERY)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
