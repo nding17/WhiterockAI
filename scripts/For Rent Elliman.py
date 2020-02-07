@@ -12,7 +12,7 @@ city users are looking at, as well as save all the images in the specified direc
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __status__ = 'complete'
 
 ### package requirements
