@@ -384,14 +384,14 @@ class rent_dot_com:
             try:
                 soup = BeautifulSoup(results, 'lxml')
                 # address tag
-                address_tag = soup.find('div', '_3wnFl _3wnFl')
+                address_tag = soup.find('div', attrs={'data-tid': 'pdpKeyInfo_address'})
                 # header tag
                 hdr = soup.find('h1', attrs={'data-tid': 'property-title'})
                 # scrape the address information
                 # get a tuple
                 addr = self._get_address(address_tag, hdr)
-                # a list of room tags 
-                room_tags = soup.find_all('div', '_1ECa-')
+                # a list of room tags, this might need to be constantly updated
+                room_tags = soup.find_all('div', '_21XBf')
             except:
                 return apt_all
 
@@ -399,7 +399,7 @@ class rent_dot_com:
                 # for each room tag, identify what type of rows the room tag is
                 # only two options: unit in grey background, floorplan in white
                 # background 
-                room_table = rt.find('table', '_1GkPp F4skJ')
+                room_table = rt.find('table', attrs={'data-tid': 'pdpfloorplan-table'})
                 room_tbody = room_table.find('tbody')
                 floor_plan = room_tbody.find_all('tr')
                 apartments = []
