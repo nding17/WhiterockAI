@@ -77,18 +77,11 @@ class rent_dot_com:
         # scrape the HTML web content from rent.com
         results = response.content 
         # a list that contains all the apartment URLs
-        apt_urls = []
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
-            # apartment tags
-            apts = soup.find_all('div', class_='_3PdAH _1EbNE')
-            for apt in apts:
-                apt_sub = apt.find('div', class_='_3RRl_ _2Hrxl')
-                # find the URL tag
-                apt_link = apt_sub.find('a', class_='_3kMwn ByXwK')
-                url = apt_link['href']
-                apt_urls.append(url)
-        
+            apts = soup.find_all('a', attrs={'data-tid': 'property-title'})
+            apt_urls = [apt['href'] for apt in apts]
+
         return apt_urls
 
     def _get_apt_urls(self, verbose=False):
@@ -119,11 +112,10 @@ class rent_dot_com:
         
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
-            apts_num_tag = soup.find('span', class_='_3YJue')
             # this is a tag that displays the total number of apartments
-            apts_num =  apts_num_tag.find('span', 
-                                          attrs={'data-tid':'pagination-total'})\
-                                    .get_text()
+            apts_num =  soup.find('span', 
+                                   attrs={'data-tid':'pagination-total'})\
+                            .get_text()
             # try to convert text into integer 
             apts_num = int(apts_num)
             # since every page contains 30 apartments, divide the total number of 
