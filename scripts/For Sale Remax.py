@@ -20,6 +20,12 @@ import requests
 import numpy as np
 import re
 import os
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 
 class remax_dot_com:
 
@@ -27,31 +33,64 @@ class remax_dot_com:
     def __init__(self, city, state):
         self._city = city
         self._state = state
-        self._overhead = 'https://www.remax.com'
         self._apt_urls = []
         self._apt_data = []
 
-    def _get_webpage(self, pg_num):
-
-        """
-        Get the page link with a specific page.
-
-        (private function)
+    @staticmethod
+    def _build_chrome_options():
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.accept_untrusted_certs = True
+        chrome_options.assume_untrusted_cert_issuer = True
         
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-impl-side-painting")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
+        chrome_options.add_argument("--disable-breakpad")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-cast")
+        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
+        chrome_options.add_argument("--disable-cloud-import")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--disable-session-crashed-bubble")
+        chrome_options.add_argument("--disable-ipv6")
+        chrome_options.add_argument("--allow-http-screen-capture")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--lang=es')
+
+        return chrome_options
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
         Parameters
         ----------
-        pg_num : int
-            page number of the apartments in a specific city
+        chromedriver : str
+            the path to the location of the chromedriver 
 
         Returns
         -------
-        string 
-            the link of the page, given the page number 
+        browser : webdriver.Chrome
+            a chrome web driver 
 
-        >>> _get_webpage(1)
-        'remax.com/realestatehomesforsale/philadelphia-pa-p001.html?query=philadelphia,pa-search/newest-sortorder'
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
 
         """
+        options = self._build_chrome_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        return browser, wait
+
+    def _get_webpage(self):
 
         # for city comes with 2 words, replace the space with -
         # e.g. 'new york' -> 'new-york'
@@ -59,11 +98,16 @@ class remax_dot_com:
         state = self._state.strip().lower().replace(' ', '-')
         # after the overhead, there's a dangle attached with the 
         # URL of this website 
-        dangle = 'realestatehomesforsale'
-        overhead = self._overhead
-        url = f'{overhead}/{dangle}/{city}-{state}-p{pg_num}.html?query={city},{state}-search/newest-sortorder'
+        url = f'https://www.remax.com/homes-for-sale/{state}/{city}/city/4260000'
         return url
 
+    def _get_apt_urls(self):
+        webpage = self._get_webpage()
+        browser, _ = self._get_browser(webpage)
+        blocks = browser.find_elements_by_xpath("//div[@class='listings-card']//script[@type='application/ld+json']")
+        for block in blocks:
+            print(block.get_attribute('innerHTML'))
+        return browser
 
     def _get_apt_urls_per_page(self, pg_num):
 
@@ -669,86 +713,86 @@ if __name__ == '__main__':
     # construct data scraping object, use Philadelphia, PA 
     # as an example
     rmdc = remax_dot_com('philadelphia', 'pa')
+    b = rmdc._get_apt_urls()
+    # # scrape all the apartment URLs in Philadelphia
+    # # status update enabled
+    # rmdc.scrape_apt_urls(verbose=True)
+    # urls = rmdc.apt_urls
 
-    # scrape all the apartment URLs in Philadelphia
-    # status update enabled
-    rmdc.scrape_apt_urls(verbose=True)
-    urls = rmdc.apt_urls
+    # # in order to avoid crashes and loses all your data
+    # # divide the list of URLs in batches and keep updating
+    # # the csv file once the batch job is finished
+    # urls_chuck = np.array_split(urls, int(len(urls))//20)
 
-    # in order to avoid crashes and loses all your data
-    # divide the list of URLs in batches and keep updating
-    # the csv file once the batch job is finished
-    urls_chuck = np.array_split(urls, int(len(urls))//20)
+    # # try to see if the current directory has a folder 
+    # # that you can use to store data 
+    # os.chdir('..')
 
-    # try to see if the current directory has a folder 
-    # that you can use to store data 
-    os.chdir('..')
+    # # this could be modified to fit the structure of 
+    # # a specific user's directory
+    # if not os.path.exists('data'):
+    #     os.mkdir('data')
 
-    # this could be modified to fit the structure of 
-    # a specific user's directory
-    if not os.path.exists('data'):
-        os.mkdir('data')
+    # # sample directory inside your data directory 
+    # # used for test run. Of course, this could be 
+    # # modified based on the architecture of your 
+    # # own data folder 
+    # os.chdir('./data')
+    # if not os.path.exists('sample'):
+    #     os.mkdir('sample')
+    # os.chdir('sample')
 
-    # sample directory inside your data directory 
-    # used for test run. Of course, this could be 
-    # modified based on the architecture of your 
-    # own data folder 
-    os.chdir('./data')
-    if not os.path.exists('sample'):
-        os.mkdir('sample')
-    os.chdir('sample')
+    # # the column names of the data frame 
+    # cols = [
+    #     'address',
+    #     'city',
+    #     'state',
+    #     'zipcode',
+    #     'bathrooms',
+    #     'bedrooms',
+    #     'interior_features',
+    #     'rooms',
+    #     'cooling',
+    #     'heating',
+    #     'AC',
+    #     'appliances',
+    #     'laundry',
+    #     'sqft',
+    #     'price',
+    #     'taxes',
+    #     'tax_year',
+    #     'list_type',
+    #     'list_id',
+    #     'possession',
+    #     'lot_sqft',
+    #     'list_status',
+    #     'year_built',
+    #     'county',
+    #     'county_school_district',
+    #     'half_bath',
+    #     'subdivision',
+    #     'luxury_home',
+    # ]
 
-    # the column names of the data frame 
-    cols = [
-        'address',
-        'city',
-        'state',
-        'zipcode',
-        'bathrooms',
-        'bedrooms',
-        'interior_features',
-        'rooms',
-        'cooling',
-        'heating',
-        'AC',
-        'appliances',
-        'laundry',
-        'sqft',
-        'price',
-        'taxes',
-        'tax_year',
-        'list_type',
-        'list_id',
-        'possession',
-        'lot_sqft',
-        'list_status',
-        'year_built',
-        'county',
-        'county_school_district',
-        'half_bath',
-        'subdivision',
-        'luxury_home',
-    ]
+    # # create an initial empty data file with all 
+    # # the features of an apartment
+    # if not os.path.exists('remax_dot_com.csv'):
+    #     df = pd.DataFrame([], columns=cols)
+    #     df.to_csv('./remax_dot_com.csv')
 
-    # create an initial empty data file with all 
-    # the features of an apartment
-    if not os.path.exists('remax_dot_com.csv'):
-        df = pd.DataFrame([], columns=cols)
-        df.to_csv('./remax_dot_com.csv')
+    # print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
-    print(f'batch jobs started, {len(urls_chuck)} batches in total')
+    # # running the batch and keep saving the intermediary 
+    # # results from the data scraping jobs 
+    # # each batch contains 10 URLs, but this could be modified
+    # for i, batch_urls in enumerate(urls_chuck):
+    #     rmdc.scrape_apt_data(batch_urls, verbose=True)
+    #     data = rmdc.apt_data
+    #     df_new = pd.DataFrame(data, columns=cols)
 
-    # running the batch and keep saving the intermediary 
-    # results from the data scraping jobs 
-    # each batch contains 10 URLs, but this could be modified
-    for i, batch_urls in enumerate(urls_chuck):
-        rmdc.scrape_apt_data(batch_urls, verbose=True)
-        data = rmdc.apt_data
-        df_new = pd.DataFrame(data, columns=cols)
+    #     # append the results from each batch
+    #     with open('remax_dot_com.csv', 'a') as df_old:
+    #         df_new.to_csv(df_old, header=False)
+    #     print(f'batch {i} finished running')
 
-        # append the results from each batch
-        with open('remax_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-        print(f'batch {i} finished running')
-
-    print('job done!')
+    # print('job done!')
