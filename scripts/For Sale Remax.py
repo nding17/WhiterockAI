@@ -10,7 +10,7 @@ in the city users are looking at.
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __status__ = 'completed'
 
 ### packages need to be imported 

@@ -18,7 +18,7 @@ and data files for these sections.
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.0.2'
 __status__ = 'documentation'
 
 ### packages need to be imported 
@@ -323,8 +323,8 @@ class trulia_dot_com:
             webpage = self._get_sold_webpage(pg_num)
         
         soup = self._get_soup(webpage)
-        # main content tag
-        apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-0 gsDQZj Box-sc-8ox7qa-0 jIGxjA'
+        # main content tag, need to be constantly updated
+        apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-2 gKJaNz Box-sc-8ox7qa-0 jIGxjA'
         apt_tags = soup.find_all('div', class_=apt_class)
 
         # scrape all the apartment URLs
