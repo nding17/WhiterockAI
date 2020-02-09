@@ -1382,6 +1382,26 @@ class rent_dot_com:
 
         self._apt_data = apt_all_data
 
+    def scraping_pipeline(self, data_path):
+        self.scrape_apt_urls()
+        urls = self.apt_urls
+        # in order to avoid crashes and loses all your data
+        # divide the list of URLs in batches and keep updating
+        # the csv file once the batch job is finished
+        urls_chunk = np.array_split(urls, int(len(urls)//10))
+
+        # running the batch and keep saving the intermediary 
+        # results from the data scraping jobs 
+        # each batch contains 10 URLs, but this could be modified
+        for i, batch_urls in enumerate(urls_chunk):
+            # print(batch_urls)
+            self.scrape_apt_data(batch_urls, verbose=True)
+            data = self.apt_data
+            self.write_data(data, data_path)
+            print(f'batch {i} finished running')
+
+        print('job finished!')
+
     @property
     def apt_urls(self):
         # serve as a way to show the apt_urls
