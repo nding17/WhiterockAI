@@ -1317,6 +1317,40 @@ class trulia_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    def scraping_pipeline(self, img_path, data_path):
+        # different sales categories 
+        categories = ['buy', 'sold', 'rent']
+
+        # scrape different streams of apartments iteratively 
+        # could be optimized by parallel programming 
+        for category in categories:
+            print(f'scraping for category - {category} starts!')
+            self.scrape_apt_urls(category, verbose=True)
+
+            # divide the apartment URLs list into small batches 
+            # in case the program crashes 
+            apt_urls = tdc.apt_urls[category]
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
+
+            # batch jobs start
+            print(f'a total number of {len(url_batches)} batches')
+            for i, url_batch in enumerate(url_batches):
+                try:
+                    print(f'batch {i} starts')
+                    self.scrape_apt_data(category, url_batch, verbose=True)
+                    data = self.apt_data[category]
+
+                    self.write_data(category, data, data_path)
+                    self.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                except:
+                    print(f'batch {i} failed')
+                    print(f'unscraped URLs: {url_batch}')
+                    continue
+
+            print(f'scraping for category - {category} done!')
+
+        print('job done, congratulations!')
+
 
     #####################
     # public attributes #
@@ -1347,37 +1381,6 @@ if __name__ == '__main__':
     img_path = '../data/sample/trulia/imgdata'
     data_path = '../data/sample/trulia/aptdata'
     
-    # different sales categories 
-    categories = ['buy', 'sold', 'rent']
     # construct a scraper object
     tdc = trulia_dot_com('philadelphia', 'pa')
-
-    # scrape different streams of apartments iteratively 
-    # could be optimized by parallel programming 
-    for category in categories:
-        print(f'scraping for category - {category} starts!')
-        tdc.scrape_apt_urls(category, verbose=True)
-
-        # divide the apartment URLs list into small batches 
-        # in case the program crashes 
-        apt_urls = tdc.apt_urls[category]
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
-
-        # batch jobs start
-        print(f'a total number of {len(url_batches)} batches')
-        for i, url_batch in enumerate(url_batches):
-            try:
-                print(f'batch {i} starts')
-                tdc.scrape_apt_data(category, url_batch, verbose=True)
-                data = tdc.apt_data[category]
-
-                tdc.write_data(category, data, data_path)
-                tdc.scrape_apt_images(category, url_batch, img_path, verbose=True)
-            except:
-                print(f'batch {i} failed')
-                print(f'unscraped URLs: {url_batch}')
-                continue
-
-        print(f'scraping for category - {category} done!')
-
-    print('job done, congratulations!')
+    tdc.scraping_pipeline(img_path, data_path)

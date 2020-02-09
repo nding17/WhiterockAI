@@ -45,7 +45,7 @@ class CONST:
     TRULIA_OVERHEAD = 'https://www.trulia.com'
 
     TRULIA_COLNAMES = {
-        'buy': [
+        'buy': (
             'street', 
             'city', 
             'state', 
@@ -56,8 +56,8 @@ class CONST:
             'bathrooms',
             'space',
             'extra_features',
-        ],
-        'rent': [
+        ),
+        'rent': (
             'street', 
             'city', 
             'state', 
@@ -68,8 +68,8 @@ class CONST:
             'bathrooms',
             'space',
             'price',
-        ],
-        'sold': [
+        ),
+        'sold': (
             'street', 
             'city', 
             'state', 
@@ -88,7 +88,7 @@ class CONST:
             'change_price', 
             'listing_date', 
             'listing_price',
-        ],
+        ),
     }
 
 ### For Rent 
@@ -2627,6 +2627,39 @@ class trulia_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    def scraping_pipeline(self, img_path, data_path):
+        # different sales categories 
+        categories = ['buy', 'sold', 'rent']
+
+        # scrape different streams of apartments iteratively 
+        # could be optimized by parallel programming 
+        for category in categories:
+            print(f'scraping for category - {category} starts!')
+            self.scrape_apt_urls(category, verbose=True)
+
+            # divide the apartment URLs list into small batches 
+            # in case the program crashes 
+            apt_urls = tdc.apt_urls[category]
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
+
+            # batch jobs start
+            print(f'a total number of {len(url_batches)} batches')
+            for i, url_batch in enumerate(url_batches):
+                try:
+                    print(f'batch {i} starts')
+                    self.scrape_apt_data(category, url_batch, verbose=True)
+                    data = self.apt_data[category]
+
+                    self.write_data(category, data, data_path)
+                    self.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                except:
+                    print(f'batch {i} failed')
+                    print(f'unscraped URLs: {url_batch}')
+                    continue
+
+            print(f'scraping for category - {category} done!')
+
+        print('job done, congratulations!')
 
     #####################
     # public attributes #
@@ -2648,3 +2681,6 @@ class trulia_dot_com:
         of the apartment data that need to be scraped.
         """
         return self._apt_data
+
+
+if __name__ == '__main__':
