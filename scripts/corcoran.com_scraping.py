@@ -305,7 +305,8 @@ class corcoran_dot_com:
         results_batch = []
         for i in range(start, end):
             # after the contents are loaded, try to identify as many siblings as possible for each scroll down
-            sibling_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{i}]"
+            # the class name need to be constantly updated
+            sibling_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 fgUXef']/following-sibling::div[{i}]"
             href = self._get_apt_url(sibling_path, wait)
             results_batch.append(href)
         return results_batch 
@@ -458,7 +459,7 @@ class corcoran_dot_com:
 
         try:
             # the destination to where we want to scrape to 
-            dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_pg}]"
+            dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 fgUXef']/following-sibling::div[{scroll_pg}]"
             browser.implicitly_wait(5)
             elem_dest = wait.until(EC.presence_of_element_located((By.XPATH, dest)))
             browser.execute_script('arguments[0].scrollIntoView(true)', elem_dest)
@@ -466,7 +467,7 @@ class corcoran_dot_com:
             scroll_buffer = self._buffer_page(scroll_pg) # obtain the buffer page
             
             # a crucial part of this program to prevent freezes, and make the scraping process so much smoother 
-            buffer_dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']/following-sibling::div[{scroll_buffer}]"
+            buffer_dest = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 fgUXef']/following-sibling::div[{scroll_buffer}]"
             browser.implicitly_wait(5)
             elem_buffer = wait.until(EC.presence_of_element_located((By.XPATH, buffer_dest))) # create a foothold for the next scroll
             browser.execute_script('arguments[0].scrollIntoView(true)', elem_buffer) # jump into the buffer page 
@@ -583,7 +584,7 @@ class corcoran_dot_com:
         """
 
         # first apartment, our initial starting point 
-        first_apt_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 bxPua']"
+        first_apt_path = f"//div[@class='ListingCard__ListingCardWrapper-k9s72e-7 fgUXef']"
         first_apt_url = self._get_apt_url(first_apt_path, wait)
         results = [first_apt_url]
         total_apt_num = self._get_total_apt_num(CONST.MAIN_QUERY) 

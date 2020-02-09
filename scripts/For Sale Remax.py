@@ -222,30 +222,25 @@ class remax_dot_com:
 
         try:
             # from the content tag, extract the tag that contains all the address info
-            address_tag = content_tag.find('div', class_='listing-detail-address')
+            address_tag = content_tag.find('div', class_='flex flex-col md:flex-row')
             # street tag
-            street_tag = address_tag.find('span', attrs={'itemprop': 'streetAddress'})
+            street_tag = address_tag.find('h1', class_='h3')
             # street information
             street = street_tag.get_text()\
                                .strip()\
                                .replace(',', '')
-            # city tag       
-            city_tag = address_tag.find('span', attrs={'itemprop': 'addressLocality'})
+            # region tag      
+            region_tag = address_tag.find('h5', class_='listing-card-location') \
+                                    .text \
+                                    .split(' ')
             # city information
-            city = city_tag.get_text()\
-                           .strip()\
-                           .replace(',', '')\
-                           .title()
-            # state tag
-            state_tag = address_tag.find('span', attrs={'itemprop': 'addressRegion'})
+            city = region_tag[0].replace(',', '').title()
             # state information
-            state = state_tag.get_text()\
-                             .strip()
-            # zipcode tag
-            zipcode_tag = address_tag.find('span', attrs={'itemprop': 'postalCode'})
+            state = region_tag[1]
             # zipcode information
-            zipcode = zipcode_tag.get_text()\
-                                 .strip()
+            zipcode = region_tag[2]
+
+            print(street, city, state, zipcode)
             
             return street, city, state, zipcode
         
