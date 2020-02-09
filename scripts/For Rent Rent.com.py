@@ -20,6 +20,19 @@ import numpy as np
 import re
 import os
 
+class CONST:
+    RENT_COLNAMES = (
+        'address',
+        'city',
+        'state',
+        'zipcode',
+        'apt',
+        'price',
+        'bedroom',
+        'bathroom',
+        'sqft',
+    )
+
 class rent_dot_com:
 
     def __init__(self, city, state):
@@ -468,6 +481,72 @@ class rent_dot_com:
 
         self._apt_data = apt_all_data
 
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists(f'rent_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.RENT_COLNAMES)
+            df.to_csv(f'rent_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.RENT_COLNAMES)
+        with open(f'rent_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+    def scraping_pipeline(self, data_path):
+        self.scrape_apt_urls()
+        urls = self.apt_urls
+        # in order to avoid crashes and loses all your data
+        # divide the list of URLs in batches and keep updating
+        # the csv file once the batch job is finished
+        urls_chunk = np.array_split(urls, int(len(urls)//10))
+
+        # running the batch and keep saving the intermediary 
+        # results from the data scraping jobs 
+        # each batch contains 10 URLs, but this could be modified
+        for i, batch_urls in enumerate(urls_chunk):
+            # print(batch_urls)
+            self.scrape_apt_data(batch_urls, verbose=True)
+            data = self.apt_data
+            self.write_data(data, data_path)
+            print(f'batch {i} finished running')
+
+        print('job finished!')
+
     @property
     def apt_urls(self):
         # serve as a way to show the apt_urls
@@ -482,58 +561,5 @@ if __name__ == '__main__':
     # construct data scraping object, use Philadelphia, Pennsylvania 
     # as an example
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
-
-    # scrape all the apartment URLs in Philadelphia
-    # status update enabled
-    rdc.scrape_apt_urls(verbose=True)
-    urls = rdc.apt_urls
-    # in order to avoid crashes and loses all your data
-    # divide the list of URLs in batches and keep updating
-    # the csv file once the batch job is finished
-    urls_chunk = np.array_split(urls, int(len(urls)//10))
-
-    # try to see if the current directory has a folder 
-    # that you can use to store data 
-    os.chdir('..')
-
-    # this could be modified to fit the structure of 
-    # a specific user's directory
-    if not os.path.exists('data'):
-        os.mkdir('data')
-
-    os.chdir('./data')
-    if not os.path.exists('sample'):
-        os.mkdir('sample')
-    os.chdir('sample')
-
-    # the column names of the data frame 
-    cols = ['address',
-            'city',
-            'state',
-            'zipcode',
-            'apt',
-            'price',
-            'bedroom',
-            'bathroom',
-            'sqft']
-
-    # create an initial empty data file with all 
-    # the features of an apartment 
-    if not os.path.exists('rent_dot_com.csv'):
-        df = pd.DataFrame([], columns=cols)
-        df.to_csv('./rent_dot_com.csv')
-
-    # running the batch and keep saving the intermediary 
-    # results from the data scraping jobs 
-    # each batch contains 10 URLs, but this could be modified
-    for i, batch_urls in enumerate(urls_chunk):
-        # print(batch_urls)
-        rdc.scrape_apt_data(batch_urls, verbose=True)
-        data = rdc.apt_data
-        df_new = pd.DataFrame(data, columns=cols)
-        # append the results from each batch
-        with open('rent_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-        print(f'batch {i} finished running')
-
-    print('job finished!')
+    data_path = '../data/sample'
+    rdc.scraping_pipeline(data_path)
