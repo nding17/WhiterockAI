@@ -17,7 +17,9 @@ __status__ = 'completed'
 import pandas as pd
 from bs4 import BeautifulSoup
 import requests
+import time
 import numpy as np
+import json
 import re
 import os
 from selenium.webdriver.common.by import By
@@ -33,6 +35,7 @@ class remax_dot_com:
     def __init__(self, city, state):
         self._city = city
         self._state = state
+        self._overhead = 'https://www.remax.com'
         self._apt_urls = []
         self._apt_data = []
 
@@ -101,54 +104,7 @@ class remax_dot_com:
         url = f'https://www.remax.com/homes-for-sale/{state}/{city}/city/4260000'
         return url
 
-    def _get_apt_urls(self):
-        webpage = self._get_webpage()
-        browser, _ = self._get_browser(webpage)
-        blocks = browser.find_elements_by_xpath("//div[@class='listings-card']//script[@type='application/ld+json']")
-        for block in blocks:
-            print(block.get_attribute('innerHTML'))
-        return browser
-
-    def _get_apt_urls_per_page(self, pg_num):
-
-        """
-        Get all the apartment URLs listed in the same page (24 URLs per page)
-
-        (private function)
-
-        Parameters
-        ----------
-        pg_num : int
-            page number of the apartments in a specific city
-
-        Returns:
-        apt_urls : list(str)
-            a list of apartment URLs correspond to different apartments in 
-            a same page 
-
-        """
-
-        # fetch the URL of the webpage given the page number
-        webpage = self._get_webpage(pg_num)
-        # send a request to get the HTML content of that page 
-        response = requests.get(webpage)
-        results = response.content
-        apt_urls = [] # apartment URLs to be stored 
-    
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-            # locate the tag that contains the bulk of the apartment contents
-            apt_sub_tags = soup.find_all('div', class_='listing-pane-details')
-            
-            # extract the link to each apartment from all the apartment tags 
-            for apt_tag in apt_sub_tags:
-                apt_link_tag = apt_tag.find('a', class_='js-detaillink')
-                url = apt_link_tag['href'] # extract the apartment URL
-                apt_urls.append(url)
-            
-        return apt_urls
-
-    def _get_ensemble_apt_urls(self, verbose=False, test=False):
+    def _get_ensemble_apt_urls(self):
 
         """
         Get all the relevant apartment links in remax.com with a specified city
@@ -174,56 +130,29 @@ class remax_dot_com:
 
         """
 
-        # at the bottom of every page, there are buttons to let you choose 
-        # which page you want to go, including the last page of the apartments
-        # in this city. We can use it to figure out the max number of pages 
-        test_page = self._get_webpage(1)
-        response = requests.get(test_page)
-        results = response.content
-        # all the apartment URLs go here 
-        apt_ensemble_urls = [] 
-        
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-            pg_lst = soup.find_all('li', class_='pages-item')
-            try:
-                # extract all the tags related to page number 
-                pg_tags = [pg.find('a', class_='js-pager-item pages-link') for pg in pg_lst]
-                pg_nums = []
-                for pg_tag in pg_tags:
-                    if pg_tag:
-                        try:
-                            # try to extract all the page number
-                            pg_nums.append(int(pg_tag.get_text()))
-                        except:
-                            continue
-                # find the maximun page number so we know exactly how 
-                # many pages needed to be scraped 
-                max_pg = max(pg_nums)
+        webpage = self._get_webpage()
+        browser, wait = self._get_browser(webpage)
+        cookie = browser.find_element_by_xpath('//*[@id="__layout"]/div/div[3]/div/div[2]/button[1]')
+        cookie.click()
+        apt_urls = []
 
-                # if the test flag is enabled, we use 50 pages 
-                # to reduce runtime 
-                if test:
-                    max_pg = 50
+        try:
+            while True:
+                time.sleep(5)
+                blocks = browser.find_elements_by_xpath("//div[@class='listings-card']//script[@type='application/ld+json']")
+                for block in blocks:
+                    jblock = json.loads(block.get_attribute('innerHTML'))
+                    url = jblock[1]['url']
+                    apt_urls.append(url)
+                btn_next = wait.until(
+                    EC.element_to_be_clickable((By.XPATH, '//*[@id="__layout"]/div/div[2]/main/div/section[2]/div[2]/div/div[2]/div/button[last()]'))
+                )
+                btn_next.click()
+        except:
+            pass
 
-                if verbose:
-                    print(f'there are {max_pg} apartment URLs to be collected')
-            except:
-                # failed to find max number of webpages 
-                max_pg = np.nan
-            
-            if not max_pg == np.nan:
-                for pg_num in range(1, max_pg+1):
-                    # use an iterative method to scrape all the apartment 
-                    # URLs in every single page
-                    apt_ensemble_urls += self._get_apt_urls_per_page(pg_num)
-                    if verbose:
-                        print(f'page {pg_num} apartment URLs collected')
-    
-            if verbose:
-                print(f'all apartment URLs collected')
+        return apt_urls
 
-        return apt_ensemble_urls
 
     def _get_price(self, soup):
 
@@ -636,7 +565,7 @@ class remax_dot_com:
 
         return apt_info
 
-    def scrape_apt_urls(self, verbose=False, test=False):
+    def scrape_apt_urls(self):
 
         """
         A public function that allows you to call to scrape apartment URLs
@@ -659,7 +588,7 @@ class remax_dot_com:
             and all the apartments URLs will be stored in this field 
         """
 
-        self._apt_urls = self._get_ensemble_apt_urls(verbose=verbose, test=test)
+        self._apt_urls = self._get_ensemble_apt_urls()
 
     def scrape_apt_data(self, apt_urls, verbose=False):
 
@@ -713,86 +642,85 @@ if __name__ == '__main__':
     # construct data scraping object, use Philadelphia, PA 
     # as an example
     rmdc = remax_dot_com('philadelphia', 'pa')
-    b = rmdc._get_apt_urls()
-    # # scrape all the apartment URLs in Philadelphia
-    # # status update enabled
-    # rmdc.scrape_apt_urls(verbose=True)
-    # urls = rmdc.apt_urls
+    # scrape all the apartment URLs in Philadelphia
+    # status update enabled
+    rmdc.scrape_apt_urls()
+    urls = rmdc.apt_urls
 
-    # # in order to avoid crashes and loses all your data
-    # # divide the list of URLs in batches and keep updating
-    # # the csv file once the batch job is finished
-    # urls_chuck = np.array_split(urls, int(len(urls))//20)
+    # in order to avoid crashes and loses all your data
+    # divide the list of URLs in batches and keep updating
+    # the csv file once the batch job is finished
+    urls_chuck = np.array_split(urls, int(len(urls))//20)
 
-    # # try to see if the current directory has a folder 
-    # # that you can use to store data 
-    # os.chdir('..')
+    # try to see if the current directory has a folder 
+    # that you can use to store data 
+    os.chdir('..')
 
-    # # this could be modified to fit the structure of 
-    # # a specific user's directory
-    # if not os.path.exists('data'):
-    #     os.mkdir('data')
+    # this could be modified to fit the structure of 
+    # a specific user's directory
+    if not os.path.exists('data'):
+        os.mkdir('data')
 
-    # # sample directory inside your data directory 
-    # # used for test run. Of course, this could be 
-    # # modified based on the architecture of your 
-    # # own data folder 
-    # os.chdir('./data')
-    # if not os.path.exists('sample'):
-    #     os.mkdir('sample')
-    # os.chdir('sample')
+    # sample directory inside your data directory 
+    # used for test run. Of course, this could be 
+    # modified based on the architecture of your 
+    # own data folder 
+    os.chdir('./data')
+    if not os.path.exists('sample'):
+        os.mkdir('sample')
+    os.chdir('sample')
 
-    # # the column names of the data frame 
-    # cols = [
-    #     'address',
-    #     'city',
-    #     'state',
-    #     'zipcode',
-    #     'bathrooms',
-    #     'bedrooms',
-    #     'interior_features',
-    #     'rooms',
-    #     'cooling',
-    #     'heating',
-    #     'AC',
-    #     'appliances',
-    #     'laundry',
-    #     'sqft',
-    #     'price',
-    #     'taxes',
-    #     'tax_year',
-    #     'list_type',
-    #     'list_id',
-    #     'possession',
-    #     'lot_sqft',
-    #     'list_status',
-    #     'year_built',
-    #     'county',
-    #     'county_school_district',
-    #     'half_bath',
-    #     'subdivision',
-    #     'luxury_home',
-    # ]
+    # the column names of the data frame 
+    cols = [
+        'address',
+        'city',
+        'state',
+        'zipcode',
+        'bathrooms',
+        'bedrooms',
+        'interior_features',
+        'rooms',
+        'cooling',
+        'heating',
+        'AC',
+        'appliances',
+        'laundry',
+        'sqft',
+        'price',
+        'taxes',
+        'tax_year',
+        'list_type',
+        'list_id',
+        'possession',
+        'lot_sqft',
+        'list_status',
+        'year_built',
+        'county',
+        'county_school_district',
+        'half_bath',
+        'subdivision',
+        'luxury_home',
+    ]
 
-    # # create an initial empty data file with all 
-    # # the features of an apartment
-    # if not os.path.exists('remax_dot_com.csv'):
-    #     df = pd.DataFrame([], columns=cols)
-    #     df.to_csv('./remax_dot_com.csv')
+    # create an initial empty data file with all 
+    # the features of an apartment
+    if not os.path.exists('remax_dot_com.csv'):
+        df = pd.DataFrame([], columns=cols)
+        df.to_csv('./remax_dot_com.csv')
 
-    # print(f'batch jobs started, {len(urls_chuck)} batches in total')
+    print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
-    # # running the batch and keep saving the intermediary 
-    # # results from the data scraping jobs 
-    # # each batch contains 10 URLs, but this could be modified
-    # for i, batch_urls in enumerate(urls_chuck):
-    #     rmdc.scrape_apt_data(batch_urls, verbose=True)
-    #     data = rmdc.apt_data
-    #     df_new = pd.DataFrame(data, columns=cols)
+    # running the batch and keep saving the intermediary 
+    # results from the data scraping jobs 
+    # each batch contains 10 URLs, but this could be modified
+    for i, batch_urls in enumerate(urls_chuck):
+        rmdc.scrape_apt_data(batch_urls, verbose=True)
+        data = rmdc.apt_data
+        df_new = pd.DataFrame(data, columns=cols)
 
-    #     # append the results from each batch
-    #     with open('remax_dot_com.csv', 'a') as df_old:
-    #         df_new.to_csv(df_old, header=False)
-    #     print(f'batch {i} finished running')
+        # append the results from each batch
+        with open('remax_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+        print(f'batch {i} finished running')
 
-    # print('job done!')
+    print('job done!')
