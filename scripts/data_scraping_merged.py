@@ -3396,7 +3396,6 @@ class remax_dot_com:
         # serve as a way to show the apt_data
         return self._apt_data
 
-
 class coldwell_dot_com:
 
     def __init__(self, city, state, start_page, end_page):
@@ -3610,16 +3609,14 @@ class coldwell_dot_com:
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
 
         content_list = []
-        print(f'\ttotal number of pages to be scraped: {len(content_list)}')
+        print(f'\ttotal number of aparments to be scraped: {len(listing_link)}')
         for i, url in enumerate(listing_link):
             content_list.append(self._get_content(url, img_path))
-            print(f'\tscraping for page # {i+1} is done')
+            print(f'\tscraping for apartment # {i+1} is done')
         
         df = self._get_df(content_list, save_to_excel=True)
         df.to_csv(f'{data_path}/coldwell_dot_com.csv')
         print('job done!')
-
-
 
 if __name__ == '__main__':
     ### coldwell Philadelphia For Sale

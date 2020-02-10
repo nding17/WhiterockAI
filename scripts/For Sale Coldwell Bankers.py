@@ -228,10 +228,10 @@ class coldwell_dot_com:
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
 
         content_list = []
-        print(f'\ttotal number of pages to be scraped: {len(content_list)}')
+        print(f'\ttotal number of aparments to be scraped: {len(listing_link)}')
         for i, url in enumerate(listing_link):
             content_list.append(self._get_content(url, img_path))
-            print(f'\tscraping for page # {i+1} is done')
+            print(f'\tscraping for apartment # {i+1} is done')
         
         df = self._get_df(content_list, save_to_excel=True)
         df.to_csv(f'{data_path}/coldwell_dot_com.csv')
@@ -240,5 +240,5 @@ class coldwell_dot_com:
 if __name__ == '__main__':
     data_path = '../data/sample'
     img_path = '../data/sample/coldwell'
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 2)
     cdc.scraping_pipeline(data_path, img_path)
