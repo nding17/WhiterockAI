@@ -104,7 +104,7 @@ class remax_dot_com:
         url = f'https://www.remax.com/homes-for-sale/{state}/{city}/city/4260000'
         return url
 
-    def _get_ensemble_apt_urls(self):
+    def _get_ensemble_apt_urls(self, test=False):
 
         """
         Get all the relevant apartment links in remax.com with a specified city
@@ -148,6 +148,9 @@ class remax_dot_com:
                     EC.element_to_be_clickable((By.XPATH, '//*[@id="__layout"]/div/div[2]/main/div/section[2]/div[2]/div/div[2]/div/button[last()]'))
                 )
                 btn_next.click()
+
+                if test:
+                    break
         except:
             pass
 
@@ -197,7 +200,7 @@ class remax_dot_com:
             return np.nan
 
 
-    def _get_address(self, content_tag):
+    def _get_address(self, soup):
 
         """
         Scrape the address of the apartment given the content tag of 
@@ -222,7 +225,7 @@ class remax_dot_com:
 
         try:
             # from the content tag, extract the tag that contains all the address info
-            address_tag = content_tag.find('div', class_='flex flex-col md:flex-row')
+            address_tag = soup.find('div', class_='flex flex-col md:flex-row')
             # street tag
             street_tag = address_tag.find('h1', class_='h3')
             # street information
@@ -232,6 +235,7 @@ class remax_dot_com:
             # region tag      
             region_tag = address_tag.find('h5', class_='listing-card-location') \
                                     .text \
+                                    .strip() \
                                     .split(' ')
             # city information
             city = region_tag[0].replace(',', '').title()
@@ -239,9 +243,7 @@ class remax_dot_com:
             state = region_tag[1]
             # zipcode information
             zipcode = region_tag[2]
-
-            print(street, city, state, zipcode)
-            
+                        
             return street, city, state, zipcode
         
         except:
@@ -401,8 +403,8 @@ class remax_dot_com:
         # but here are the features that are common across all aparments and 
         # I also picked some features I think are important
         price = self._get_price(soup)
-        street, city, state, zipcode = self._get_address(content_tag)
-        sidict = self._get_sideinfo(content_tag)
+        street, city, state, zipcode = self._get_address(soup)
+        sidict = self._get_sideinfo(soup)
         listid = self._access_dict(sidict, 'Listing ID')
         listtype = self._access_dict(sidict, 'Listing Type')
         bedrooms = self._access_dict(sidict, 'Bedrooms')
@@ -583,7 +585,7 @@ class remax_dot_com:
             and all the apartments URLs will be stored in this field 
         """
 
-        self._apt_urls = self._get_ensemble_apt_urls()
+        self._apt_urls = self._get_ensemble_apt_urls(test=True)
 
     def scrape_apt_data(self, apt_urls, verbose=False):
 
