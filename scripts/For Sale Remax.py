@@ -182,7 +182,8 @@ class remax_dot_com:
 
         try:
             # try to locate the price tag 
-            price_tag = soup.find('span', class_='listing-detail-price-amount pad-half-right')
+            price_tag = soup.find('div', class_='listing-detail-header-row md:ml-auto -ml-1')\
+                            .find('h4', class_='h3')
             # remove punctuation marks 
             price_text = price_tag.get_text()\
                               .replace(',','')\
@@ -234,7 +235,7 @@ class remax_dot_com:
                                .replace(',', '')
             # region tag      
             region_tag = address_tag.find('h5', class_='listing-card-location') \
-                                    .text \
+                                    .get_text() \
                                     .strip() \
                                     .split(' ')
             # city information
@@ -243,7 +244,7 @@ class remax_dot_com:
             state = region_tag[1]
             # zipcode information
             zipcode = region_tag[2]
-                        
+
             return street, city, state, zipcode
         
         except:
