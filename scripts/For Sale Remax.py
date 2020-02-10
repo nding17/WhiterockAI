@@ -156,6 +156,14 @@ class remax_dot_com:
 
         return apt_urls
 
+    def _parse_int(self, text):
+        # extract the numerical price value 
+        pattern = r'[-+]?\d*\.\d+|\d+'
+        number = re.findall(pattern, text)[0]
+        # convert the price to float 
+        number = float(number)
+
+        return number
 
     def _get_price(self, soup):
 
@@ -186,15 +194,10 @@ class remax_dot_com:
                             .find('h4', class_='h3')
             # remove punctuation marks 
             price_text = price_tag.get_text()\
-                              .replace(',','')\
-                              .strip()
+                                  .replace(',','')\
+                                  .strip()
 
-            # extract the numerical price value 
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            price_unit = re.findall(pattern, price_text)[0]
-
-            # convert the price to float 
-            price = float(price_unit)
+            price = self._parse_int(price_text)
             return price
 
         except:
@@ -302,19 +305,25 @@ class remax_dot_com:
         sideinfo = {} 
         try:
             # main content of all the relavent features 
-            apt_info_tag = content_tag.find('div', class_='forsalelistingdetail')
-            # extract the contents as lists
-            apt_list_tag = apt_info_tag.find_all('li', class_='listing-detail-stats')
+            apt_info_tags = content_tag.find_all('div', class_='flex flex-col pr-8')
             
-            for apt_tag in apt_list_tag:
-                spans = apt_tag.find_all('span')
+            for apt_tag in apt_info_tags:
                 # construct (key, value) pair for the dictionary 
-                key = spans[0].get_text()\
-                              .strip()
-                value = spans[1].get_text()\
-                                .strip()
+                key = apt_tag.find('div', class_='data-name') \
+                             .get_text() \
+                             .strip()
+
+                value = apt_tag.find('div', class_='data-value') \
+                               .get_text() \
+                               .strip()
+                try:
+                    value = self._parse_int(value)
+                except:
+                    pass
+
                 # fill in the dictionary
                 sideinfo[key] = value
+                
             return sideinfo
         except:
             return sideinfo
