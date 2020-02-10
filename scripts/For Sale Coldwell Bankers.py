@@ -222,15 +222,16 @@ class coldwell_dot_com:
 
         listing_link = []
 
-        for i, url in enumerate(url_list):
+        for url in url_list:
             content = self._get_link_content(url)
-            print(self._get_max_page())
             for listing in content.find_all('div', class_="address notranslate"):
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
 
         content_list = []
-        for url in listing_link:
+        print(f'\ttotal number of pages to be scraped: {len(content_list)}')
+        for i, url in enumerate(listing_link):
             content_list.append(self._get_content(url, img_path))
+            print(f'\tscraping for page # {i+1} is done')
         
         df = self._get_df(content_list, save_to_excel=True)
         df.to_csv(f'{data_path}/coldwell_dot_com.csv')
