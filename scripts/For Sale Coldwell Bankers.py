@@ -202,7 +202,18 @@ class coldwell_dot_com:
             df.to_excel("Phil_demo_data_2.xlsx")
         return df
 
+    def _get_max_page(self):
+        url = 'https://www.coldwellbankerhomes.com/pa/philadelphia/?sortId=2&offset=0'
+        content = self._get_link_content(url)
+        pg_list = content.find('ul', class_='propertysearch-results-pager')
+        pages = pg_list.find_all('li')
+        max_pg = pages[-2].get_text()
+        return int(max_pg)
+
     def scraping_pipeline(self, data_path, img_path):
+        print(f'Coldwell Bankers For Sale - Start Scraping!')
+        if self._end_page == 'max':
+            self._end_page = self._get_max_page()
 
         ##Test the function and integrate the results
         url_list = ['https://www.coldwellbankerhomes.com/{}/{}?sortId=2&offset={}' \
@@ -211,9 +222,10 @@ class coldwell_dot_com:
 
         listing_link = []
 
-        for url in url_list:
+        for i, url in enumerate(url_list):
             content = self._get_link_content(url)
-            for listing in content.find_all('div',class_="address notranslate"):
+            print(self._get_max_page())
+            for listing in content.find_all('div', class_="address notranslate"):
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
 
         content_list = []
@@ -222,9 +234,10 @@ class coldwell_dot_com:
         
         df = self._get_df(content_list, save_to_excel=True)
         df.to_csv(f'{data_path}/coldwell_dot_com.csv')
+        print('job done!')
 
 if __name__ == '__main__':
     data_path = '../data/sample'
     img_path = '../data/sample/coldwell'
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 2)
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
     cdc.scraping_pipeline(data_path, img_path)
