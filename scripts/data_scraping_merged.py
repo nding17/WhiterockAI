@@ -1406,6 +1406,52 @@ class rent_dot_com:
 
         self._apt_data = apt_all_data
 
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists(f'rent_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.RENT_COLNAMES)
+            df.to_csv(f'rent_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.RENT_COLNAMES)
+        with open(f'rent_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
     def scraping_pipeline(self, data_path):
         self.scrape_apt_urls()
         urls = self.apt_urls
@@ -2728,3 +2774,22 @@ class trulia_dot_com:
 
 
 if __name__ == '__main__':
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    data_path_rent = '../data/sample'
+    rdc.scraping_pipeline(data_path_rent)
+
+    ### elliman.com For Rent 
+    img_path_elliman = '../data/sample/elliman/imgdata'
+    data_path_elliman = '../data/sample/elliman'
+    # construct an elliman_doc_com object to work
+    # on the task
+    edc = elliman_dot_com()
+    edc.scraping_pipeline(data_path_elliman, img_path_elliman)
+
+    ### trulia.com For Rent and For Sale
+    img_path_trulia = '../data/sample/trulia/imgdata'
+    data_path_trulia = '../data/sample/trulia/aptdata'
+    # construct a scraper object
+    tdc = trulia_dot_com('philadelphia', 'pa')
+    tdc.scraping_pipeline(img_path_trulia, data_path_trulia)
