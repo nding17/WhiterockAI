@@ -3399,8 +3399,8 @@ class remax_dot_com:
 class coldwell_dot_com:
 
     def __init__(self, city, state, start_page, end_page):
-        self._city = city
-        self._state = state
+        self._city = city.lower().replace(' ', '-')
+        self._state = state.lower()
         self._start_page = start_page
         self._end_page = end_page
 
@@ -3584,7 +3584,7 @@ class coldwell_dot_com:
         return df
 
     def _get_max_page(self):
-        url = 'https://www.coldwellbankerhomes.com/pa/philadelphia/?sortId=2&offset=0'
+        url = f'https://www.coldwellbankerhomes.com/{self._state}/{self._city}/?sortId=2&offset=0'
         content = self._get_link_content(url)
         pg_list = content.find('ul', class_='propertysearch-results-pager')
         pages = pg_list.find_all('li')
@@ -3596,7 +3596,7 @@ class coldwell_dot_com:
         if self._end_page == 'max':
             self._end_page = self._get_max_page()
 
-        ##Test the function and integrate the results
+        ## Test the function and integrate the results
         url_list = ['https://www.coldwellbankerhomes.com/{}/{}?sortId=2&offset={}' \
                     .format(self._state, self._city, (i-1)*24) \
                     for i in range(self._start_page, self._end_page+1)]
