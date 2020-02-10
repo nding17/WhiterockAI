@@ -3638,14 +3638,11 @@ if __name__ == '__main__':
     ### elliman.com For Rent 
     img_path_elliman = '../data/sample/elliman/imgdata'
     data_path_elliman = '../data/sample/elliman'
-    # construct an elliman_doc_com object to work
-    # on the task
     edc = elliman_dot_com()
     edc.scraping_pipeline(data_path_elliman, img_path_elliman)
 
     ### trulia.com For Rent and For Sale
     img_path_trulia = '../data/sample/trulia/imgdata'
     data_path_trulia = '../data/sample/trulia/aptdata'
-    # construct a scraper object
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(img_path_trulia, data_path_trulia)

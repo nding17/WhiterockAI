@@ -198,7 +198,7 @@ class corcoran_dot_com:
         # send a request and get the soup
         response = requests.get(url, headers=headers)
         results = response.content
-        if not response.status_code == 404:
+        if not response.status_code == 254:
             soup = BeautifulSoup(results, 'lxml')
         return soup
 
@@ -383,17 +383,17 @@ class corcoran_dot_com:
         >>> _buffer_page(490)
         495
         """
-        if scroll_pg <= 10*49:
+        if scroll_pg <= 10*25:
             scroll_buffer = scroll_pg+5
-        elif scroll_pg <= 16*49:
+        elif scroll_pg <= 16*25:
             scroll_buffer = scroll_pg+10
-        elif scroll_pg <= 21*49:
+        elif scroll_pg <= 21*25:
             scroll_buffer = scroll_pg+15
-        elif scroll_pg <= 25*49:
+        elif scroll_pg <= 25*25:
             scroll_buffer = scroll_pg+20
-        elif scroll_pg <= 31*49:
+        elif scroll_pg <= 31*25:
             scroll_buffer = scroll_pg+25
-        elif scroll_pg <= 32*49:
+        elif scroll_pg <= 32*25:
             scroll_buffer = scroll_pg+30
         else:
             scroll_buffer = scroll_pg+35
@@ -513,7 +513,7 @@ class corcoran_dot_com:
         # 49 is the magic number of how many apartments we can look ahead 
         # for each scroll-down, we use it to compute the total number of 
         # batches 
-        nbatches = int((total_apt_num//49)+1)
+        nbatches = int((total_apt_num//25)+1)
         results = []
 
         if verbose:
@@ -531,14 +531,14 @@ class corcoran_dot_com:
                 time.sleep(10)
 
             # this is the apartment we are scrolling down to 
-            scroll_pg = 49*(i+1)
+            scroll_pg = 25*(i+1)
             self._scroll_down(scroll_pg, browser, wait)
             if verbose:
                 print(f'page {i+1} scrolled')
             
             # start of the number of the apartment and end of 
             # the apartment number 
-            start, end = 49*i, 49*(i+1)
+            start, end = 25*i, 25*(i+1)
             if i == 0:
                 start = 1
             results += self._get_apt_url_batches(start, end, wait)
