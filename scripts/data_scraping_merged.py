@@ -5,14 +5,21 @@ __version__ = '1.0.1'
 __status__ = 'complete'
 
 ### package requirements
-import pandas as pd
-from bs4 import BeautifulSoup
+import re
+import os
+import time
+import json
 import requests
 import numpy as np
-import re
-import time
+import pandas as pd
 from fake_useragent import UserAgent
-import os
+from bs4 import BeautifulSoup
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as EC
+from selenium import webdriver
+from selenium.webdriver.common.keys import Keys
+from webdriver_manager.chrome import ChromeDriverManager
 
 class CONST:
     ELLIMAN_HEADER = 'https://www.elliman.com'
