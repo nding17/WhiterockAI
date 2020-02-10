@@ -912,6 +912,30 @@ class elliman_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    def scraping_pipeline(self, data_path, img_path):
+        # time of sleep 
+        sleep_secs = 15
+
+        # scrape all the apartment URLs
+        # notice the test is opted out here
+        self.scrape_apt_urls(verbose=True, test=False)
+        apt_urls = self.apt_urls # fetch the apartment URLs
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            self.scrape_apt_data(batch, verbose=True)
+            self.scrape_apt_images(batch, image_path, verbose=True)
+            apt_data = self.apt_data
+            self.write_data(apt_data, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+        print('job done, congratulations!')
+
     #####################
     # public attributes #
     #####################

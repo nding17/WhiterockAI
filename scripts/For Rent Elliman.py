@@ -863,6 +863,30 @@ class elliman_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    def scraping_pipeline(self, data_path, img_path):
+        # time of sleep 
+        sleep_secs = 15
+
+        # scrape all the apartment URLs
+        # notice the test is opted out here
+        self.scrape_apt_urls(verbose=True, test=False)
+        apt_urls = self.apt_urls # fetch the apartment URLs
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            self.scrape_apt_data(batch, verbose=True)
+            self.scrape_apt_images(batch, image_path, verbose=True)
+            apt_data = self.apt_data
+            self.write_data(apt_data, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+        print('job done, congratulations!')
+
     #####################
     # public attributes #
     #####################
@@ -891,31 +915,10 @@ if __name__ == '__main__':
     # store the data by changing img_path and data_path
     # these are the only lines that users need to change
     # the rest will be automatic 
-    image_path = '../data/sample/elliman/imgdata'
+    img_path = '../data/sample/elliman/imgdata'
     data_path = '../data/sample/elliman'
 
-    # time of sleep 
-    sleep_secs = 15
     # construct an elliman_doc_com object to work
     # on the task
     edc = elliman_dot_com()
-
-    # scrape all the apartment URLs
-    # notice the test is opted out here
-    edc.scrape_apt_urls(verbose=True, test=False)
-    apt_urls = edc.apt_urls # fetch the apartment URLs
-
-    # divide the apartment URLs list into small batches 
-    url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
-
-    # batch jobs start
-    print(f'total number of batches: {len(url_batches)}')
-    for i, batch in enumerate(url_batches):
-        print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-        edc.scrape_apt_data(batch, verbose=True)
-        edc.scrape_apt_images(batch, image_path, verbose=True)
-        apt_data = edc.apt_data
-        edc.write_data(apt_data, data_path)
-        print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-        time.sleep(15) # rest for a few seconds after each batch job done
-    print('job done, congratulations!')
+    edc.scraping_pipeline(data_path, img_path)
