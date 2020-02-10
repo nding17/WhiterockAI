@@ -203,7 +203,7 @@ class coldwell_dot_com:
         return df
 
     def _get_max_page(self):
-        url = 'https://www.coldwellbankerhomes.com/pa/philadelphia/?sortId=2&offset=0'
+        url = f'https://www.coldwellbankerhomes.com/{self._state}/{self._city}/?sortId=2&offset=0'
         content = self._get_link_content(url)
         pg_list = content.find('ul', class_='propertysearch-results-pager')
         pages = pg_list.find_all('li')
