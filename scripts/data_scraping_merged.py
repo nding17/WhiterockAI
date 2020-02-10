@@ -9,17 +9,20 @@ import re
 import os
 import time
 import json
+import random
 import requests
 import numpy as np
 import pandas as pd
-from fake_useragent import UserAgent
+import urllib as ulb
+
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium import webdriver
+from fake_useragent import UserAgent
+from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.support import expected_conditions as EC
 
 class CONST:
     ELLIMAN_HEADER = 'https://www.elliman.com'
