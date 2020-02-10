@@ -29,6 +29,27 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
+class CONST:
+
+    REMAX_COLNAMES = (
+        'ADDRESS', 
+        'CITY', 
+        'STATE', 
+        'ZIPCODE',
+        'PRICE',
+        'BEDROOMS',
+        'BATHROOMS',
+        'FIREPLACE',
+        'LIVING AREA',
+        'PROPERTY TYPE',
+        'YEAR BUILT',
+        'LOT SIZE',
+        'WATERFRONT',
+        'AC',
+        'TAX AMOUNT',
+        'TAX YEAR',
+    )
+
 class remax_dot_com:
 
     # initialization - users need to specify a city and state 
@@ -362,15 +383,6 @@ class remax_dot_com:
         try:
             # try to get access to the value by using the key
             value = d[key]
-            if 'year' in key.lower():
-                try:
-                    value = int(value)
-                except:
-                    value = np.nan
-            if 'no' in value.lower():
-                value = 0
-            if 'yes' in value.lower():
-                value = 1
             return value
         except:
             # fail to access the value from the key
@@ -378,9 +390,13 @@ class remax_dot_com:
             # feature dictionary of a specific apartment
             return None
 
-## bedrooms, fireplace, living area, property type, year built, lot size, waterfront, ac, tax amount, tax year 
+    def _parse_year(self, year):
+        try:
+            return int(year)
+        except:
+            return year
 
-    def _remax_apt(self, soup, content_tag):
+    def _remax_apt(self, soup):
 
         """
         Scrape all the relavent information of the apartment given 
@@ -417,12 +433,12 @@ class remax_dot_com:
         fireplace = self._access_dict(sidict, 'Fireplace')
         living_area = self._access_dict(sidict, 'Living Area')
         property_type = self._access_dict(sidict, 'Property Type')
-        year_built = self._access_dict(sidict, 'Year Built')
+        year_built = self._parse_year(self._access_dict(sidict, 'Year Built'))
         lot_size = self._access_dict(sidict, 'Lot Size')
         waterfront = self._access_dict(sidict, 'Waterfront')
         ac = self._access_dict(sidict, 'Air Conditioning')
         tax = self._access_dict(sidict, 'Tax Annual Amount')
-        tax_year = self._access_dict(sidict, 'Tax Year')
+        tax_year = self._parse_year(self._access_dict(sidict, 'Tax Year'))
 
         # package all the features into a list 
         unit = [
@@ -445,49 +461,6 @@ class remax_dot_com:
         ]
 
         return unit
-
-    def _check_lux(self, soup):
-
-        """
-        Check the type of the apartment based on the webpage
-
-        (privare funtion)
-
-        Parameters
-        ----------
-        soup : bs4.BeautifulSoup
-            a BeautifulSoup scraper object that contains all the elements 
-            in a webpage
-
-        Returns
-        -------
-        is_lux : Boolean
-
-        >>> _check_lux(soup)
-        False
-
-        """
-        try:
-            is_lux = False
-            
-            # if this is a collection apartment
-            # it would have a tag indicating 'luxury home'
-            lux_tag = soup.find('span', attrs={
-                'itemprop': 'name',
-                'class': 'js-stateformatted'
-            })
-            
-            # strip the text out of this tag
-            lux = lux_tag.get_text()\
-                         .strip()\
-                         .lower()
-            
-            # check keyword 'luxury'
-            if 'luxury' in lux:
-                is_lux = True
-            return is_lux
-        except:
-            return False
 
     def _get_apt_info(self, apt_url):
 
@@ -529,20 +502,8 @@ class remax_dot_com:
         
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
-            # check what type of apartment this is - normal or collection
-            is_lux = self._check_lux(soup)
-            lux = 'No'
-            if is_lux:
-                # collection / luxury homes
-                content_tag = soup.find('div', class_='property-details--details')
-                lux = 'Yes'
-            else:
-                # normal apartment
-                content_tag = soup.find('div', class_='property-details-body fullwidth-content-container clearfix')
-            
             # append the luxury feature as an additional column
-            apt_info = self._remax_apt(soup, content_tag)
-            apt_info.append(lux)
+            apt_info = self._remax_apt(soup)
 
         return apt_info
 
@@ -569,7 +530,7 @@ class remax_dot_com:
             and all the apartments URLs will be stored in this field 
         """
 
-        self._apt_urls = self._get_ensemble_apt_urls(test=True)
+        self._apt_urls = self._get_ensemble_apt_urls()
 
     def scrape_apt_data(self, apt_urls, verbose=False):
 
@@ -606,6 +567,72 @@ class remax_dot_com:
         
         self._apt_data = apt_all_data
 
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('remax_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.REMAX_COLNAMES)
+            df.to_csv('remax_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.REMAX_COLNAMES)
+        with open('remax_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+    def scraping_pipeline(self, data_path):
+        # scrape all the apartment URLs in Philadelphia
+        # status update enabled
+        self.scrape_apt_urls()
+        urls = self.apt_urls
+
+        # in order to avoid crashes and loses all your data
+        # divide the list of URLs in batches and keep updating
+        # the csv file once the batch job is finished
+        urls_chuck = np.array_split(urls, int(len(urls))//20)
+
+        print(f'batch jobs started, {len(urls_chuck)} batches in total')
+
+        # running the batch and keep saving the intermediary 
+        # results from the data scraping jobs 
+        # each batch contains 10 URLs, but this could be modified
+        for i, batch_urls in enumerate(urls_chuck):
+            self.scrape_apt_data(batch_urls, verbose=True)
+            data = self.apt_data
+            self.write_data(data, data_path)
+            print(f'batch {i} finished running')
+
+        print('job done!')
+
     @property
     def apt_urls(self):
         # public attritube 
@@ -623,85 +650,5 @@ if __name__ == '__main__':
     # construct data scraping object, use Philadelphia, PA 
     # as an example
     rmdc = remax_dot_com('philadelphia', 'pa')
-    # scrape all the apartment URLs in Philadelphia
-    # status update enabled
-    rmdc.scrape_apt_urls()
-    urls = rmdc.apt_urls
-
-    # in order to avoid crashes and loses all your data
-    # divide the list of URLs in batches and keep updating
-    # the csv file once the batch job is finished
-    urls_chuck = np.array_split(urls, int(len(urls))//20)
-
-    # try to see if the current directory has a folder 
-    # that you can use to store data 
-    os.chdir('..')
-
-    # this could be modified to fit the structure of 
-    # a specific user's directory
-    if not os.path.exists('data'):
-        os.mkdir('data')
-
-    # sample directory inside your data directory 
-    # used for test run. Of course, this could be 
-    # modified based on the architecture of your 
-    # own data folder 
-    os.chdir('./data')
-    if not os.path.exists('sample'):
-        os.mkdir('sample')
-    os.chdir('sample')
-
-    # the column names of the data frame 
-    cols = [
-        'address',
-        'city',
-        'state',
-        'zipcode',
-        'bathrooms',
-        'bedrooms',
-        'interior_features',
-        'rooms',
-        'cooling',
-        'heating',
-        'AC',
-        'appliances',
-        'laundry',
-        'sqft',
-        'price',
-        'taxes',
-        'tax_year',
-        'list_type',
-        'list_id',
-        'possession',
-        'lot_sqft',
-        'list_status',
-        'year_built',
-        'county',
-        'county_school_district',
-        'half_bath',
-        'subdivision',
-        'luxury_home',
-    ]
-
-    # create an initial empty data file with all 
-    # the features of an apartment
-    if not os.path.exists('remax_dot_com.csv'):
-        df = pd.DataFrame([], columns=cols)
-        df.to_csv('./remax_dot_com.csv')
-
-    print(f'batch jobs started, {len(urls_chuck)} batches in total')
-
-    # running the batch and keep saving the intermediary 
-    # results from the data scraping jobs 
-    # each batch contains 10 URLs, but this could be modified
-    for i, batch_urls in enumerate(urls_chuck):
-        rmdc.scrape_apt_data(batch_urls, verbose=True)
-        data = rmdc.apt_data
-        df_new = pd.DataFrame(data, columns=cols)
-
-        # append the results from each batch
-        with open('remax_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-        print(f'batch {i} finished running')
-
-    print('job done!')
+    data_path = '../data/sample'
+    rmdc.scraping_pipeline(data_path)
