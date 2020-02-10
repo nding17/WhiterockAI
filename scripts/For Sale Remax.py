@@ -156,13 +156,13 @@ class remax_dot_com:
 
         return apt_urls
 
-    def _parse_int(self, text):
+    def _parse_num(self, text):
+        text = text.replace(',', '')
         # extract the numerical price value 
         pattern = r'[-+]?\d*\.\d+|\d+'
         number = re.findall(pattern, text)[0]
         # convert the price to float 
         number = float(number)
-
         return number
 
     def _get_price(self, soup):
@@ -197,9 +197,8 @@ class remax_dot_com:
                                   .replace(',','')\
                                   .strip()
 
-            price = self._parse_int(price_text)
+            price = self._parse_num(price_text)
             return price
-
         except:
             return np.nan
 
@@ -317,13 +316,13 @@ class remax_dot_com:
                                .get_text() \
                                .strip()
                 try:
-                    value = self._parse_int(value)
+                    value = self._parse_num(value)
                 except:
                     pass
 
                 # fill in the dictionary
                 sideinfo[key] = value
-                
+
             return sideinfo
         except:
             return sideinfo
@@ -363,25 +362,23 @@ class remax_dot_com:
         try:
             # try to get access to the value by using the key
             value = d[key]
-            if 'sqft' in value:
-                # try to format any area related features 
-                # remove punctuation marks and text
-                value = value.replace(',','')\
-                             .replace('sqft', '')\
-                             .strip()
-            try:
-                # try to convert any numerical type features 
-                # into float 
-                return float(value)
-            except: 
-                # if this is a text value, leave it as it is 
-                return value
+            if 'year' in key.lower():
+                try:
+                    value = int(value)
+                except:
+                    value = np.nan
+            if 'no' in value.lower():
+                value = 0
+            if 'yes' in value.lower():
+                value = 1
+            return value
         except:
             # fail to access the value from the key
             # namely, the feature does not exist in the 
             # feature dictionary of a specific apartment
             return None
 
+## bedrooms, fireplace, living area, property type, year built, lot size, waterfront, ac, tax amount, tax year 
 
     def _remax_apt(self, soup, content_tag):
 
@@ -415,59 +412,36 @@ class remax_dot_com:
         price = self._get_price(soup)
         street, city, state, zipcode = self._get_address(soup)
         sidict = self._get_sideinfo(soup)
-        listid = self._access_dict(sidict, 'Listing ID')
-        listtype = self._access_dict(sidict, 'Listing Type')
-        bedrooms = self._access_dict(sidict, 'Bedrooms')
-        bathrooms = self._access_dict(sidict, 'Bathrooms')
-        interior = self._access_dict(sidict, 'Interior Features')
-        sqft = self._access_dict(sidict, 'House Size')
-        lotsf = self._access_dict(sidict, 'Lot Size')
+        bedrooms = self._access_dict(sidict, 'Bedrooms Total')
+        bathrooms = self._access_dict(sidict, 'Bathrooms Total')
+        fireplace = self._access_dict(sidict, 'Fireplace')
+        living_area = self._access_dict(sidict, 'Living Area')
+        property_type = self._access_dict(sidict, 'Property Type')
+        year_built = self._access_dict(sidict, 'Year Built')
+        lot_size = self._access_dict(sidict, 'Lot Size')
         waterfront = self._access_dict(sidict, 'Waterfront')
-        liststatus = self._access_dict(sidict, 'Listing Status')
-        yrbuilt = self._access_dict(sidict, 'Year Built')
-        county = self._access_dict(sidict, 'County')
-        school = self._access_dict(sidict, 'County School District')
-        halfbath = self._access_dict(sidict, 'Half Bath')
-        subdivision = self._access_dict(sidict, 'Subdivision')
-        cooling = self._access_dict(sidict, 'Cooling')
-        heating = self._access_dict(sidict, 'Heating')
         ac = self._access_dict(sidict, 'Air Conditioning')
-        appliances = self._access_dict(sidict, 'Appliances')
-        rooms = self._access_dict(sidict, 'Rooms')
-        laundry = self._access_dict(sidict, 'Laundry')
-        taxes = self._access_dict(sidict, 'Taxes')
-        yrtax = self._access_dict(sidict, 'TaxYear')
-        possession = self._access_dict(sidict, 'Possession')
+        tax = self._access_dict(sidict, 'Tax Annual Amount')
+        tax_year = self._access_dict(sidict, 'Tax Year')
 
         # package all the features into a list 
         unit = [
-            street,
-            city,
-            state,
+            street, 
+            city, 
+            state, 
             zipcode,
-            bathrooms,
-            bedrooms,
-            interior,
-            rooms,
-            cooling,
-            heating,
-            ac,
-            appliances,
-            laundry,
-            sqft,
             price,
-            taxes,
-            yrtax,
-            listtype,
-            listid,
-            possession,
-            lotsf,
-            liststatus,
-            yrbuilt,
-            county,
-            school,
-            halfbath,
-            subdivision,
+            bedrooms,
+            bathrooms,
+            fireplace,
+            living_area,
+            property_type,
+            year_built,
+            lot_size,
+            waterfront,
+            ac,
+            tax,
+            tax_year,
         ]
 
         return unit
