@@ -21,6 +21,27 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from webdriver_manager.chrome import ChromeDriverManager
 
+class CONST:
+
+    COMPASS_COLNAMES = (
+        'ADDRESS', 
+        'UNIT #',
+        'CITY',
+        'STATE', 
+        'ZIPCODE', 
+        'PRICE', 
+        'BEDS', 
+        'BATH', 
+        'SF', 
+        'YEAR BUILT', 
+        'PROPERTY TYPE',
+        '# UNITS', 
+        '# FLOORS',
+        'CENTRAL AC', 
+        'WASHER/DRIER',
+        'LAST PRICE',
+    )
+
 class compass_dot_com:
 
     def __init__(self, city, state):
@@ -137,9 +158,9 @@ class compass_dot_com:
             soup = BeautifulSoup(results, 'lxml')
         return soup
 
-    def _get_apt_urls(self):
+    def _get_apt_urls(self, test=False):
         apt_urls = []
-        browser = self._get_browser(self._url)
+        browser, _ = self._get_browser(self._url)
         try:
             while True:
                 atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
@@ -147,6 +168,10 @@ class compass_dot_com:
                 apt_urls += hrefs
                 button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']")
                 button.click() # click until the last possible right arrow 
+
+                if test == True:
+                    browser.close()
+                    return apt_urls
         except:
             # if the last page is reached then we can return all the apartment urls that link to the 
             # apartments 
@@ -322,6 +347,8 @@ class compass_dot_com:
     def _get_apt_data(self, url, img_path):
         soup = self._get_soup(url)
 
+        city = self._city.replace('-', ' ').title()
+        state = self._state.upper()
         addr, unit, zipcode = self._get_address(soup)
         price, beds, bath = self._get_price(soup)
         sqft = self._get_sf(soup)
@@ -333,6 +360,8 @@ class compass_dot_com:
         data = (
             addr, 
             unit, 
+            city,
+            state,
             zipcode, 
             price, 
             beds, 
@@ -352,13 +381,77 @@ class compass_dot_com:
 
         return data
 
-    def scraping_pipeline(self):
+    def scrape_apt_data(self, urls, img_path):
+        apt_data = []
+
+        for url in urls:
+            apt_data.append(self._get_apt_data(url, img_path))
+
+        return apt_data
+
+    def write_data(self,
+                   apt_data, 
+                   data_path):
+
+        """
         
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists('compass_dot_com.csv'):
+            df = pd.DataFrame([], columns=CONST.COMPASS_COLNAMES)
+            df.to_csv('compass_dot_com.csv')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=CONST.COMPASS_COLNAMES)
+        with open('compass_dot_com.csv', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        apt_urls = self._get_apt_urls(test=test)
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+        print('job done, congratulations!')
+
 
 if __name__ == '__main__':
     codc = compass_dot_com('new york', 'ny')
-    url = 'https://www.compass.com/listing/2-northside-piers-unit-23a-brooklyn-ny-11249/449139305400128897/?origin_type=Listing%20Photocard&result_id=40add53f-4b2a-4536-9dea-a851bf792527'
+    data_path = '../../data/sample'
     img_path = '../../data/sample/compass/imgdata'
-    print(codc._get_apt_data(url, img_path))
+    codc.scraping_pipeline(data_path, img_path, test=True)
 
 
