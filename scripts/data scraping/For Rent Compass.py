@@ -27,7 +27,6 @@ class compass_dot_com:
 		self._city = city.lower().replace(' ', '-')
 		self._state = state.lower()
 		self._url = f'https://www.compass.com/for-rent/{self._city}-{self._state}/'
-		self._browser = self._get_browser(self._url)
 
 	@staticmethod
 	def _build_chrome_options():
@@ -140,7 +139,7 @@ class compass_dot_com:
 
 	def _get_apt_urls(self):
 		apt_urls = []
-		browser = self._browser
+		browser = self._get_browser(self._url)
 		try:
 			while True:
 				atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
@@ -151,6 +150,7 @@ class compass_dot_com:
 		except:
 			# if the last page is reached then we can return all the apartment urls that link to the 
 			# apartments 
+			browser.close()
 			return apt_urls
 
 	def _get_address(self, soup):
@@ -185,6 +185,12 @@ class compass_dot_com:
 		except:
 			return None
 
+	def _ad(self, d, k):
+		try:
+			return d[k]
+		except:
+			return None
+
 	def _get_price(self, soup):
 		price_tags = soup.find('div', class_='u-flexContainer--row summary__RightContent-e4c4ok-4 eFqMfB') \
 						 .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 bgfBKu')
@@ -193,7 +199,7 @@ class compass_dot_com:
 		values = [self._parse_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
 		d = dict(zip(keys, values))
-		return d['Price'], d['Beds'], d['Bath']
+		return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
 
 	def _get_sf(self, soup):
 		sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
@@ -202,15 +208,71 @@ class compass_dot_com:
 		sqft = self._parse_num(sqft)
 		return sqft
 
+	def _get_prop_details(self, soup):
+		rows = soup.find_all('tr', class_='keyDetails-text')
+		keys = [row.find_all('td')[0].get_text() for row in rows]
+		values = [row.find_all('td')[1].get_text() for row in rows]
+		d = dict(zip(keys, values))
+		return self._ad(d,'Year Built'), self._ad(d,'Compass Type')
+
+	def _get_amenities(self, apt_url):
+		try:
+			browser, _ = self._get_browser(apt_url)
+			view_more = browser.find_element_by_xpath("//button[@class='sc-kkGfuU hltMrU cx-nakedBtn textIntent-caption1--strong']")
+			view_more.click()
+			amenities = browser.find_elements_by_xpath("//span[@data-tn='uc-listing-amenity']")
+			amenities = [a.text.lower() for a in amenities]
+			central_ac, wd = 0, 0
+
+			if 'Central AC'.lower() in amenities:
+				central_ac = 1
+			if 'Washer / Dryer'.lower() in amenities:
+				wd = 1
+			browser.close()
+			return central_ac, wd
+		except:
+			return 0, 0
+
+	def _get_last_price(self, soup):
+		try:
+			price_tab = soup.find('table', attrs={'data-tn': 'listingHistory-view-eventTable'})
+			rows = price_tab.find_all('tr')[1:]
+			price_cols = [row.find_all('td')[2].get_text() for row in rows]
+			price_cols = [self._parse_num(col) for col in price_cols]
+			last_price = list(filter(lambda price: not price==None, price_cols))[0]
+			return last_price
+		except:
+			return None
+
 	def _get_apt_data(self, url):
 		soup = self._get_soup(url)
+
 		addr, unit, zipcode = self._get_address(soup)
 		price, beds, bath = self._get_price(soup)
 		sqft = self._get_sf(soup)
-		return addr, unit, zipcode, price, beds, bath, sqft
+		yrbuilt, rtype = self._get_prop_details(soup)
+		central_ac, wd = self._get_amenities(url)
+		last_price = self._get_last_price(soup)
+
+		data = (
+			addr, 
+			unit, 
+			zipcode, 
+			price, 
+			beds, 
+			bath, 
+			sqft, 
+			yrbuilt, 
+			rtype, 
+			central_ac, 
+			wd,
+			last_price, 
+		)
+
+		return data
 
 if __name__ == '__main__':
 	codc = compass_dot_com('new york', 'ny')
-	print(codc._get_apt_data('https://www.compass.com/listing/1329-fulton-street-unit-store-brooklyn-ny-11216/426326699769857857/?origin_type=Listing%20Photocard&result_id=bf2ce9ab-fe94-4d8e-9e96-547e89c55f99'))
+	print(codc._get_apt_data('https://www.compass.com/listing/246-east-90th-street-unit-1a-manhattan-ny-10128/447952853626797617/?origin_type=Listing%20Photocard&result_id=2b2ab18b-29ea-4aa6-9435-9ad62bb5ddb9'))
 
 
