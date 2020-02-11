@@ -48,6 +48,7 @@ class compass_dot_com:
         self._city = city.lower().replace(' ', '-')
         self._state = state.lower()
         self._url = f'https://www.compass.com/for-rent/{self._city}-{self._state}/'
+        self._browser, _ = self._get_browser(self._url)
 
     @staticmethod
     def _build_chrome_options():
@@ -160,7 +161,7 @@ class compass_dot_com:
 
     def _get_apt_urls(self, test=False):
         apt_urls = []
-        browser, _ = self._get_browser(self._url)
+        browser = self._browser
         try:
             while True:
                 atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
@@ -170,12 +171,10 @@ class compass_dot_com:
                 button.click() # click until the last possible right arrow 
 
                 if test == True:
-                    browser.close()
                     return apt_urls
         except:
             # if the last page is reached then we can return all the apartment urls that link to the 
             # apartments 
-            browser.close()
             return apt_urls
 
     def _get_address(self, soup):
@@ -254,7 +253,8 @@ class compass_dot_com:
 
     def _get_amenities(self, apt_url):
         try:
-            browser, _ = self._get_browser(apt_url)
+            browser = self._browser
+            browser.get(apt_url)
             view_more = browser.find_element_by_xpath("//button[@class='sc-kkGfuU hltMrU cx-nakedBtn textIntent-caption1--strong']")
             view_more.click()
             amenities = browser.find_elements_by_xpath("//span[@data-tn='uc-listing-amenity']")
@@ -266,7 +266,6 @@ class compass_dot_com:
                     central_ac = 1
                 if 'Washer / Dryer'.lower() in a:
                     wd = 1
-            browser.close()
             return central_ac, wd
         except:
             return 0, 0
@@ -432,6 +431,10 @@ class compass_dot_com:
         os.chdir(current_path)
 
     def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
         apt_urls = self._get_apt_urls(test=test)
 
         # divide the apartment URLs list into small batches 
@@ -445,13 +448,13 @@ class compass_dot_com:
             self.write_data(apt_data, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
+
+        self._browser.close()
         print('job done, congratulations!')
 
 
 if __name__ == '__main__':
     codc = compass_dot_com('new york', 'ny')
     data_path = '../../data/sample'
-    img_path = '../../data/sample/compass/imgdata'
+    img_path = '../../data/sample/compass/'
     codc.scraping_pipeline(data_path, img_path, test=True)
-
-
