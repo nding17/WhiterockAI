@@ -23,8 +23,10 @@ from webdriver_manager.chrome import ChromeDriverManager
 class compass_dot_com:
 
 	def __init__(self, city, state):
-		self._city = city
-		self._state = state
+		self._city = city.lower().replace(' ', '-')
+		self._state = state.lower()
+		self._url = f'https://www.compass.com/for-rent/{city}-{state}/'
+		self._browser = self._get_apt_urls(self._url)
 
 	@staticmethod
 	def _build_chrome_options():
@@ -80,7 +82,19 @@ class compass_dot_com:
 		wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
 		return browser, wait
 
+	def _get_apt_urls(self):
+		apt_urls = []
+		browser = self._browser
+		try:
+			while True:
+				atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
+				hrefs = [atag.get_attribute('href') for atag in atags]
+				apt_urls += hrefs
+				button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']")
+				button.click() # click until the last possible right arrow 
+		except:
+			return apt_urls
 
 if __name__ == '__main__':
 	codc = compass_dot_com('new york', 'ny')
-	codc._get_browser('https://www.compass.com/for-rent/new-york-ny/')
+	print(codc._get_apt_urls())
