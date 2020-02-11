@@ -215,6 +215,18 @@ class compass_dot_com:
 		d = dict(zip(keys, values))
 		return self._ad(d,'Year Built'), self._ad(d,'Compass Type')
 
+	def _get_building_details(self, soup):
+		try:
+			units = soup.find('span', attrs={'data-tn': 'listing-page-building-units'}).get_text()
+			stories = soup.find('span', attrs={'data-tn': 'listing-page-building-stories'}).get_text()
+
+			units = int(self._parse_num(units))
+			stories = int(self._parse_num(stories))
+
+			return units, stories
+		except:
+			return None, None
+
 	def _get_amenities(self, apt_url):
 		try:
 			browser, _ = self._get_browser(apt_url)
@@ -224,10 +236,11 @@ class compass_dot_com:
 			amenities = [a.text.lower() for a in amenities]
 			central_ac, wd = 0, 0
 
-			if 'Central AC'.lower() in amenities:
-				central_ac = 1
-			if 'Washer / Dryer'.lower() in amenities:
-				wd = 1
+			for a in amenities:
+				if 'Central AC'.lower() in a:
+					central_ac = 1
+				if 'Washer / Dryer'.lower() in a:
+					wd = 1
 			browser.close()
 			return central_ac, wd
 		except:
@@ -244,13 +257,76 @@ class compass_dot_com:
 		except:
 			return None
 
-	def _get_apt_data(self, url):
+	def _get_image_urls(self, soup):
+		img_tags = soup.find_all('div', attrs={'data-tn': 'undefined-gallery-navigation-navigation-image'})
+		img_urls = [itag.find('img')['src'] for itag in img_tags]
+		return img_urls
+
+	def _save_images(self, 
+	                 img_urls, 
+	                 data_path, 
+	                 address):
+
+		"""
+		Save all the images into a specific directory given the 
+		downloadable image URLs
+
+		Parameters
+		----------
+		img_urls : list(str)
+		    this is a list of image URLs that you directly download 
+
+		data_path : str
+		    the string format of the path to the directory where you
+		    want to save all the images
+
+		address : str
+		    this is the name of the folder to contain the images of a 
+		    specific apartment
+
+		Returns
+		-------
+		status : int
+		    if successful, return 1, otherwise, 0
+
+		"""
+
+		try:
+		    # if address is invalid, discontinue the process
+		    if not address:
+		        return 0
+
+		    # this is the path we want the OS to come back
+		    # when it finishes the image saving tasks
+		    current_path = os.getcwd()
+		    os.chdir(data_path)
+		    
+		    # create a folder for the apartment if it doesn't
+		    # exist inside the section folder
+		    if not os.path.exists(address):
+		        os.mkdir(address)
+		    os.chdir(address)
+
+		    # write images inside the apartment folder
+		    for i, img_url in enumerate(img_urls):
+		        img_data = requests.get(img_url).content
+		        with open(f'img{i}.jpg', 'wb') as handler:
+		            handler.write(img_data)
+		            
+		    os.chdir(current_path)
+		    return 1
+		except:
+		    os.chdir(current_path)
+		    return 0
+
+	def _get_apt_data(self, url, img_path):
 		soup = self._get_soup(url)
 
 		addr, unit, zipcode = self._get_address(soup)
 		price, beds, bath = self._get_price(soup)
 		sqft = self._get_sf(soup)
 		yrbuilt, rtype = self._get_prop_details(soup)
+		units, stories = self._get_building_details(soup)
 		central_ac, wd = self._get_amenities(url)
 		last_price = self._get_last_price(soup)
 
@@ -263,16 +339,23 @@ class compass_dot_com:
 			bath, 
 			sqft, 
 			yrbuilt, 
-			rtype, 
+			rtype,
+			units, 
+			stories,
 			central_ac, 
 			wd,
 			last_price, 
 		)
 
+		img_urls = self._get_image_urls(soup)
+		self._save_images(img_urls, img_path, f"{addr}, {self._city.replace('-', ' ').title()}, {self._state.upper()}")
+
 		return data
 
 if __name__ == '__main__':
 	codc = compass_dot_com('new york', 'ny')
-	print(codc._get_apt_data('https://www.compass.com/listing/246-east-90th-street-unit-1a-manhattan-ny-10128/447952853626797617/?origin_type=Listing%20Photocard&result_id=2b2ab18b-29ea-4aa6-9435-9ad62bb5ddb9'))
+	url = 'https://www.compass.com/listing/2-northside-piers-unit-23a-brooklyn-ny-11249/449139305400128897/?origin_type=Listing%20Photocard&result_id=40add53f-4b2a-4536-9dea-a851bf792527'
+	img_path = '../../data/sample/compass/imgdata'
+	print(codc._get_apt_data(url, img_path))
 
 
