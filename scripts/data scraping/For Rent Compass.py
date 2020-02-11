@@ -159,15 +159,17 @@ class compass_dot_com:
             soup = BeautifulSoup(results, 'lxml')
         return soup
 
+    ### get all the apartment URLs 
     def _get_apt_urls(self, test=False):
         apt_urls = []
         browser = self._browser
         try:
             while True:
+                # search all the tags in the gallary, usually 20 apartments per page
                 atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
-                hrefs = [atag.get_attribute('href') for atag in atags]
+                hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
                 apt_urls += hrefs
-                button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']")
+                button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']") # click through the right button
                 button.click() # click until the last possible right arrow 
 
                 if test == True:
@@ -177,6 +179,7 @@ class compass_dot_com:
             # apartments 
             return apt_urls
 
+    ### aparantly, we are scraping the address 
     def _get_address(self, soup):
         address = soup.find('p', attrs={'data-tn': 'listing-page-address'}) \
                       .get_text()
@@ -188,6 +191,7 @@ class compass_dot_com:
             addr = address.strip()
             unit = None
 
+        # manipulate the string that contains a zipcode 
         zipcode = soup.find('div', attrs={'data-tn': 'listing-page-address-subtitle'}) \
                       .get_text() \
                       .split(',')[-1] \
@@ -197,6 +201,7 @@ class compass_dot_com:
 
         return addr, unit, zipcode
 
+    ### parse the number from any string that contains numerical values 
     def _parse_num(self, text):
         try:
             text = text.replace(',', '')
@@ -209,12 +214,16 @@ class compass_dot_com:
         except:
             return None
 
+    ### a more protective way to access an element from a dictionary
+    ### we don't want our program to break if we can't access the 
+    ### dictionary from a key 
     def _ad(self, d, k):
         try:
             return d[k]
         except:
             return None
 
+    ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
         price_tags = soup.find('div', class_='u-flexContainer--row summary__RightContent-e4c4ok-4 eFqMfB') \
                          .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 bgfBKu')
@@ -225,6 +234,7 @@ class compass_dot_com:
         d = dict(zip(keys, values))
         return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
 
+    ### get the square foot of the apartment, this is different from gross square foot 
     def _get_sf(self, soup):
         sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
                    .find('div', class_='textIntent-title2') \
@@ -232,6 +242,7 @@ class compass_dot_com:
         sqft = self._parse_num(sqft)
         return sqft
 
+    ### property details, including year built and property type 
     def _get_prop_details(self, soup):
         rows = soup.find_all('tr', class_='keyDetails-text')
         keys = [row.find_all('td')[0].get_text() for row in rows]
@@ -239,6 +250,7 @@ class compass_dot_com:
         d = dict(zip(keys, values))
         return self._ad(d,'Year Built'), self._ad(d,'Compass Type')
 
+    ### building details, including number of units and number of floors 
     def _get_building_details(self, soup):
         try:
             units = soup.find('span', attrs={'data-tn': 'listing-page-building-units'}).get_text()
@@ -251,6 +263,7 @@ class compass_dot_com:
         except:
             return None, None
 
+    ### fetch the amenity details
     def _get_amenities(self, apt_url):
         try:
             browser = self._browser
