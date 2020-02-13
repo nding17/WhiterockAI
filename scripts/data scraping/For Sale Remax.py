@@ -396,7 +396,7 @@ class remax_dot_com:
         except:
             return year
 
-    def _remax_apt(self, soup):
+    def _remax_apt(self, soup, img_path):
 
         """
         Scrape all the relavent information of the apartment given 
@@ -460,9 +460,75 @@ class remax_dot_com:
             tax_year,
         ]
 
+        img_urls = self._get_img_urls(soup)
+        if img_urls:
+            self._save_images(img_urls, img_path, f"{street}, {city.replace('-', ' ').title()}, {state.upper()}")
+
         return unit
 
-    def _get_apt_info(self, apt_url):
+    def _get_img_urls(self, soup):
+        img_tags = soup.find_all('img', class_='listing-detail-image')
+        img_urls = [tag['src'] for tag in img_tags]
+        return img_urls
+
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                img_data = requests.get(img_url).content
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    handler.write(img_data)
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
+
+    def _get_apt_info(self, apt_url, img_path):
 
         """
         Given the apartment URL, scrape the apartment unit's information regardless
@@ -503,7 +569,7 @@ class remax_dot_com:
         if not response.status_code == 404:
             soup = BeautifulSoup(results, 'lxml')
             # append the luxury feature as an additional column
-            apt_info = self._remax_apt(soup)
+            apt_info = self._remax_apt(soup, img_path)
 
         return apt_info
 
@@ -532,7 +598,7 @@ class remax_dot_com:
 
         self._apt_urls = self._get_ensemble_apt_urls()
 
-    def scrape_apt_data(self, apt_urls, verbose=False):
+    def scrape_apt_data(self, apt_urls, img_path, verbose=False):
 
         """
         A public function that allows you to call to scrape apartment information
@@ -563,7 +629,7 @@ class remax_dot_com:
         # loop through all the apartment URLs and scrape all the apartments
         # information in each URL
         for i, apt_url in enumerate(apt_urls):
-            apt_all_data.append(self._get_apt_info(apt_url)) 
+            apt_all_data.append(self._get_apt_info(apt_url, img_path)) 
         
         self._apt_data = apt_all_data
 
@@ -609,7 +675,7 @@ class remax_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path):
+    def scraping_pipeline(self, data_path, img_path):
         # scrape all the apartment URLs in Philadelphia
         # status update enabled
         self.scrape_apt_urls()
@@ -626,7 +692,7 @@ class remax_dot_com:
         # results from the data scraping jobs 
         # each batch contains 10 URLs, but this could be modified
         for i, batch_urls in enumerate(urls_chuck):
-            self.scrape_apt_data(batch_urls, verbose=True)
+            self.scrape_apt_data(batch_urls, img_path, verbose=True)
             data = self.apt_data
             self.write_data(data, data_path)
             print(f'batch {i} finished running')
@@ -650,5 +716,6 @@ if __name__ == '__main__':
     # construct data scraping object, use Philadelphia, PA 
     # as an example
     rmdc = remax_dot_com('philadelphia', 'pa')
-    data_path = '../data/sample'
-    rmdc.scraping_pipeline(data_path)
+    data_path = '../../data/sample'
+    img_path = '../../data/sample/remax'
+    rmdc.scraping_pipeline(data_path, img_path)
