@@ -37,48 +37,48 @@ class CONST:
 
     COLNAMES = {
         'buy': [
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'price',
-            'bedrooms', 
-            'bathrooms',
-            'space',
-            'extra_features',
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'PRICE',
+            'BEDS', 
+            'BATH',
+            'SF',
+            'AMENITIES',
         ],
         'rent': [
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'apartment_name',
-            'bedrooms',
-            'bathrooms',
-            'space',
-            'price',
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'UNIT #',
+            'BEDS',
+            'BATH',
+            'SF',
+            'PRICE',
         ],
         'sold': [
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'bedrooms', 
-            'bathrooms',
-            'space',
-            'extra_features',
-            'sales_date', 
-            'sales_price', 
-            'asking_price',
-            'sold_date', 
-            'sold_price', 
-            'change_date', 
-            'change_price', 
-            'listing_date', 
-            'listing_price',
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'BEDS', 
+            'BATH',
+            'SF',
+            'AMENITIES',
+            'SALE DATE', 
+            'SALE PRICE', 
+            'ASKING PRICE',
+            'SOLD DATE', 
+            'SOLD PRICE', 
+            'CHANGE DATE', 
+            'CHANGE PRICE', 
+            'LISTING DATE', 
+            'LISTING PRICE',
         ],
     }
 
@@ -1317,7 +1317,7 @@ class trulia_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, img_path, data_path):
+    def scraping_pipeline(self, data_path, img_path):
         # different sales categories 
         categories = ['buy', 'sold', 'rent']
 
@@ -1383,4 +1383,4 @@ if __name__ == '__main__':
     
     # construct a scraper object
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(img_path, data_path)
+    tdc.scraping_pipeline(data_path, img_path)

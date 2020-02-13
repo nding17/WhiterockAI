@@ -56,50 +56,50 @@ class CONST:
     TRULIA_OVERHEAD = 'https://www.trulia.com'
 
     TRULIA_COLNAMES = {
-        'buy': (
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'price',
-            'bedrooms', 
-            'bathrooms',
-            'space',
-            'extra_features',
-        ),
-        'rent': (
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'apartment_name',
-            'bedrooms',
-            'bathrooms',
-            'space',
-            'price',
-        ),
-        'sold': (
-            'street', 
-            'city', 
-            'state', 
-            'zipcode', 
-            'neighborhood',
-            'bedrooms', 
-            'bathrooms',
-            'space',
-            'extra_features',
-            'sales_date', 
-            'sales_price', 
-            'asking_price',
-            'sold_date', 
-            'sold_price', 
-            'change_date', 
-            'change_price', 
-            'listing_date', 
-            'listing_price',
-        ),
+        'buy': [
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'PRICE',
+            'BEDS', 
+            'BATH',
+            'SF',
+            'AMENITIES',
+        ],
+        'rent': [
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'UNIT #',
+            'BEDS',
+            'BATH',
+            'SF',
+            'PRICE',
+        ],
+        'sold': [
+            'ADDRESS', 
+            'CITY', 
+            'STATE', 
+            'ZIPCODE', 
+            'NEIGHBORHOOD',
+            'BEDS', 
+            'BATH',
+            'SF',
+            'AMENITIES',
+            'SALE DATE', 
+            'SALE PRICE', 
+            'ASKING PRICE',
+            'SOLD DATE', 
+            'SOLD PRICE', 
+            'CHANGE DATE', 
+            'CHANGE PRICE', 
+            'LISTING DATE', 
+            'LISTING PRICE',
+        ],
     }
 
     REMAX_COLNAMES = (
@@ -2899,7 +2899,7 @@ class trulia_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, img_path, data_path):
+    def scraping_pipeline(self, data_path, img_path):
         # different sales categories 
         categories = ['buy', 'sold', 'rent']
 
@@ -4196,10 +4196,17 @@ class compass_dot_com:
         print('job done, congratulations!')
 
 if __name__ == '__main__':
+
+    ### trulia.com For Rent and For Sale
+    img_path_trulia = '../../data/sample'
+    data_path_trulia = '../../data/sample/trulia'
+    tdc = trulia_dot_com('philadelphia', 'pa')
+    tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
+
     ### compass New York For Rent 
     codc = compass_dot_com('new york', 'ny')
     data_path = '../../data/sample'
-    img_path = '../../data/sample/compass/'
+    img_path = '../../data/sample/compass'
     codc.scraping_pipeline(data_path, img_path, test=False)
 
     ### rent.com Philadelphia For Rent
@@ -4224,9 +4231,3 @@ if __name__ == '__main__':
     data_path_elliman = '../../data/sample/elliman'
     edc = elliman_dot_com()
     edc.scraping_pipeline(data_path_elliman, img_path_elliman)
-
-    ### trulia.com For Rent and For Sale
-    img_path_trulia = '../../data/sample/trulia/imgdata'
-    data_path_trulia = '../../data/sample/trulia/aptdata'
-    tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(img_path_trulia, data_path_trulia)
