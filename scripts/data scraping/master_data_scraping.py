@@ -16,6 +16,7 @@ import pandas as pd
 import urllib as ulb
 
 from bs4 import BeautifulSoup
+from urllib import request
 from selenium import webdriver
 from fake_useragent import UserAgent
 from selenium.webdriver.common.by import By
@@ -41,15 +42,15 @@ class CONST:
     )
 
     RENT_COLNAMES = (
-        'address',
-        'city',
-        'state',
-        'zipcode',
-        'apt',
-        'price',
-        'bedroom',
-        'bathroom',
-        'sqft',
+        'ADDRESS',
+        'CITY',
+        'STATE',
+        'ZIPCODE',
+        'UNIT #',
+        'PRICE',
+        'BEDS',
+        'BATH',
+        'SF',
     )
 
     TRULIA_OVERHEAD = 'https://www.trulia.com'
@@ -993,8 +994,63 @@ class rent_dot_com:
         self._city = city
         self._state = state
         self._overhead = 'https://www.rent.com'
+        self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
         self._apt_data = []
+
+    @staticmethod
+    def _build_chrome_options():
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.accept_untrusted_certs = True
+        chrome_options.assume_untrusted_cert_issuer = True
+
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-impl-side-painting")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
+        chrome_options.add_argument("--disable-breakpad")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-cast")
+        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
+        chrome_options.add_argument("--disable-cloud-import")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--disable-session-crashed-bubble")
+        chrome_options.add_argument("--disable-ipv6")
+        chrome_options.add_argument("--allow-http-screen-capture")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--lang=es')
+
+        return chrome_options
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+        options = self._build_chrome_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        return browser, wait
 
     def _get_page_url(self, page_num):
         """
@@ -1312,7 +1368,79 @@ class rent_dot_com:
                         unit.append(np.nan)
         return unit
 
-    def _get_apt_info(self, apt_url):
+    def _get_img_urls(self, url):
+        try:
+            browser = self._browser
+            browser.get(url)
+
+            button_gallery = browser.find_element_by_xpath("//button[@data-tid='pdp-gallery-photos-icon']")
+            button_gallery.click()
+
+            photos = browser.find_elements_by_xpath("//img[@data-tid='gallery-modal-thumbnail']")
+            img_urls = [photo.get_attribute('src') for photo in photos]
+            return img_urls
+        except:
+            return []
+
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    img_data = request.urlopen(img_url).read()
+                    handler.write(img_data)
+                    handler.close()
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
+
+    def _get_apt_info(self, apt_url, img_path):
         """
         Given the apartment URL, scrape the apartment unit's information regardless
         of what type of tag it is
@@ -1380,7 +1508,11 @@ class rent_dot_com:
                         apt = list(addr)+self._get_units(unit_tag)
                         apartments.append(apt)
                 # update the list that contains all the apartments info
-                apt_all += apartments 
+                apt_all += apartments
+
+            img_urls = self._get_img_urls(complete_url)
+            if img_urls:
+                self._save_images(img_urls, img_path, f"{addr[0]}, {self._city.replace('-', ' ').title()}, {self._state.upper()}")
                             
         return apt_all
 
@@ -1401,7 +1533,7 @@ class rent_dot_com:
         """
         self._apt_urls = self._get_apt_urls(verbose)
 
-    def scrape_apt_data(self, apt_urls, verbose=False):
+    def scrape_apt_data(self, apt_urls, img_path, verbose=False):
         """
         A public function that allows you to call to scrape apartment information
 
@@ -1429,7 +1561,7 @@ class rent_dot_com:
         # loop through all the apartment URLs and scrape all the apartments
         # information in each URL
         for i, apt_url in enumerate(apt_urls):
-            apt_all_data += self._get_apt_info(apt_url)
+            apt_all_data += self._get_apt_info(apt_url, img_path)
             if verbose:
                 print(f'apartments in address {i} all scraped')
 
@@ -1481,8 +1613,8 @@ class rent_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path):
-        self.scrape_apt_urls()
+    def scraping_pipeline(self, data_path, img_path, verbose=False):
+        self.scrape_apt_urls(verbose=verbose)
         urls = self.apt_urls
         # in order to avoid crashes and loses all your data
         # divide the list of URLs in batches and keep updating
@@ -1494,10 +1626,12 @@ class rent_dot_com:
         # each batch contains 10 URLs, but this could be modified
         for i, batch_urls in enumerate(urls_chunk):
             # print(batch_urls)
-            self.scrape_apt_data(batch_urls, verbose=True)
+            self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
             data = self.apt_data
             self.write_data(data, data_path)
             print(f'batch {i} finished running')
+
+        self._browser.close()
 
         print('job finished!')
 
@@ -3619,6 +3753,12 @@ class coldwell_dot_com:
         print('job done!')
 
 if __name__ == '__main__':
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    data_path = '../../data/sample'
+    img_path = '../../data/sample/rent'
+    rdc.scraping_pipeline(data_path, img_path, verbose=True)
+    
     ### coldwell Philadelphia For Sale
     data_path_coldwell = '../../data/sample'
     img_path_coldwell = '../../data/sample/coldwell'
@@ -3629,11 +3769,6 @@ if __name__ == '__main__':
     rmdc = remax_dot_com('philadelphia', 'pa')
     data_path_remax = '../../data/sample'
     rmdc.scraping_pipeline(data_path_remax)
-
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    data_path_rent = '../../data/sample'
-    rdc.scraping_pipeline(data_path_rent)
 
     ### elliman.com For Rent 
     img_path_elliman = '../../data/sample/elliman/imgdata'
