@@ -29,15 +29,15 @@ from webdriver_manager.chrome import ChromeDriverManager
 
 class CONST:
     RENT_COLNAMES = (
-        'address',
-        'city',
-        'state',
-        'zipcode',
-        'apt',
-        'price',
-        'bedroom',
-        'bathroom',
-        'sqft',
+        'ADDRESS',
+        'CITY',
+        'STATE',
+        'ZIPCODE',
+        'UNIT #',
+        'PRICE',
+        'BEDS',
+        'BATH',
+        'SF',
     )
 
 class rent_dot_com:
