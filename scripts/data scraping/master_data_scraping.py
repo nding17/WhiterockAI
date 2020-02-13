@@ -56,7 +56,7 @@ class CONST:
     TRULIA_OVERHEAD = 'https://www.trulia.com'
 
     TRULIA_COLNAMES = {
-        'buy': [
+        'buy': (
             'ADDRESS', 
             'CITY', 
             'STATE', 
@@ -67,8 +67,8 @@ class CONST:
             'BATH',
             'SF',
             'AMENITIES',
-        ],
-        'rent': [
+        ),
+        'rent': (
             'ADDRESS', 
             'CITY', 
             'STATE', 
@@ -79,8 +79,8 @@ class CONST:
             'BATH',
             'SF',
             'PRICE',
-        ],
-        'sold': [
+        ),
+        'sold': (
             'ADDRESS', 
             'CITY', 
             'STATE', 
@@ -99,7 +99,7 @@ class CONST:
             'CHANGE PRICE', 
             'LISTING DATE', 
             'LISTING PRICE',
-        ],
+        ),
     }
 
     REMAX_COLNAMES = (
@@ -4265,21 +4265,21 @@ if __name__ == '__main__':
 
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
-    data_path = '../../data/sample'
-    img_path = '../../data/sample/remax'
-    rmdc.scraping_pipeline(data_path, img_path)
+    data_path_remax = '../../data/sample'
+    img_path_remax = '../../data/sample/remax'
+    rmdc.scraping_pipeline(data_path_remax, img_path_remax)
 
     ### compass New York For Rent 
     codc = compass_dot_com('new york', 'ny')
-    data_path = '../../data/sample'
-    img_path = '../../data/sample/compass'
-    codc.scraping_pipeline(data_path, img_path, test=False)
+    data_path_compass = '../../data/sample'
+    img_path_compass = '../../data/sample/compass'
+    codc.scraping_pipeline(data_path_compass, img_path_compass, test=False)
 
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    data_path = '../../data/sample'
-    img_path = '../../data/sample/rent'
-    rdc.scraping_pipeline(data_path, img_path, verbose=True)
+    data_path_rent = '../../data/sample'
+    img_path_rent = '../../data/sample/rent'
+    rdc.scraping_pipeline(data_path_rent, img_path_rent, verbose=True)
 
     ### coldwell Philadelphia For Sale
     data_path_coldwell = '../../data/sample'
@@ -4294,7 +4294,7 @@ if __name__ == '__main__':
     tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
 
     ### elliman.com For Rent 
-    img_path_elliman = '../../data/sample/elliman/imgdata'
-    data_path_elliman = '../../data/sample/elliman'
+    data_path_elliman = '../../data/sample'
+    img_path_elliman = '../../data/sample/elliman'
     edc = elliman_dot_com()
     edc.scraping_pipeline(data_path_elliman, img_path_elliman)
