@@ -4198,8 +4198,8 @@ class compass_dot_com:
 if __name__ == '__main__':
 
     ### trulia.com For Rent and For Sale
-    img_path_trulia = '../../data/sample'
-    data_path_trulia = '../../data/sample/trulia'
+    data_path_trulia = '../../data/sample'
+    img_path_trulia = '../../data/sample/trulia'
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
 
