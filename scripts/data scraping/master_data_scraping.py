@@ -4197,12 +4197,6 @@ class compass_dot_com:
 
 if __name__ == '__main__':
 
-    ### trulia.com For Rent and For Sale
-    data_path_trulia = '../../data/sample'
-    img_path_trulia = '../../data/sample/trulia'
-    tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
-
     ### compass New York For Rent 
     codc = compass_dot_com('new york', 'ny')
     data_path = '../../data/sample'
@@ -4225,6 +4219,12 @@ if __name__ == '__main__':
     rmdc = remax_dot_com('philadelphia', 'pa')
     data_path_remax = '../../data/sample'
     rmdc.scraping_pipeline(data_path_remax)
+
+    ### trulia.com For Rent and For Sale
+    data_path_trulia = '../../data/sample'
+    img_path_trulia = '../../data/sample/trulia'
+    tdc = trulia_dot_com('philadelphia', 'pa')
+    tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
 
     ### elliman.com For Rent 
     img_path_elliman = '../../data/sample/elliman/imgdata'
