@@ -23,6 +23,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver import ActionChains
 from selenium.webdriver.support import expected_conditions as EC
 
 ### constant
@@ -1706,10 +1707,89 @@ class trulia_dot_com:
             'rent': [],
             'sold': [],
         }
+        self._browser, _ = self._get_browser(CONST.TRULIA_OVERHEAD)
 
     #############################
     # private functions section #
     #############################
+
+    @staticmethod
+    def _build_chrome_options():
+        chrome_options = webdriver.ChromeOptions()
+        chrome_options.accept_untrusted_certs = True
+        chrome_options.assume_untrusted_cert_issuer = True
+
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        chrome_options.add_argument("--no-sandbox")
+        chrome_options.add_argument("--disable-impl-side-painting")
+        chrome_options.add_argument("--disable-setuid-sandbox")
+        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
+        chrome_options.add_argument("--disable-breakpad")
+        chrome_options.add_argument("--disable-client-side-phishing-detection")
+        chrome_options.add_argument("--disable-cast")
+        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
+        chrome_options.add_argument("--disable-cloud-import")
+        chrome_options.add_argument("--disable-popup-blocking")
+        chrome_options.add_argument("--ignore-certificate-errors")
+        chrome_options.add_argument("--disable-session-crashed-bubble")
+        chrome_options.add_argument("--disable-ipv6")
+        chrome_options.add_argument("--allow-http-screen-capture")
+        chrome_options.add_argument("--start-maximized")
+        chrome_options.add_argument('--lang=es')
+
+        return chrome_options
+
+    def _recaptcha(self, browser):
+        captcha_iframe = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located(
+                (
+                    By.TAG_NAME, 'iframe'
+                )
+            )
+        )
+
+        ActionChains(browser).move_to_element(captcha_iframe).click().perform()
+
+        # click im not robot
+        captcha_box = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (
+                    By.ID, 'g-recaptcha-response'
+                )
+            )
+        )
+
+        browser.execute_script("arguments[0].click()", captcha_box)
+        # time.sleep(120)
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+        options = self._build_chrome_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+
+        return browser, wait
 
     def _get_buy_webpage(self, pg_num, htype):
 
@@ -1925,16 +2005,24 @@ class trulia_dot_com:
 
         if sales_type.lower() == 'sold':
             webpage = self._get_sold_webpage(pg_num)
+
+        browser = self._browser
+        browser.get(webpage)
+        time.sleep(3)
+        try:
+            robot_check = browser.find_element_by_xpath("//div[@class='content center']")
+            if 'I am not a robot' in robot_check.text:
+                self._recaptcha(browser)
+        except:
+            pass
         
-        soup = self._get_soup(webpage)
         # main content tag, need to be constantly updated
         apt_class = 'PropertyCard__PropertyCardContainer-sc-1ush98q-2 gKJaNz Box-sc-8ox7qa-0 jIGxjA'
-        apt_tags = soup.find_all('div', class_=apt_class)
+        apt_tags = browser.find_elements_by_xpath("//div[@class='PropertyCard__PropertyCardContainer-sc-1ush98q-2 gKJaNz Box-sc-8ox7qa-0 jIGxjA']")
 
         # scrape all the apartment URLs
-        apt_link_tags = [tag.find('a') for tag in apt_tags]
-        apt_urls = [f"{CONST.TRULIA_OVERHEAD}{tag['href']}" for tag in apt_link_tags]
-        
+        apt_link_tags = [tag.find_element_by_tag_name('a') for tag in apt_tags]
+        apt_urls = [f"{tag.get_attribute('href')}" for tag in apt_link_tags]
         return apt_urls
 
     def _get_apt_urls_ensemble(self,
@@ -2547,14 +2635,14 @@ class trulia_dot_com:
         try:
             price_history = jdict['props']['homeDetails']['priceHistory']
             price_sold = self._first(price_history, 
-                               condition=lambda x: x['event'].lower() == 'sold')
+                               condition=lambda x: x['event'].lower()=='sold')
             price_listed = self._first(price_history,
-                                condition=lambda x: x['event'].lower() == 'listed for sale')
+                                condition=lambda x: x['event'].lower()=='listed for sale')
             try:
                 start, end = price_history.index(price_sold), price_history.index(price_listed)
                 price_history = price_history[start:end]
                 price_change = self._first(price_history,
-                                    condition=lambda x: x['event'].lower() == 'price change')
+                                    condition=lambda x: x['event'].lower()=='price change')
                 return price_sold, price_change, price_listed
             except:
                 return price_sold, None, price_listed
@@ -2923,7 +3011,7 @@ class trulia_dot_com:
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        categories = ['buy', 'sold', 'rent']
+        categories = ['rent', 'buy', 'sold']
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -2952,6 +3040,7 @@ class trulia_dot_com:
                     continue
 
             print(f'scraping for category - {category} done!')
+            self._browser.close()
 
         print('job done, congratulations!')
 
@@ -4673,25 +4762,25 @@ if __name__ == '__main__':
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('new york', 'new york')
-    # ldc.scraping_pipeline(data_path, img_path, test=True)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com('new york', 'new york')
+    ldc.scraping_pipeline(data_path, img_path, test=True)
 
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('philadelphia', 'pa')
-    # rmdc.scraping_pipeline(data_path, img_path, test=True)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('philadelphia', 'pa')
+    rmdc.scraping_pipeline(data_path, img_path, test=True)
 
-    # ### compass New York For Rent 
-    # codc = compass_dot_com('new york', 'ny')
-    # codc.scraping_pipeline(data_path, img_path, test=True)
+    ### compass New York For Rent 
+    codc = compass_dot_com('new york', 'ny')
+    codc.scraping_pipeline(data_path, img_path, test=True)
 
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    # rdc.scraping_pipeline(data_path, img_path, test=True)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    rdc.scraping_pipeline(data_path, img_path, test=True)
 
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    # cdc.scraping_pipeline(data_path, img_path, test=True)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc.scraping_pipeline(data_path, img_path, test=True)
 
     ### elliman.com For Rent 
     edc = elliman_dot_com('new york', 'ny')
