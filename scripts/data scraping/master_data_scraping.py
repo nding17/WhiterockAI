@@ -126,6 +126,7 @@ class CONST:
         'AC',
         'TAX AMOUNT',
         'TAX YEAR',
+        'LINK',
     )
 
     # for rent 
@@ -146,6 +147,7 @@ class CONST:
         'CENTRAL AC', 
         'WASHER/DRIER',
         'LAST PRICE',
+        'LINK',
     )
 
     # for sale 
@@ -163,6 +165,7 @@ class CONST:
         'BUILDING CLASS',
         'YEAR BUILT',
         'AVERAGE OCCUPANCY',
+        'LINK',
     )
 
 ### For Sale 
@@ -1045,32 +1048,32 @@ class rent_dot_com:
         self._apt_data = []
 
     @staticmethod
-    def _build_chrome_options():
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.accept_untrusted_certs = True
-        chrome_options.assume_untrusted_cert_issuer = True
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
 
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-impl-side-painting")
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-cast")
-        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
-        chrome_options.add_argument("--disable-cloud-import")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-session-crashed-bubble")
-        chrome_options.add_argument("--disable-ipv6")
-        chrome_options.add_argument("--allow-http-screen-capture")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--lang=es')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
 
-        return chrome_options
+        return options
 
     def _get_browser(self, webpage):
         """
@@ -1092,8 +1095,8 @@ class rent_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        options = self._build_chrome_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -1550,11 +1553,11 @@ class rent_dot_com:
                 for unit_tag in floor_plan:
                     # unit tag
                     if unit_tag['data-tid'] == 'pdpfloorplan-row':
-                        apt = list(addr)+self._get_floorplan(unit_tag)
+                        apt = list(addr)+self._get_floorplan(unit_tag)+[complete_url]
                         apartments.append(apt)
                     # floorplan tag
                     if unit_tag['data-tid'] == 'pdpfloorplans-unit-row':
-                        apt = list(addr)+self._get_units(unit_tag)
+                        apt = list(addr)+self._get_units(unit_tag)+[complete_url]
                         apartments.append(apt)
                 # update the list that contains all the apartments info
                 apt_all += apartments
@@ -1720,32 +1723,32 @@ class trulia_dot_com:
     #############################
 
     @staticmethod
-    def _build_chrome_options():
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.accept_untrusted_certs = True
-        chrome_options.assume_untrusted_cert_issuer = True
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
 
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-impl-side-painting")
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-cast")
-        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
-        chrome_options.add_argument("--disable-cloud-import")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-session-crashed-bubble")
-        chrome_options.add_argument("--disable-ipv6")
-        chrome_options.add_argument("--allow-http-screen-capture")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--lang=es')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
 
-        return chrome_options
+        return options
 
     def _recaptcha(self, browser):
         captcha_iframe = WebDriverWait(browser, 10).until(
@@ -1790,8 +1793,8 @@ class trulia_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        options = self._build_chrome_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
 
@@ -3046,32 +3049,32 @@ class remax_dot_com:
         self._apt_data = []
 
     @staticmethod
-    def _build_chrome_options():
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.accept_untrusted_certs = True
-        chrome_options.assume_untrusted_cert_issuer = True
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
         
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-impl-side-painting")
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-cast")
-        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
-        chrome_options.add_argument("--disable-cloud-import")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-session-crashed-bubble")
-        chrome_options.add_argument("--disable-ipv6")
-        chrome_options.add_argument("--allow-http-screen-capture")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--lang=es')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
 
-        return chrome_options
+        return options
 
     def _get_browser(self, webpage):
         """
@@ -3093,11 +3096,107 @@ class remax_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        options = self._build_chrome_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
+
+    def _random_user_agent(self):
+        """
+        A helper function to generate a random header to 
+        avoid getting blocked by the website
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        str
+        a random user agent 
+
+        >>> _random_user_agent()
+        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/58.0.3029.110 Safari/537.36'
+        """
+        try:
+            ua = UserAgent()
+            return ua.random
+        except:
+            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
+                    AppleWebKit/537.36 (KHTML, like Gecko) \
+                    Chrome/58.0.3029.110 Safari/537.36'
+            return default_ua
+
+    def _get_soup(self, url):
+        
+
+        """
+        This is a helper function that will automatically generate a 
+        BeautifulSoup object based on the given URL of the apartment 
+        webpage
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage
+        """
+
+        # generate a random header 
+        headers = {'User-Agent': self._random_user_agent()}
+        # send a request and get the soup
+        response = requests.get(url, headers=headers)
+        results = response.content
+        if not response.status_code == 404:
+            soup = BeautifulSoup(results, 'lxml')
+        return soup
+
+    def _soup_attempts(self, url, total_attempts=5):
+
+        """
+        A helper function that will make several attempts
+        to obtain a soup to avoid getting blocked
+
+        Parameters
+        ----------
+        url : str
+            the URL of a specific apartment or a general website 
+
+        total_attempts: int
+            the number of attempts you want to try to obtain the 
+            soup before you already give up. Default is 5 attempts
+
+        Returns
+        -------
+        soup : bs4.BeautifulSoup
+            a scraper for a specified webpage        
+
+        """
+
+        soup = self._get_soup(url)
+
+        # if we get the soup with the first attempt
+        if soup:
+            return soup
+        # if we don't get the soup during our first
+        # attempt
+        else:
+            attempts = 0
+            while attempts < total_attempts:
+                # put the program idle to avoid detection
+                time.sleep(3)
+                soup = self._get_soup(url)
+                if soup:
+                    return soup
+            # time to give up, try to find what's going on 
+            raise ValueError(f'FAILED to get soup for apt url {url}')
 
     def _get_webpage(self):
 
@@ -3381,7 +3480,7 @@ class remax_dot_com:
         except:
             return year
 
-    def _remax_apt(self, soup, img_path):
+    def _remax_apt(self, complete_url, img_path):
 
         """
         Scrape all the relavent information of the apartment given 
@@ -3410,6 +3509,7 @@ class remax_dot_com:
         # is by creating dictionaries to store the unstructured information
         # but here are the features that are common across all aparments and 
         # I also picked some features I think are important
+        soup = self._soup_attempts(complete_url)
         price = self._get_price(soup)
         street, city, state, zipcode = self._get_address(soup)
         sidict = self._get_sideinfo(soup)
@@ -3443,11 +3543,12 @@ class remax_dot_com:
             ac,
             tax,
             tax_year,
+            complete_url,
         ]
 
         img_urls = self._get_img_urls(soup)
         if img_urls:
-            self._save_images(img_urls, img_path, f"{street}, {city.replace('-', ' ').title()}, {state.upper()}")
+            self._save_images(img_urls, img_path, f"{street.title()}, {city.replace('-', ' ').title()}, {state.upper()}")
 
         return unit
 
@@ -3547,14 +3648,13 @@ class remax_dot_com:
          ['1417 N 8TH ST', 'Philadelphia', 'PA', '19122', ... , 'Philadelphia County', None, 'Ludlow', 'Yes']
          ...]
         """
-
-        response = requests.get(self._overhead+apt_url)
+        complete_url = self._overhead+apt_url
+        response = requests.get(complete_url)
         results = response.content
         
         if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
             # append the luxury feature as an additional column
-            apt_info = self._remax_apt(soup, img_path)
+            apt_info = self._remax_apt(complete_url, img_path)
 
         return apt_info
 
@@ -3835,10 +3935,10 @@ class coldwell_dot_com:
             'CITY': city, 
             'STATE': state, 
             'ZIP': zip_code, 
-            'APT': apt_num, 
-            'BATHROOMS': bathrooms,
-            'BEDROOMS': bedrooms, 
-            'SF': sqt,
+            'APT #': apt_num, 
+            'BATH': bathrooms,
+            'BED': bedrooms, 
+            'GSF': sqt,
             'ASKING PRICE': asking_price, 
             'LISTING TYPE': listing_type,
             'LOT SF': lot_size, 
@@ -3847,7 +3947,8 @@ class coldwell_dot_com:
             'BASEMENT': base,
             'BASEMENT DESC': base_desc, 
             'ARCH': arch_info, 
-            'MATERIAL': material
+            'MATERIAL': material,
+            'LINK': url,
         }
 
         ##Scrap all the image for each property and store them into each folder
@@ -3857,7 +3958,7 @@ class coldwell_dot_com:
             image_url.append(image_link.get('data-href'))
 
         file_root = img_path
-        file_folder = ','.join([street,city])
+        file_folder = ', '.join([street,city])
         file_path = os.path.join(file_root, file_folder)
 
         current_path = os.getcwd() 
@@ -3932,32 +4033,32 @@ class compass_dot_com:
         self._browser, _ = self._get_browser(self._url)
 
     @staticmethod
-    def _build_chrome_options():
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.accept_untrusted_certs = True
-        chrome_options.assume_untrusted_cert_issuer = True
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
 
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-impl-side-painting")
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-cast")
-        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
-        chrome_options.add_argument("--disable-cloud-import")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-session-crashed-bubble")
-        chrome_options.add_argument("--disable-ipv6")
-        chrome_options.add_argument("--allow-http-screen-capture")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--lang=es')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
 
-        return chrome_options
+        return options
 
     def _get_browser(self, webpage):
         """
@@ -3979,8 +4080,8 @@ class compass_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        options = self._build_chrome_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -4266,7 +4367,8 @@ class compass_dot_com:
             stories,
             central_ac, 
             wd,
-            last_price, 
+            last_price,
+            url,
         )
 
         img_urls = self._get_image_urls(soup)
@@ -4529,6 +4631,7 @@ class loopnet_dot_com:
             building_class,
             year_built,
             avg_occ,
+            complete_url,
         ]
 
         img_urls = self._get_img_urls(soup)
@@ -4544,32 +4647,32 @@ class loopnet_dot_com:
         return img_urls
 
     @staticmethod
-    def _build_chrome_options():
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.accept_untrusted_certs = True
-        chrome_options.assume_untrusted_cert_issuer = True
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
 
         # chrome configuration
         # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
         # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        chrome_options.add_argument("--no-sandbox")
-        chrome_options.add_argument("--disable-impl-side-painting")
-        chrome_options.add_argument("--disable-setuid-sandbox")
-        chrome_options.add_argument("--disable-seccomp-filter-sandbox")
-        chrome_options.add_argument("--disable-breakpad")
-        chrome_options.add_argument("--disable-client-side-phishing-detection")
-        chrome_options.add_argument("--disable-cast")
-        chrome_options.add_argument("--disable-cast-streaming-hw-encoding")
-        chrome_options.add_argument("--disable-cloud-import")
-        chrome_options.add_argument("--disable-popup-blocking")
-        chrome_options.add_argument("--ignore-certificate-errors")
-        chrome_options.add_argument("--disable-session-crashed-bubble")
-        chrome_options.add_argument("--disable-ipv6")
-        chrome_options.add_argument("--allow-http-screen-capture")
-        chrome_options.add_argument("--start-maximized")
-        chrome_options.add_argument('--lang=es')
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
 
-        return chrome_options
+        return options
 
     def _get_browser(self, webpage):
         """
@@ -4591,8 +4694,8 @@ class loopnet_dot_com:
             of time since we need some time to listen to the server 
 
         """
-        options = self._build_chrome_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), chrome_options=options)
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -4731,30 +4834,32 @@ if __name__ == '__main__':
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('new york', 'new york')
-    # ldc.scraping_pipeline(data_path, img_path, test=True)
+    is_testing = True
 
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('philadelphia', 'pa')
-    # rmdc.scraping_pipeline(data_path, img_path, test=True)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com('new york', 'new york')
+    ldc.scraping_pipeline(data_path, img_path, test=is_testing)
 
-    # ### compass New York For Rent 
-    # codc = compass_dot_com('new york', 'ny')
-    # codc.scraping_pipeline(data_path, img_path, test=True)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('philadelphia', 'pa')
+    rmdc.scraping_pipeline(data_path, img_path, test=is_testing)
 
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    # rdc.scraping_pipeline(data_path, img_path, test=True)
+    ### compass New York For Rent 
+    codc = compass_dot_com('new york', 'ny')
+    codc.scraping_pipeline(data_path, img_path, test=is_testing)
 
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    # cdc.scraping_pipeline(data_path, img_path, test=True)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    rdc.scraping_pipeline(data_path, img_path, test=is_testing)
 
-    # ### elliman.com For Rent 
-    # edc = elliman_dot_com('new york', 'ny')
-    # edc.scraping_pipeline(data_path, img_path, test=True)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc.scraping_pipeline(data_path, img_path, test=is_testing)
+
+    ### elliman.com For Rent 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, img_path, test=is_testing)
 
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path, img_path, test=True)
+    tdc.scraping_pipeline(data_path, img_path, test=is_testing)
