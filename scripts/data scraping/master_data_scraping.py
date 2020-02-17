@@ -28,6 +28,7 @@ from fake_useragent import UserAgent
 
 ### constant
 class CONST:
+    # for sale 
     ELLIMAN_HEADER = 'https://www.elliman.com'
 
     ELLIMAN_COLNAMES = (
@@ -35,24 +36,27 @@ class CONST:
         'NEIGHBORHOOD', 
         'CITY',
         'ASKING PRICE',
-        'BEDROOMS', 
-        'BATHROOMS', 
-        'HALF BATHROOMS',
+        'BED', 
+        'BATH', 
+        'HALF BATH',
         'LISTING TYPE',
-        'SF',
+        'GSF',
         'LISTING ID',
+        'LINK',
     )
 
+    # for rent 
     RENT_COLNAMES = (
         'ADDRESS',
         'CITY',
         'STATE',
-        'ZIPCODE',
-        'UNIT #',
-        'PRICE',
-        'BEDS',
+        'ZIP',
+        'APT #',
+        'RENT',
+        'BED',
         'BATH',
-        'SF',
+        'UNIT SF',
+        'LINK',
     )
 
     TRULIA_OVERHEAD = 'https://www.trulia.com'
@@ -62,35 +66,34 @@ class CONST:
             'ADDRESS', 
             'CITY', 
             'STATE', 
-            'ZIPCODE', 
-            'NEIGHBORHOOD',
-            'PRICE',
-            'BEDS', 
+            'ZIP', 
+            'ASKING PRICE',
+            'BED', 
             'BATH',
-            'SF',
+            'GSF',
             'AMENITIES',
+            'LINK',
         ),
         'rent': (
             'ADDRESS', 
             'CITY', 
             'STATE', 
-            'ZIPCODE', 
-            'NEIGHBORHOOD',
-            'UNIT #',
-            'BEDS',
+            'ZIP', 
+            'APT #',
+            'BED',
             'BATH',
-            'SF',
-            'PRICE',
+            'UNIT SF',
+            'RENT',
+            'LINK',
         ),
         'sold': (
             'ADDRESS', 
             'CITY', 
             'STATE', 
-            'ZIPCODE', 
-            'NEIGHBORHOOD',
-            'BEDS', 
+            'ZIP', 
+            'BED', 
             'BATH',
-            'SF',
+            'GSF',
             'AMENITIES',
             'SALE DATE', 
             'SALE PRICE', 
@@ -101,19 +104,21 @@ class CONST:
             'CHANGE PRICE', 
             'LISTING DATE', 
             'LISTING PRICE',
+            'LINK',
         ),
     }
 
+    # for sale 
     REMAX_COLNAMES = (
         'ADDRESS', 
         'CITY', 
         'STATE', 
-        'ZIPCODE',
+        'ZIP',
         'PRICE',
-        'BEDROOMS',
-        'BATHROOMS',
+        'BED',
+        'BATH',
         'FIREPLACE',
-        'LIVING AREA',
+        'GSF',
         'PROPERTY TYPE',
         'YEAR BUILT',
         'LOT SIZE',
@@ -123,13 +128,14 @@ class CONST:
         'TAX YEAR',
     )
 
+    # for rent 
     COMPASS_COLNAMES = (
         'ADDRESS', 
-        'UNIT #',
+        'APT #',
         'CITY',
         'STATE', 
-        'ZIPCODE', 
-        'PRICE', 
+        'ZIP', 
+        'RENT', 
         'BEDS', 
         'BATH', 
         'SF', 
@@ -142,6 +148,7 @@ class CONST:
         'LAST PRICE',
     )
 
+    # for sale 
     LOOPNET_COLNAMES = (
         'ADDRESS', 
         'CITY', 
@@ -158,7 +165,7 @@ class CONST:
         'AVERAGE OCCUPANCY',
     )
 
-### For Rent 
+### For Sale 
 class elliman_dot_com:
 
     ############################
@@ -747,7 +754,7 @@ class elliman_dot_com:
         except:
             return None
 
-    def _get_apt_data(self, soup):
+    def _get_apt_data(self, url):
 
         """
 
@@ -765,7 +772,7 @@ class elliman_dot_com:
             features are specified with the previous functions      
 
         """
-    
+        soup = self._soup_attempts(url)
         street, neighborhood, city = self._get_address(soup)
         price = self._get_price(soup)
         beds, baths, halfbaths = self._get_features(soup)
@@ -785,6 +792,7 @@ class elliman_dot_com:
             htype,
             sqft,
             listid,
+            url,
         ]
         
         return unit
@@ -858,9 +866,7 @@ class elliman_dot_com:
                 break
             try:
                 # update apartment info to the list
-                soup = self._soup_attempts(url)
-                unit = self._get_apt_data(soup)
-
+                unit = self._get_apt_data(url)
                 apt_data.append(unit)
             except:
                 print(soup)
@@ -1599,7 +1605,7 @@ class rent_dot_com:
         apt_all_data = []
 
         if verbose:
-            print(f'aparments in {len(apt_urls)} addresses to be scraped')
+            print(f'apartments in {len(apt_urls)} addresses to be scraped')
 
         # loop through all the apartment URLs and scrape all the apartments
         # information in each URL
@@ -1928,37 +1934,6 @@ class trulia_dot_com:
 
         return webpage
 
-
-    def _get_soup(self, url):
-
-        """
-        This is a helper function that will automatically generate a BeautifulSoup
-        object based on the given URL of the apartment webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # Here we added User-Agent to the header of our request 
-        # It is because sometimes the web server will check the
-        # different fields of the header to block robot scrapers
-        # User-Agent is the most common one because it is specific 
-        # to your browser.
-        headers = {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                AppleWebKit/537.36 (KHTML, like Gecko) Chrome/58.0.3029.110 Safari/537.36'}
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup # generate a scraper
-
     def _get_apt_urls_per_page(self,
                                pg_num,
                                sales_type,
@@ -2096,7 +2071,7 @@ class trulia_dot_com:
             print('last 2 pages removed since they are the same.')
         return urls_ensemble_cut
 
-    def _load_json(self, soup):
+    def _load_json(self, url):
 
         """
         
@@ -2114,14 +2089,21 @@ class trulia_dot_com:
             a JSON object, a dictionary of dictionaries  
 
         """
+        browser = self._browser
+        browser.get(url)
 
-        jfile = soup.find('script', attrs={
-            'id': '__NEXT_DATA__',
-            'type': 'application/json',
-        }).get_text()
+        try:
+            robot_check = browser.find_element_by_xpath("//div[@class='content center']")
+            if 'I am not a robot' in robot_check.text:
+                self._recaptcha(browser)
+        except:
+            pass
+
+        jtext = browser.find_element_by_xpath("//script[@id='__NEXT_DATA__']")\
+                       .get_attribute("innerHTML")
         
         # convert text to JSON
-        jdict = json.loads(jfile) 
+        jdict = json.loads(jtext) 
         return jdict
 
     def _get_img_urls(self, jdict):
@@ -2241,13 +2223,9 @@ class trulia_dot_com:
             city = loc_dict['city']
             zipcode = loc_dict['zipCode']
             street = loc_dict['formattedLocation']
-            try:
-                neighborhood = loc_dict['neighborhoodName']
-            except:
-                neighborhood = None
-            return street, city, state, zipcode, neighborhood
+            return street, city, state, zipcode
         except:
-            return None, None, None, None, None
+            return None, None, None, None
 
     def _get_price(self, jdict):
 
@@ -2422,9 +2400,8 @@ class trulia_dot_com:
         apt_info_data = []
 
         for url in apt_urls:
-            soup = self._get_soup(url)
-            jdict = self._load_json(soup)
-            street, city, state, zipcode, neighborhood = self._get_address(jdict)
+            jdict = self._load_json(url)
+            street, city, state, zipcode = self._get_address(jdict)
             price = self._get_price(jdict)
             bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
             space = self._get_space(jdict)
@@ -2435,12 +2412,12 @@ class trulia_dot_com:
                 city, 
                 state, 
                 zipcode, 
-                neighborhood,
                 price,
                 bedrooms, 
                 bathrooms,
                 space,
                 features,
+                url,
             ])
 
         return apt_info_data
@@ -2532,7 +2509,7 @@ class trulia_dot_com:
         except:
             return np.nan
 
-    def _get_floorplans(self, jdict):
+    def _get_floorplans(self, url):
         
         """
         This is a helper function that extract the floorplan information of 
@@ -2550,6 +2527,7 @@ class trulia_dot_com:
         """
         
         try:
+            jdict = self._load_json(url)
             floorplans_groups = jdict['props']['homeDetails']['floorPlans']['floorPlanGroups']
             address_data = list(self._get_address(jdict))
             rental_data = []
@@ -2560,12 +2538,12 @@ class trulia_dot_com:
                 for section in plans:
                     # this is the header 
                     section_data = self._get_section_data(section)
-                    rental_data.append(address_data+section_data)
+                    rental_data.append(address_data+section_data+[url])
                     units = section['units']
                     # these are all the units under that header 
                     for unit in units:
                         unit_data = self._get_section_data(unit)
-                        rental_data.append(address_data+unit_data)
+                        rental_data.append(address_data+unit_data+[url])
             return rental_data
         except:
             return None
@@ -2587,9 +2565,7 @@ class trulia_dot_com:
 
         for i, apt_url in enumerate(apt_urls):
             try:
-                soup = self._get_soup(apt_url)
-                jdict = self._load_json(soup)
-                floorplan_data = self._get_floorplans(jdict)
+                floorplan_data = self._get_floorplans(apt_url)
                 if floorplan_data:
                     apt_info_data += floorplan_data
 
@@ -2701,11 +2677,12 @@ class trulia_dot_com:
         
         return date_s, price_s, date_c, price_c, date_l, price_l
 
-    def _get_sold_info(self, jdict):
+    def _get_sold_info(self, url):
         """
         A helper function that packages all the sold apartment information
         """
-        street, city, state, zipcode, neighborhood = self._get_address(jdict)
+        jdict = self._load_json(url)
+        street, city, state, zipcode = self._get_address(jdict)
         bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
         space = self._get_space(jdict)
         features = self._get_apt_features(jdict)
@@ -2717,7 +2694,6 @@ class trulia_dot_com:
             city, 
             state, 
             zipcode, 
-            neighborhood,
             bedrooms, 
             bathrooms,
             space,
@@ -2731,6 +2707,7 @@ class trulia_dot_com:
             change_price, 
             list_date, 
             list_price,
+            url,
         ]
         
         return sold_info
@@ -2796,9 +2773,7 @@ class trulia_dot_com:
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
 
         for i, apt_url in enumerate(apt_urls):
-            soup = self._get_soup(apt_url)
-            jdict = self._load_json(soup)
-            sold_data = self._get_sold_info(jdict)
+            sold_data = self._get_sold_info(apt_url)
             apt_info_data.append(sold_data)
 
             if test and i==5:
@@ -2943,8 +2918,7 @@ class trulia_dot_com:
             if test and i == 5:
                 break
 
-            soup = self._get_soup(url) # get a soup object
-            jdict = self._load_json(soup) # extract the json file 
+            jdict = self._load_json(url) # extract the json file
             img_urls = self._get_img_urls(jdict) # extract image URLs from the json file
             address = self._get_address(jdict)[0] # name of the folder 
             # write images onto the local machine 
@@ -3011,7 +2985,6 @@ class trulia_dot_com:
         for category in categories:
             print(f'scraping for category - {category} starts!')
             self.scrape_apt_urls(category, test=test, verbose=True)
-        self._browser.close()
 
         # divide the apartment URLs list into small batches 
         # in case the program crashes
@@ -3035,6 +3008,8 @@ class trulia_dot_com:
                     continue
 
             print(f'scraping for category - {category} done!')
+
+        self._browser.close()
         
         print('job done, congratulations!')
 
