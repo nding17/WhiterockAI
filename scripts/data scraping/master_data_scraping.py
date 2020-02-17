@@ -1762,7 +1762,7 @@ class trulia_dot_com:
         )
 
         browser.execute_script("arguments[0].click()", captcha_box)
-        # time.sleep(120)
+        time.sleep(120)
 
     def _get_browser(self, webpage):
         """
@@ -3011,14 +3011,16 @@ class trulia_dot_com:
         for category in categories:
             print(f'scraping for category - {category} starts!')
             self.scrape_apt_urls(category, test=test, verbose=True)
+        self._browser.close()
 
-            # divide the apartment URLs list into small batches 
-            # in case the program crashes 
+        # divide the apartment URLs list into small batches 
+        # in case the program crashes
+        for category in categories:
             apt_urls = tdc.apt_urls[category]
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
             # batch jobs start
-            print(f'a total number of {len(url_batches)} batches')
+            print(f'a total number of {len(url_batches)} batches, category={category}')
             for i, url_batch in enumerate(url_batches):
                 try:
                     print(f'batch {i} starts')
@@ -3033,8 +3035,7 @@ class trulia_dot_com:
                     continue
 
             print(f'scraping for category - {category} done!')
-            self._browser.close()
-
+        
         print('job done, congratulations!')
 
     #####################
