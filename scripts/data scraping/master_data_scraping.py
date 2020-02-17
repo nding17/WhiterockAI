@@ -25,6 +25,8 @@ from bs4 import BeautifulSoup
 from urllib import request
 from selenium import webdriver
 from fake_useragent import UserAgent
+from os import listdir
+from os.path import isfile, join
 
 ### constant
 class CONST:
@@ -137,7 +139,7 @@ class CONST:
         'STATE', 
         'ZIP', 
         'RENT', 
-        'BEDS', 
+        'BED', 
         'BATH', 
         'SF', 
         'YEAR BUILT', 
@@ -4829,6 +4831,32 @@ class loopnet_dot_com:
         self._browser.close()
         print('job done, congratulations!')
 
+### merge all the files together 
+class data_merger:
+
+    def __init__(self, data_path):
+        self._data_path = data_path
+
+    def merge_data(self):
+        files = [f for f in listdir(self._data_path) \
+                    if isfile(join(self._data_path, f)) \
+                        and '.csv' in f\
+                        and not f=='master_scraping_data.csv']
+        dfs = []
+
+        for file in files:
+            df = pd.read_csv(f'{data_path}/{file}',
+                             index_col=0,
+                             error_bad_lines=False)
+            dfs.append(df)
+
+        final_df = pd.concat(dfs, 
+                             axis=0, 
+                             ignore_index=True, 
+                             sort=False)
+
+        final_df.to_csv(f'{data_path}/master_scraping_data.csv', index=False)
+
 if __name__ == '__main__':
 
     data_path = '../../data/sample/info'
@@ -4863,3 +4891,6 @@ if __name__ == '__main__':
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path, img_path, test=is_testing)
+
+    dm = data_merger(data_path)
+    dm.merge_data()
