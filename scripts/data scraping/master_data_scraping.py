@@ -4045,8 +4045,8 @@ class compass_dot_com:
 
     ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
-        price_tags = soup.find('div', class_='u-flexContainer--row summary__RightContent-e4c4ok-4 eFqMfB') \
-                         .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 bgfBKu')
+        price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
+                         .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
         keys = [tag.find('div', class_='textIntent-caption2 summary__SummaryCaption-e4c4ok-5 bcaMfK').get_text() for tag in price_tags]
         values = [self._parse_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
@@ -4667,44 +4667,33 @@ class loopnet_dot_com:
 
 if __name__ == '__main__':
 
+    data_path = '../../data/sample/info'
+    img_path = '../../data/sample/images'
+
     ### loopnet.com New York For Sale 
     ldc = loopnet_dot_com('new york', 'new york')
-    data_path_loopnet = '../../data/sample'
-    img_path_loopnet = '../../data/sample/loopnet'
-    ldc.scraping_pipeline(data_path_loopnet, img_path_loopnet, test=True)
+    ldc.scraping_pipeline(data_path, img_path, test=True)
 
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
-    data_path_remax = '../../data/sample'
-    img_path_remax = '../../data/sample/remax'
-    rmdc.scraping_pipeline(data_path_remax, img_path_remax, test=True)
+    rmdc.scraping_pipeline(data_path, img_path, test=True)
 
     ### compass New York For Rent 
     codc = compass_dot_com('new york', 'ny')
-    data_path_compass = '../../data/sample'
-    img_path_compass = '../../data/sample/compass'
-    codc.scraping_pipeline(data_path_compass, img_path_compass, test=True)
+    codc.scraping_pipeline(data_path, img_path, test=True)
 
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    data_path_rent = '../../data/sample'
-    img_path_rent = '../../data/sample/rent'
-    rdc.scraping_pipeline(data_path_rent, img_path_rent, test=True)
+    rdc.scraping_pipeline(data_path, img_path, test=True)
 
     ### coldwell Philadelphia For Sale
-    data_path_coldwell = '../../data/sample'
-    img_path_coldwell = '../../data/sample/coldwell'
     cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path_coldwell, img_path_coldwell, test=True)
+    cdc.scraping_pipeline(data_path, img_path, test=True)
 
     ### trulia.com For Rent and For Sale
-    data_path_trulia = '../../data/sample'
-    img_path_trulia = '../../data/sample/trulia'
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path_trulia, img_path_trulia, test=True)
+    tdc.scraping_pipeline(data_path, img_path, test=True)
 
     ### elliman.com For Rent 
-    data_path_elliman = '../../data/sample'
-    img_path_elliman = '../../data/sample/elliman'
     edc = elliman_dot_com()
-    edc.scraping_pipeline(data_path_elliman, img_path_elliman, test=True)
+    edc.scraping_pipeline(data_path, img_path, test=True)
