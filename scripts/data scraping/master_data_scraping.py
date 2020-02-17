@@ -164,9 +164,11 @@ class elliman_dot_com:
     # class initiation section #
     ############################
 
-    def __init__(self):
+    def __init__(self, city, state):
         self._apt_urls = []
         self._apt_data = []
+        self._city = city
+        self._state = state
 
     #############################
     # private functions section #
@@ -499,9 +501,10 @@ class elliman_dot_com:
             
             # create a folder for the apartment if it doesn't
             # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
+            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
+            if not os.path.exists(addr):
+                os.mkdir(addr)
+            os.chdir(addr)
 
             # write images inside the apartment folder
             for i, img_url in enumerate(img_urls):
@@ -994,8 +997,8 @@ class elliman_dot_com:
         print(f'total number of batches: {len(url_batches)}')
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            self.scrape_apt_data(batch, verbose=True)
-            self.scrape_apt_images(batch, image_path, verbose=True)
+            self.scrape_apt_data(batch, verbose=True, test=test)
+            self.scrape_apt_images(batch, img_path, verbose=True, test=test)
             apt_data = self.apt_data
             self.write_data(apt_data, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
@@ -4048,7 +4051,7 @@ class compass_dot_com:
         price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
                          .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
-        keys = [tag.find('div', class_='textIntent-caption2 summary__SummaryCaption-e4c4ok-5 bcaMfK').get_text() for tag in price_tags]
+        keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
         values = [self._parse_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
         d = dict(zip(keys, values))
@@ -4670,30 +4673,30 @@ if __name__ == '__main__':
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('new york', 'new york')
-    ldc.scraping_pipeline(data_path, img_path, test=True)
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com('new york', 'new york')
+    # ldc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('philadelphia', 'pa')
-    rmdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com('philadelphia', 'pa')
+    # rmdc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### compass New York For Rent 
-    codc = compass_dot_com('new york', 'ny')
-    codc.scraping_pipeline(data_path, img_path, test=True)
+    # ### compass New York For Rent 
+    # codc = compass_dot_com('new york', 'ny')
+    # codc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    rdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    # rdc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    # cdc.scraping_pipeline(data_path, img_path, test=True)
+
+    ### elliman.com For Rent 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, img_path, test=True)
 
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path, img_path, test=True)
-
-    ### elliman.com For Rent 
-    edc = elliman_dot_com()
-    edc.scraping_pipeline(data_path, img_path, test=True)
