@@ -5,26 +5,26 @@ __version__ = '1.0.1'
 __status__ = 'complete'
 
 ### package requirements
+import numpy as np
+import pandas as pd
+import urllib as ulb
 import re
+import requests
 import os
 import time
 import json
 import random
-import requests
-import numpy as np
-import pandas as pd
-import urllib as ulb
 
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.ui import WebDriverWait
 from bs4 import BeautifulSoup
 from urllib import request
 from selenium import webdriver
 from fake_useragent import UserAgent
-from selenium.webdriver.common.by import By
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.support.ui import WebDriverWait
-from webdriver_manager.chrome import ChromeDriverManager
-from selenium.webdriver import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
 
 ### constant
 class CONST:
@@ -2154,7 +2154,6 @@ class trulia_dot_com:
     def _save_images(self, 
                      img_urls, 
                      data_path, 
-                     img_type, 
                      address):
 
         """
@@ -2190,18 +2189,13 @@ class trulia_dot_com:
             # when it finishes the image saving tasks
             current_path = os.getcwd()
             os.chdir(data_path)
-            
-            # create a folder for the section if it doesn't
-            # exist
-            if not os.path.exists(img_type):
-                os.mkdir(img_type)
-            os.chdir(img_type)
 
             # create a folder for the apartment if it doesn't
             # exist inside the section folder 
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
+            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
+            if not os.path.exists(addr):
+                os.mkdir(addr)
+            os.chdir(addr)
 
             # write images inside the apartment folder 
             for i, img_url in enumerate(img_urls):
@@ -2952,11 +2946,10 @@ class trulia_dot_com:
             soup = self._get_soup(url) # get a soup object
             jdict = self._load_json(soup) # extract the json file 
             img_urls = self._get_img_urls(jdict) # extract image URLs from the json file
-            address = self._get_address(jdict)[0].upper() # name of the folder 
+            address = self._get_address(jdict)[0] # name of the folder 
             # write images onto the local machine 
             self._save_images(img_urls, 
                               data_path, 
-                              sales_type,
                               address)
 
         if verbose:
@@ -4762,29 +4755,29 @@ if __name__ == '__main__':
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('new york', 'new york')
-    ldc.scraping_pipeline(data_path, img_path, test=True)
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com('new york', 'new york')
+    # ldc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('philadelphia', 'pa')
-    rmdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com('philadelphia', 'pa')
+    # rmdc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### compass New York For Rent 
-    codc = compass_dot_com('new york', 'ny')
-    codc.scraping_pipeline(data_path, img_path, test=True)
+    # ### compass New York For Rent 
+    # codc = compass_dot_com('new york', 'ny')
+    # codc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    rdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    # rdc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path, img_path, test=True)
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    # cdc.scraping_pipeline(data_path, img_path, test=True)
 
-    ### elliman.com For Rent 
-    edc = elliman_dot_com('new york', 'ny')
-    edc.scraping_pipeline(data_path, img_path, test=True)
+    # ### elliman.com For Rent 
+    # edc = elliman_dot_com('new york', 'ny')
+    # edc.scraping_pipeline(data_path, img_path, test=True)
 
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
