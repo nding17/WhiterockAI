@@ -978,13 +978,13 @@ class elliman_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path, img_path):
+    def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
 
         # scrape all the apartment URLs
         # notice the test is opted out here
-        self.scrape_apt_urls(verbose=True, test=False)
+        self.scrape_apt_urls(verbose=True, test=test)
         apt_urls = self.apt_urls # fetch the apartment URLs
 
         # divide the apartment URLs list into small batches 
@@ -1143,7 +1143,7 @@ class rent_dot_com:
 
         return apt_urls
 
-    def _get_apt_urls(self, verbose=False):
+    def _get_apt_urls(self, test=False, verbose=False):
         """
         Get all the relevant apartment links in rent.com with a specified city
 
@@ -1191,6 +1191,9 @@ class rent_dot_com:
             apt_urls += self._get_apt_urls_per_page(pg_num)
             if verbose:
                 print(f'page {pg_num} done')
+
+            if test:
+                break 
         
         # make sure that all the links are in the state user specified 
         apt_urls = [url for url in apt_urls if self._state in url]
@@ -1552,7 +1555,7 @@ class rent_dot_com:
                             
         return apt_all
 
-    def scrape_apt_urls(self, verbose=False):
+    def scrape_apt_urls(self, test=False, verbose=False):
         """
         A public function that allows you to call to scrape apartment URLs
 
@@ -1567,7 +1570,7 @@ class rent_dot_com:
             nothing will be returned, but the attribute _apt_urls will be updated
             and all the apartments URLs will be stored in this field 
         """
-        self._apt_urls = self._get_apt_urls(verbose)
+        self._apt_urls = self._get_apt_urls(test=test, verbose=verbose)
 
     def scrape_apt_data(self, apt_urls, img_path, verbose=False):
         """
@@ -1649,8 +1652,8 @@ class rent_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path, img_path, verbose=False):
-        self.scrape_apt_urls(verbose=verbose)
+    def scraping_pipeline(self, data_path, img_path, test=False, verbose=False):
+        self.scrape_apt_urls(test=test, verbose=verbose)
         urls = self.apt_urls
         # in order to avoid crashes and loses all your data
         # divide the list of URLs in batches and keep updating
@@ -1668,7 +1671,6 @@ class rent_dot_com:
             print(f'batch {i} finished running')
 
         self._browser.close()
-
         print('job finished!')
 
     @property
@@ -2916,7 +2918,7 @@ class trulia_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path, img_path):
+    def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
         categories = ['buy', 'sold', 'rent']
 
@@ -2924,7 +2926,7 @@ class trulia_dot_com:
         # could be optimized by parallel programming 
         for category in categories:
             print(f'scraping for category - {category} starts!')
-            self.scrape_apt_urls(category, verbose=True)
+            self.scrape_apt_urls(category, test=test, verbose=True)
 
             # divide the apartment URLs list into small batches 
             # in case the program crashes 
@@ -3495,7 +3497,7 @@ class remax_dot_com:
 
         return apt_info
 
-    def scrape_apt_urls(self):
+    def scrape_apt_urls(self, test=False):
 
         """
         A public function that allows you to call to scrape apartment URLs
@@ -3518,7 +3520,7 @@ class remax_dot_com:
             and all the apartments URLs will be stored in this field 
         """
 
-        self._apt_urls = self._get_ensemble_apt_urls()
+        self._apt_urls = self._get_ensemble_apt_urls(test=test)
 
     def scrape_apt_data(self, apt_urls, img_path, verbose=False):
 
@@ -3597,10 +3599,10 @@ class remax_dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
-    def scraping_pipeline(self, data_path, img_path):
+    def scraping_pipeline(self, data_path, img_path, test=False):
         # scrape all the apartment URLs in Philadelphia
         # status update enabled
-        self.scrape_apt_urls()
+        self.scrape_apt_urls(test=test)
         urls = self.apt_urls
 
         # in order to avoid crashes and loses all your data
@@ -3829,7 +3831,7 @@ class coldwell_dot_com:
         max_pg = pages[-2].get_text()
         return int(max_pg)
 
-    def scraping_pipeline(self, data_path, img_path):
+    def scraping_pipeline(self, data_path, img_path, test=False):
         print(f'Coldwell Bankers For Sale - Start Scraping!')
         if self._end_page == 'max':
             self._end_page = self._get_max_page()
@@ -3845,6 +3847,9 @@ class coldwell_dot_com:
             content = self._get_link_content(url)
             for listing in content.find_all('div', class_="address notranslate"):
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
+
+            if test:
+                break
 
         content_list = []
         print(f'\ttotal number of aparments to be scraped: {len(listing_link)}')
@@ -4365,7 +4370,7 @@ class loopnet_dot_com:
             return False
 
     ### get all the urls to access the information of the apartments 
-    def _get_apt_urls(self):
+    def _get_apt_urls(self, test=False):
         soup = self._get_soup(self._url)
         max_pg = soup.find_all('a', class_='searchPagingBorderless')[-1].text
         max_pg = int(self._parse_num(max_pg))
@@ -4381,6 +4386,9 @@ class loopnet_dot_com:
             urls = np.array(urls)
             urls = urls[~portfolio]
             apt_urls += list(urls)
+
+            if test:
+                break
 
         apt_urls = np.array(apt_urls)
         return apt_urls
@@ -4640,7 +4648,7 @@ class loopnet_dot_com:
         sleep_secs = 15
 
         # all apartment URLs
-        apt_urls = self._get_apt_urls()
+        apt_urls = self._get_apt_urls(test=test)
 
         # divide the apartment URLs list into small batches 
         url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
@@ -4663,40 +4671,40 @@ if __name__ == '__main__':
     ldc = loopnet_dot_com('new york', 'new york')
     data_path_loopnet = '../../data/sample'
     img_path_loopnet = '../../data/sample/loopnet'
-    ldc.scraping_pipeline(data_path_loopnet, img_path_loopnet)
+    ldc.scraping_pipeline(data_path_loopnet, img_path_loopnet, test=True)
 
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
     data_path_remax = '../../data/sample'
     img_path_remax = '../../data/sample/remax'
-    rmdc.scraping_pipeline(data_path_remax, img_path_remax)
+    rmdc.scraping_pipeline(data_path_remax, img_path_remax, test=True)
 
     ### compass New York For Rent 
     codc = compass_dot_com('new york', 'ny')
     data_path_compass = '../../data/sample'
     img_path_compass = '../../data/sample/compass'
-    codc.scraping_pipeline(data_path_compass, img_path_compass, test=False)
+    codc.scraping_pipeline(data_path_compass, img_path_compass, test=True)
 
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
     data_path_rent = '../../data/sample'
     img_path_rent = '../../data/sample/rent'
-    rdc.scraping_pipeline(data_path_rent, img_path_rent, verbose=True)
+    rdc.scraping_pipeline(data_path_rent, img_path_rent, test=True)
 
     ### coldwell Philadelphia For Sale
     data_path_coldwell = '../../data/sample'
     img_path_coldwell = '../../data/sample/coldwell'
     cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path_coldwell, img_path_coldwell)
+    cdc.scraping_pipeline(data_path_coldwell, img_path_coldwell, test=True)
 
     ### trulia.com For Rent and For Sale
     data_path_trulia = '../../data/sample'
     img_path_trulia = '../../data/sample/trulia'
     tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path_trulia, img_path_trulia)
+    tdc.scraping_pipeline(data_path_trulia, img_path_trulia, test=True)
 
     ### elliman.com For Rent 
     data_path_elliman = '../../data/sample'
     img_path_elliman = '../../data/sample/elliman'
     edc = elliman_dot_com()
-    edc.scraping_pipeline(data_path_elliman, img_path_elliman)
+    edc.scraping_pipeline(data_path_elliman, img_path_elliman, test=True)
