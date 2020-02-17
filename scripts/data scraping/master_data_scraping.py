@@ -25,6 +25,7 @@ from selenium.webdriver.support.ui import WebDriverWait
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.support import expected_conditions as EC
 
+### constant
 class CONST:
     ELLIMAN_HEADER = 'https://www.elliman.com'
 
@@ -2970,6 +2971,7 @@ class trulia_dot_com:
         """
         return self._apt_data
 
+### For Sale
 class remax_dot_com:
 
     # initialization - users need to specify a city and state 
@@ -3631,6 +3633,7 @@ class remax_dot_com:
         # serve as a way to show the apt_data
         return self._apt_data
 
+### For Sale 
 class coldwell_dot_com:
 
     def __init__(self, city, state, start_page, end_page):
@@ -4656,6 +4659,7 @@ class loopnet_dot_com:
 
 if __name__ == '__main__':
 
+    ### loopnet.com New York For Sale 
     ldc = loopnet_dot_com('new york', 'new york')
     data_path_loopnet = '../../data/sample'
     img_path_loopnet = '../../data/sample/loopnet'
