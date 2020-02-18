@@ -1726,6 +1726,60 @@ class trulia_dot_com(dot_com):
     # private functions section #
     #############################
 
+    @staticmethod
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
+
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
+
+        return options
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        return browser, wait
+
     def _recaptcha(self, browser):
         captcha_iframe = WebDriverWait(browser, 10).until(
         EC.presence_of_element_located(
@@ -2973,7 +3027,7 @@ class trulia_dot_com(dot_com):
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        categories = ['rent', 'buy', 'sold']
+        categories = ['buy', 'rent', 'sold']
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -3002,9 +3056,9 @@ class trulia_dot_com(dot_com):
                     print(f'unscraped URLs: {url_batch}')
                     continue
 
+            self._browser.close()
             print(f'scraping for category - {category} done!')
 
-        self._browser.close()
         
         print('job done, congratulations!')
 
@@ -4349,34 +4403,34 @@ if __name__ == '__main__':
 
     is_testing = True
 
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
-
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('philadelphia', 'pa')
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
-
-    ### elliman.com For Sale 
-    edc = elliman_dot_com('new york', 'ny')
-    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
-
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('new york', 'new york')
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
-
-    ### compass New York For Rent 
-    codc = compass_dot_com('new york', 'ny')
-    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
-
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
-    ### merge all the datafiles into a master datafile 
-    dm = data_merger(data_path)
-    dm.merge_dfs()
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com('philadelphia', 'pa')
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+
+    # ### elliman.com For Sale 
+    # edc = elliman_dot_com('new york', 'ny')
+    # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com('new york', 'new york')
+    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+
+    # ### compass New York For Rent 
+    # codc = compass_dot_com('new york', 'ny')
+    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+
+    # ### merge all the datafiles into a master datafile 
+    # dm = data_merger(data_path)
+    # dm.merge_dfs()
