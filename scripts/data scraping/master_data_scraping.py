@@ -14,6 +14,7 @@ import os
 import time
 import json
 import random
+import datetime
 
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
@@ -73,7 +74,12 @@ class CONST:
             'BED', 
             'BATH',
             'GSF',
-            'AMENITIES',
+            'PROPERTY TYPE', 
+            'LAND SF', 
+            'YEAR BUILT',
+            'FIREPLACE',
+            'CENTRAL AC',
+            '# FLOORS',
             'LINK',
         ),
         'rent': (
@@ -96,7 +102,12 @@ class CONST:
             'BED', 
             'BATH',
             'GSF',
-            'AMENITIES',
+            'PROPERTY TYPE', 
+            'LAND SF', 
+            'YEAR BUILT',
+            'FIREPLACE',
+            'CENTRAL AC',
+            '# FLOORS',
             'SALE DATE', 
             'SALE PRICE', 
             'ASKING PRICE',
@@ -123,9 +134,9 @@ class CONST:
         'GSF',
         'PROPERTY TYPE',
         'YEAR BUILT',
-        'LOT SIZE',
+        'LAND SF',
         'WATERFRONT',
-        'AC',
+        'CENTRAL AC',
         'TAX AMOUNT',
         'TAX YEAR',
         'LINK',
@@ -2368,9 +2379,113 @@ class trulia_dot_com:
                 except:
                     next
             # stick all the features together, seperated by |
-            return ' | '.join(features)
+            return features
         except:
             return None
+
+    def _check_prop_type(self, features):
+        prop_types = ['condo', 
+                      'multi family', 
+                      'townhouse', 
+                      'single family', 
+                      'lot land',
+                      'mobile']
+
+        prop_type = None
+
+        for feature in features:
+            feature = feature.lower()
+
+            for pt in prop_types:
+                if pt in feature:
+                    prop_type = feature.title()
+                    break
+
+        return prop_type
+
+    def _check_lot_size(self, features):
+
+        lot_size = None
+
+        for feature in features:
+
+            feature = feature.lower()
+            ACRE = 43560
+
+            if 'lot size:' in feature:
+                if 'acres' in feature:
+                    lot_size = self._extract_num(feature)
+                    break
+                if 'sqft' in feature:
+                    try:
+                        lot_size = self._extract_num(feature)/ACRE
+                        break
+                    except:
+                        lot_size = None
+                        break
+
+        return lot_size
+                
+
+    def _check_year_built(self, features):
+
+        year_built = None
+
+        for feature in features:
+            feature = feature.lower()
+            if 'built in' in feature:
+                year_built = int(self._extract_num(feature))
+                break
+
+        return year_built
+
+    def _check_fireplace(self, features):
+        fireplace = 0
+
+        for feature in features:
+            feature = feature.lower()
+            if 'fireplace' in feature:
+                fireplace = 1
+                break
+
+        return fireplace
+
+    def _check_central_ac(self, features):
+        central_ac = 0
+
+        for feature in features:
+            feature = feature.lower()
+            if 'cooling system:' in feature:
+                coolings = feature.split(':')[1]
+                if 'central' in coolings:
+                    central_ac = 1
+                    break
+
+        return central_ac
+
+    def _check_stories(self, features):
+        stories = None
+        for feature in features:
+            feature = feature.lower()
+            if 'stories:' in feature:
+                stories = self._extract_num(feature)
+                break
+
+        return stories
+
+
+    def _open_features(self, features):
+        
+        prop_type, lot_size, year_built, \
+            central_ac, fireplace, stories \
+                 = self._check_prop_type(features), \
+                    self._check_lot_size(features), \
+                    self._check_year_built(features), \
+                    self._check_central_ac(features), \
+                    self._check_fireplace(features), \
+                    self._check_stories(features)
+
+        return prop_type, lot_size, year_built, fireplace, central_ac, stories
 
     def _get_buy_apt_data(self, 
                           apt_urls, 
@@ -2411,6 +2526,7 @@ class trulia_dot_com:
             bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
             space = self._get_space(jdict)
             features = self._get_apt_features(jdict)
+            prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
 
             apt_info_data.append([
                 street, 
@@ -2421,7 +2537,12 @@ class trulia_dot_com:
                 bedrooms, 
                 bathrooms,
                 space,
-                features,
+                prop_type, 
+                lot_size, 
+                year_built, 
+                fireplace, 
+                central_ac,
+                stories,
                 url,
             ])
 
@@ -2508,6 +2629,7 @@ class trulia_dot_com:
         try:
             if 'studio' in text.lower():
                 return 0.0
+            text = text.replace(',', '')
             pattern = r'[-+]?\d*\.\d+|\d+'
             result = re.findall(pattern, text)[0]
             return float(result)
@@ -2691,9 +2813,11 @@ class trulia_dot_com:
         bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
         space = self._get_space(jdict)
         features = self._get_apt_features(jdict)
+        prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
+
         sales_date, sales_price, ask_price = self._get_normal_sold_prices(jdict)
         sold_date, sold_price, change_date, change_price, list_date, list_price = self._get_important_sold_prices(jdict)
-        
+
         sold_info = [
             street, 
             city, 
@@ -2702,7 +2826,12 @@ class trulia_dot_com:
             bedrooms, 
             bathrooms,
             space,
-            features,
+            prop_type, 
+            lot_size, 
+            year_built, 
+            fireplace, 
+            central_ac,
+            stories,
             sales_date, 
             sales_price, 
             ask_price,
@@ -2983,7 +3112,8 @@ class trulia_dot_com:
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        categories = ['rent', 'buy', 'sold']
+        # categories = ['rent', 'buy', 'sold']
+        categories = ['buy']
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -3523,9 +3653,14 @@ class remax_dot_com:
         year_built = self._parse_year(self._access_dict(sidict, 'Year Built'))
         lot_size = self._access_dict(sidict, 'Lot Size')
         waterfront = self._access_dict(sidict, 'Waterfront')
-        ac = self._access_dict(sidict, 'Air Conditioning')
+        ac = self._access_dict(sidict, 'Cooling')
         tax = self._access_dict(sidict, 'Tax Annual Amount')
         tax_year = self._parse_year(self._access_dict(sidict, 'Tax Year'))
+
+        if 'central' in ac.lower():
+            ac = 1
+        else:
+            ac = 0
 
         # package all the features into a list 
         unit = [
@@ -4837,11 +4972,11 @@ class data_merger:
     def __init__(self, data_path):
         self._data_path = data_path
 
-    def merge_data(self):
+    def merge_dfs(self):
         files = [f for f in listdir(self._data_path) \
                     if isfile(join(self._data_path, f)) \
-                        and '.csv' in f\
-                        and not f=='master_scraping_data.csv']
+                        and '.csv' in f \
+                        and not 'master_scraping_data.csv' == f]
         dfs = []
 
         for file in files:
@@ -4892,5 +5027,6 @@ if __name__ == '__main__':
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path, img_path, test=is_testing)
 
+    ### merge all the datafiles into a master datafile 
     dm = data_merger(data_path)
-    dm.merge_data()
+    dm.merge_dfs()
