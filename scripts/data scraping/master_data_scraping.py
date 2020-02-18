@@ -180,6 +180,27 @@ class CONST:
         'LINK',
     )
 
+    COLDWELL_COLNAMES = (
+        'ADDRESS',
+        'CITY', 
+        'STATE', 
+        'ZIP', 
+        'APT #', 
+        'BATH',
+        'BED', 
+        'GSF',
+        'ASKING PRICE', 
+        'LISTING TYPE',
+        'LOT SF', 
+        'YEAR BUILT', 
+        '# FLOORS', 
+        'BASEMENT',
+        'BASEMENT DESC', 
+        'ARCH', 
+        'MATERIAL',
+        'LINK',
+    )
+
 ### parent class that includes the most commonly used functions 
 class dot_com:
 
@@ -365,6 +386,54 @@ class dot_com:
         except:
             return np.nan
 
+    def write_data(self,
+                   apt_data,
+                   filename,
+                   colnames, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists(f'{filename}'):
+            df = pd.DataFrame([], columns=colnames)
+            df.to_csv(f'{filename}')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=colnames)
+        with open(f'{filename}', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
 ### For Sale 
 class elliman_dot_com(dot_com):
 
@@ -471,7 +540,7 @@ class elliman_dot_com(dot_com):
         # keep going until reaching the last page 
         while not stop:
         
-            if test and pg_num == 10:
+            if test and pg_num == 2:
                 break
             
             if pg_num%50 == 0:
@@ -663,31 +732,6 @@ class elliman_dot_com(dot_com):
             return street, neighborhood, city
         except:
             return None, None, None
-
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            # pattern to find any number (int or float)
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
 
     def _get_price(self, soup):
 
@@ -1050,48 +1094,6 @@ class elliman_dot_com(dot_com):
         if verbose:
             print('all images scraped')
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('elliman_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.ELLIMAN_COLNAMES)
-            df.to_csv('elliman_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.ELLIMAN_COLNAMES)
-        with open('elliman_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
@@ -1111,9 +1113,10 @@ class elliman_dot_com(dot_com):
             self.scrape_apt_data(batch, verbose=True, test=test)
             self.scrape_apt_images(batch, img_path, verbose=True, test=test)
             apt_data = self.apt_data
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'elliman.csv', CONST.ELLIMAN_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
+
         print('job done, congratulations!')
 
     #####################
@@ -1666,52 +1669,6 @@ class rent_dot_com(dot_com):
 
         self._apt_data = apt_all_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        sales_type : str
-            a handler to tell the function which section you're looking at, e.g. 'buy'
-
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists(f'rent_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.RENT_COLNAMES)
-            df.to_csv(f'rent_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.RENT_COLNAMES)
-        with open(f'rent_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False, verbose=False):
         self.scrape_apt_urls(test=test, verbose=verbose)
         urls = self.apt_urls
@@ -1727,7 +1684,7 @@ class rent_dot_com(dot_com):
             # print(batch_urls)
             self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
             data = self.apt_data
-            self.write_data(data, data_path)
+            self.write_data(data, 'rent.csv', CONST.RENT_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         self._browser.close()
@@ -3014,53 +2971,6 @@ class trulia_dot_com(dot_com):
         if verbose:
             print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
 
-    def write_data(self,
-                   sales_type,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        sales_type : str
-            a handler to tell the function which section you're looking at, e.g. 'buy'
-
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists(f'trulia_dot_com_{sales_type}.csv'):
-            df = pd.DataFrame([], columns=CONST.TRULIA_COLNAMES[sales_type])
-            df.to_csv(f'trulia_dot_com_{sales_type}.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.TRULIA_COLNAMES[sales_type])
-        with open(f'trulia_dot_com_{sales_type}.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
         categories = ['rent', 'buy', 'sold']
@@ -3085,7 +2995,7 @@ class trulia_dot_com(dot_com):
                     self.scrape_apt_data(category, url_batch, verbose=True)
                     data = self.apt_data[category]
 
-                    self.write_data(category, data, data_path)
+                    self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
                     self.scrape_apt_images(category, url_batch, img_path, verbose=True)
                 except:
                     print(f'batch {i} failed')
@@ -3656,48 +3566,6 @@ class remax_dot_com(dot_com):
         
         self._apt_data = apt_all_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('remax_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.REMAX_COLNAMES)
-            df.to_csv('remax_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.REMAX_COLNAMES)
-        with open('remax_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # scrape all the apartment URLs in Philadelphia
         # status update enabled
@@ -3717,7 +3585,7 @@ class remax_dot_com(dot_com):
         for i, batch_urls in enumerate(urls_chuck):
             self.scrape_apt_data(batch_urls, img_path, verbose=True)
             data = self.apt_data
-            self.write_data(data, data_path)
+            self.write_data(data, 'remax.csv', CONST.REMAX_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         print('job done!')
@@ -3780,32 +3648,6 @@ class coldwell_dot_com(dot_com):
         fp.close
         content = BeautifulSoup(html,"lxml")
         return content
-
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            # pattern to find any number (int or float)
-            text = text.replace(',', '')
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
     
     def _get_content(self, url, img_path):
         
@@ -3894,32 +3736,32 @@ class coldwell_dot_com(dot_com):
                 break
             else:
                 arch_info = 'N/A'
-                
-        listing_detail = {
-            'ADDRESS': street,
-            'CITY': city, 
-            'STATE': state, 
-            'ZIP': zip_code, 
-            'APT #': apt_num, 
-            'BATH': bathrooms,
-            'BED': bedrooms, 
-            'GSF': sqt,
-            'ASKING PRICE': asking_price, 
-            'LISTING TYPE': listing_type,
-            'LOT SF': lot_size, 
-            'YEAR BUILT': year_built, 
-            'FLOORS': floors, 
-            'BASEMENT': base,
-            'BASEMENT DESC': base_desc, 
-            'ARCH': arch_info, 
-            'MATERIAL': material,
-            'LINK': url,
-        }
+
+        data = [
+            street,
+            city, 
+            state, 
+            zip_code, 
+            apt_num, 
+            bathrooms,
+            bedrooms, 
+            sqt,
+            asking_price, 
+            listing_type,
+            lot_size, 
+            year_built, 
+            floors, 
+            base,
+            base_desc, 
+            arch_info, 
+            material,
+            url,
+        ]
 
         ##Scrap all the image for each property and store them into each folder
         ##Please change the file_root accordingly when tested
         image_url = []
-        for image_link in listing_content.find_all('img',class_="owl-lazy"):
+        for image_link in listing_content.find_all('img', class_="owl-lazy"):
             image_url.append(image_link.get('data-href'))
 
         file_root = img_path
@@ -3932,23 +3774,13 @@ class coldwell_dot_com(dot_com):
         os.chdir(file_path)
 
         for i in range(len(image_url)):
-            f= open("{} {}.jpg".format(street,i+1),"wb")
+            f= open("{} {}.jpg".format(street, i+1),"wb")
             f.write(ulb.request.urlopen(image_url[i]).read())
             f.close
 
         os.chdir(current_path)
             
-        return listing_detail
-
-    def _get_df(self, content_list, save_to_excel=False):
-        ## Store all the listing info to a dataframe, if choose to save as Excel Spread Sheet, pass True
-        df = pd.DataFrame()
-        for i in range(len(content_list)):
-            temp_df = pd.DataFrame(content_list[i],index=[i])
-            df = pd.concat([df,temp_df],axis=0, ignore_index=True)
-        if not save_to_excel:
-            df.to_excel("Phil_demo_data_2.xlsx")
-        return df
+        return data
 
     def _get_max_page(self):
         url = f'https://www.coldwellbankerhomes.com/{self._state}/{self._city}/?sortId=2&offset=0'
@@ -3977,15 +3809,25 @@ class coldwell_dot_com(dot_com):
             if test:
                 break
 
-        content_list = []
-        print(f'\ttotal number of aparments to be scraped: {len(listing_link)}')
-        for i, url in enumerate(listing_link):
-            content_list.append(self._get_content(url, img_path))
-            print(f'\tscraping for apartment # {i+1} is done')
-        
-        df = self._get_df(content_list, save_to_excel=True)
-        df.to_csv(f'{data_path}/coldwell_dot_com.csv')
-        print('job done!')
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = listing_link
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = [self._get_content(url, img_path) for url in batch]
+            self.write_data(apt_data, 'coldwell.csv', CONST.COLDWELL_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        print('job done, congratulations!')
 
 ### Compass For Rent
 class compass_dot_com(dot_com):
@@ -4226,48 +4068,6 @@ class compass_dot_com(dot_com):
 
         return apt_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('compass_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.COMPASS_COLNAMES)
-            df.to_csv('compass_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.COMPASS_COLNAMES)
-        with open('compass_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
@@ -4283,7 +4083,7 @@ class compass_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'compass.csv', CONST.COMPASS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4485,48 +4285,6 @@ class loopnet_dot_com(dot_com):
 
         return apt_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('loopnet_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.LOOPNET_COLNAMES)
-            df.to_csv('loopnet_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.LOOPNET_COLNAMES)
-        with open('loopnet_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
@@ -4542,12 +4300,20 @@ class loopnet_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'loopnet.csv', CONST.LOOPNET_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
         self._browser.close()
         print('job done, congratulations!')
+
+### Hotpads For Rent
+class hotpads_dot_com(dot_com):
+
+    def __init__(self, city, state):
+        self._city = city
+        self._state = state
+        self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
 
 ### merge all the files together 
 class data_merger:
@@ -4583,6 +4349,10 @@ if __name__ == '__main__':
 
     is_testing = True
 
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
@@ -4602,10 +4372,6 @@ if __name__ == '__main__':
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
