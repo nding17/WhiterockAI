@@ -42,7 +42,7 @@ class CONST:
         'BED', 
         'BATH', 
         'HALF BATH',
-        'LISTING TYPE',
+        'PROPERTY TYPE',
         'GSF',
         'LISTING ID',
         'LINK',
