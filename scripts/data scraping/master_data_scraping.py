@@ -3112,8 +3112,7 @@ class trulia_dot_com:
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        # categories = ['rent', 'buy', 'sold']
-        categories = ['buy']
+        categories = ['rent', 'buy', 'sold']
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -3979,6 +3978,32 @@ class coldwell_dot_com:
         fp.close
         content = BeautifulSoup(html,"lxml")
         return content
+
+    def _extract_num(self, text):
+        """
+        A helper function that extract any number from a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
+        try:
+            # pattern to find any number (int or float)
+            text = text.replace(',', '')
+            pattern = r'[-+]?\d*\.\d+|\d+'
+            result = re.findall(pattern, text)[0]
+            return float(result)
+        except:
+            return np.nan
     
     def _get_content(self, url, img_path):
         
@@ -4001,6 +4026,7 @@ class coldwell_dot_com:
             street = address[0].split('#')[0].strip()
             apt_num = 'N/A'
         asking_price = listing_content.find('span', itemprop='price').get_text()
+        asking_price = self._extract_num(asking_price)
         
         # Scrap the number of bedrooms,full bathroom, sqt, listing type
         title = str()
