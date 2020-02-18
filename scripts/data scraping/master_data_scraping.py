@@ -36,8 +36,8 @@ class CONST:
 
     ELLIMAN_COLNAMES = (
         'ADDRESS', 
-        'NEIGHBORHOOD', 
         'CITY',
+        'STATE',
         'ASKING PRICE',
         'BED', 
         'BATH', 
@@ -790,6 +790,7 @@ class elliman_dot_com:
         """
         soup = self._soup_attempts(url)
         street, neighborhood, city = self._get_address(soup)
+        state = self._state.upper()
         price = self._get_price(soup)
         beds, baths, halfbaths = self._get_features(soup)
         htype = self._get_htype(soup)
@@ -799,8 +800,8 @@ class elliman_dot_com:
         # create a list that package all the useful data
         unit = [
             street, 
-            neighborhood, 
             city,
+            state,
             price,
             beds, 
             baths, 
@@ -4172,7 +4173,6 @@ class coldwell_dot_com:
             content = self._get_link_content(url)
             for listing in content.find_all('div', class_="address notranslate"):
                 listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
-
             if test:
                 break
 
@@ -5041,13 +5041,13 @@ if __name__ == '__main__':
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
-
     ### elliman.com For Rent 
     edc = elliman_dot_com('new york', 'ny')
     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
     ### trulia.com For Rent and For Sale
     tdc = trulia_dot_com('philadelphia', 'pa')
