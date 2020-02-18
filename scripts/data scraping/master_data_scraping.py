@@ -29,7 +29,7 @@ from fake_useragent import UserAgent
 from os import listdir
 from os.path import isfile, join
 
-### constant
+### constant, column names etc.
 class CONST:
     # for sale 
     ELLIMAN_HEADER = 'https://www.elliman.com'
@@ -41,7 +41,6 @@ class CONST:
         'ASKING PRICE',
         'BED', 
         'BATH', 
-        'HALF BATH',
         'PROPERTY TYPE',
         'GSF',
         'LISTING ID',
@@ -181,22 +180,11 @@ class CONST:
         'LINK',
     )
 
-### For Sale 
-class elliman_dot_com:
+### parent class that includes the most commonly used functions 
+class dot_com:
 
-    ############################
-    # class initiation section #
-    ############################
-
-    def __init__(self, city, state):
-        self._apt_urls = []
-        self._apt_data = []
-        self._city = city
-        self._state = state
-
-    #############################
-    # private functions section #
-    #############################
+    def __init__(self):
+        pass
 
     def _random_user_agent(self):
         """
@@ -293,6 +281,106 @@ class elliman_dot_com:
                     return soup
             # time to give up, try to find what's going on 
             raise ValueError(f'FAILED to get soup for apt url {url}')
+
+
+    @staticmethod
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
+
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
+
+        return options
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        return browser, wait
+
+    def _extract_num(self, text):
+        """
+        A helper function that extract any number from
+        a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
+        try:
+            if 'studio' in text.lower():
+                return 0.0
+            text = text.replace(',', '')
+            pattern = r'[-+]?\d*\.\d+|\d+'
+            result = re.findall(pattern, text)[0]
+            return float(result)
+        except:
+            return np.nan
+
+### For Sale 
+class elliman_dot_com(dot_com):
+
+    ############################
+    # class initiation section #
+    ############################
+
+    def __init__(self, city, state):
+        self._apt_urls = []
+        self._apt_data = []
+        self._city = city
+        self._state = state
+
+    #############################
+    # private functions section #
+    #############################
 
     def _get_webpage(self, pg_num):
 
@@ -792,7 +880,7 @@ class elliman_dot_com:
         street, neighborhood, city = self._get_address(soup)
         state = self._state.upper()
         price = self._get_price(soup)
-        beds, baths, halfbaths = self._get_features(soup)
+        beds, baths, _ = self._get_features(soup)
         htype = self._get_htype(soup)
         sqft = self._get_sqft(soup)
         listid = self._get_list_id(soup)
@@ -805,7 +893,6 @@ class elliman_dot_com:
             price,
             beds, 
             baths, 
-            halfbaths,
             htype,
             sqft,
             listid,
@@ -1051,7 +1138,7 @@ class elliman_dot_com:
         return self._apt_data
 
 ### For Rent 
-class rent_dot_com:
+class rent_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city
@@ -1060,60 +1147,6 @@ class rent_dot_com:
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
         self._apt_data = []
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
 
     def _get_page_url(self, page_num):
         """
@@ -1711,7 +1744,7 @@ class rent_dot_com:
         return self._apt_data
 
 ### For Sale, For Rent
-class trulia_dot_com:
+class trulia_dot_com(dot_com):
 
     ############################
     # class initiation section #
@@ -1736,34 +1769,6 @@ class trulia_dot_com:
     # private functions section #
     #############################
 
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
     def _recaptcha(self, browser):
         captcha_iframe = WebDriverWait(browser, 10).until(
         EC.presence_of_element_located(
@@ -1786,33 +1791,6 @@ class trulia_dot_com:
 
         browser.execute_script("arguments[0].click()", captcha_box)
         time.sleep(120)
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-
-        return browser, wait
 
     def _get_buy_webpage(self, pg_num, htype):
 
@@ -2609,34 +2587,6 @@ class trulia_dot_com:
         
         return section_data
 
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from
-        a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            if 'studio' in text.lower():
-                return 0.0
-            text = text.replace(',', '')
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
-
     def _get_floorplans(self, url):
         
         """
@@ -3170,7 +3120,7 @@ class trulia_dot_com:
         return self._apt_data
 
 ### For Sale
-class remax_dot_com:
+class remax_dot_com(dot_com):
 
     # initialization - users need to specify a city and state 
     def __init__(self, city, state):
@@ -3179,156 +3129,6 @@ class remax_dot_com:
         self._overhead = 'https://www.remax.com'
         self._apt_urls = []
         self._apt_data = []
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-        
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        
-
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
-
-    def _soup_attempts(self, url, total_attempts=5):
-
-        """
-        A helper function that will make several attempts
-        to obtain a soup to avoid getting blocked
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        total_attempts: int
-            the number of attempts you want to try to obtain the 
-            soup before you already give up. Default is 5 attempts
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage        
-
-        """
-
-        soup = self._get_soup(url)
-
-        # if we get the soup with the first attempt
-        if soup:
-            return soup
-        # if we don't get the soup during our first
-        # attempt
-        else:
-            attempts = 0
-            while attempts < total_attempts:
-                # put the program idle to avoid detection
-                time.sleep(3)
-                soup = self._get_soup(url)
-                if soup:
-                    return soup
-            # time to give up, try to find what's going on 
-            raise ValueError(f'FAILED to get soup for apt url {url}')
 
     def _get_webpage(self):
 
@@ -3393,15 +3193,6 @@ class remax_dot_com:
 
         return apt_urls
 
-    def _parse_num(self, text):
-        text = text.replace(',', '')
-        # extract the numerical price value 
-        pattern = r'[-+]?\d*\.\d+|\d+'
-        number = re.findall(pattern, text)[0]
-        # convert the price to float 
-        number = float(number)
-        return number
-
     def _get_price(self, soup):
 
         """
@@ -3434,7 +3225,7 @@ class remax_dot_com:
                                   .replace(',','')\
                                   .strip()
 
-            price = self._parse_num(price_text)
+            price = self._extract_num(price_text)
             return price
         except:
             return np.nan
@@ -3491,6 +3282,15 @@ class remax_dot_com:
             # if there's any part that's missing in the address part,
             # the whole address becomes useless
             return None, None, None, None
+
+    def _extract_num(self, text):
+        text = text.replace(',', '')
+        # extract the numerical price value 
+        pattern = r'[-+]?\d*\.\d+|\d+'
+        number = re.findall(pattern, text)[0]
+        # convert the price to float 
+        number = float(number)
+        return number
 
     def _get_sideinfo(self, content_tag):
 
@@ -3553,7 +3353,7 @@ class remax_dot_com:
                                .get_text() \
                                .strip()
                 try:
-                    value = self._parse_num(value)
+                    value = self._extract_num(value)
                 except:
                     pass
 
@@ -3657,9 +3457,10 @@ class remax_dot_com:
         tax = self._access_dict(sidict, 'Tax Annual Amount')
         tax_year = self._parse_year(self._access_dict(sidict, 'Tax Year'))
 
-        if 'central' in ac.lower():
-            ac = 1
-        else:
+        try:
+            if 'central' in ac.lower():
+                ac = 1
+        except:
             ac = 0
 
         # package all the features into a list 
@@ -3934,7 +3735,7 @@ class remax_dot_com:
         return self._apt_data
 
 ### For Sale 
-class coldwell_dot_com:
+class coldwell_dot_com(dot_com):
 
     def __init__(self, city, state, start_page, end_page):
         self._city = city.lower().replace(' ', '-')
@@ -4187,122 +3988,13 @@ class coldwell_dot_com:
         print('job done!')
 
 ### Compass For Rent
-class compass_dot_com:
+class compass_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city.lower().replace(' ', '-')
         self._state = state.lower()
         self._url = f'https://www.compass.com/for-rent/{self._city}-{self._state}/'
         self._browser, _ = self._get_browser(self._url)
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac O21S X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 254:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
 
     ### get all the apartment URLs 
     def _get_apt_urls(self, test=False):
@@ -4346,19 +4038,6 @@ class compass_dot_com:
 
         return addr, unit, zipcode
 
-    ### parse the number from any string that contains numerical values 
-    def _parse_num(self, text):
-        try:
-            text = text.replace(',', '')
-            # extract the numerical price value 
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            number = re.findall(pattern, text)[0]
-            # convert the price to float 
-            number = float(number)
-            return number
-        except:
-            return None
-
     ### a more protective way to access an element from a dictionary
     ### we don't want our program to break if we can't access the 
     ### dictionary from a key 
@@ -4374,7 +4053,7 @@ class compass_dot_com:
                          .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
         keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
-        values = [self._parse_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
+        values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
         d = dict(zip(keys, values))
         return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
@@ -4384,7 +4063,7 @@ class compass_dot_com:
         sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
                    .find('div', class_='textIntent-title2') \
                    .get_text()
-        sqft = self._parse_num(sqft)
+        sqft = self._extract_num(sqft)
         return sqft
 
     ### property details, including year built and property type 
@@ -4401,8 +4080,8 @@ class compass_dot_com:
             units = soup.find('span', attrs={'data-tn': 'listing-page-building-units'}).get_text()
             stories = soup.find('span', attrs={'data-tn': 'listing-page-building-stories'}).get_text()
 
-            units = int(self._parse_num(units))
-            stories = int(self._parse_num(stories))
+            units = int(self._extract_num(units))
+            stories = int(self._extract_num(stories))
 
             return units, stories
         except:
@@ -4433,7 +4112,7 @@ class compass_dot_com:
             price_tab = soup.find('table', attrs={'data-tn': 'listingHistory-view-eventTable'})
             rows = price_tab.find_all('tr')[1:]
             price_cols = [row.find_all('td')[2].get_text() for row in rows]
-            price_cols = [self._parse_num(col) for col in price_cols]
+            price_cols = [self._extract_num(col) for col in price_cols]
             last_price = list(filter(lambda price: not price==None, price_cols))[0]
             return last_price
         except:
@@ -4502,7 +4181,7 @@ class compass_dot_com:
             return 0
 
     def _get_apt_data(self, url, img_path):
-        soup = self._get_soup(url)
+        soup = self._soup_attempts(url)
 
         city = self._city.replace('-', ' ').title()
         state = self._state.upper()
@@ -4612,81 +4291,13 @@ class compass_dot_com:
         print('job done, congratulations!')
 
 ### Loopnet For Sale
-class loopnet_dot_com:
+class loopnet_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city.replace(' ', '-').lower()
         self._state = state.replace(' ', '-').lower()
         self._url = f'https://www.loopnet.com/{self._state}_multifamily-properties-for-sale/'
         self._browser, _ = self._get_browser('https://www.loopnet.com')
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac O21S X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 254:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
-
-    ### parse the number from any string that contains numerical values 
-    def _parse_num(self, text):
-        try:
-            text = text.replace(',', '')
-            # extract the numerical price value 
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            number = re.findall(pattern, text)[0]
-            # convert the price to float 
-            number = float(number)
-            return number
-        except:
-            return None
 
     def _is_portfolio(self, description):
         description = description.lower()
@@ -4697,9 +4308,9 @@ class loopnet_dot_com:
 
     ### get all the urls to access the information of the apartments 
     def _get_apt_urls(self, test=False):
-        soup = self._get_soup(self._url)
+        soup = self._soup_attempts(self._url)
         max_pg = soup.find_all('a', class_='searchPagingBorderless')[-1].text
-        max_pg = int(self._parse_num(max_pg))
+        max_pg = int(self._extract_num(max_pg))
 
         apt_urls = []
 
@@ -4763,19 +4374,19 @@ class loopnet_dot_com:
 
         d = dict(pairs)
 
-        cap_rate = self._parse_num(self._ad(d, 'Cap Rate'))
+        cap_rate = self._extract_num(self._ad(d, 'Cap Rate'))
         if cap_rate:
             cap_rate = cap_rate/100
 
         prop_type = self._ad(d, 'Property Type')
-        units = self._parse_num(self._ad(d, 'No. Units'))
-        price = self._parse_num(self._ad(d, 'Price'))
-        floors = self._parse_num(self._ad(d, 'No. Stories'))
-        gsf = self._parse_num(self._ad(d, 'Building Size'))
-        land_sf = self._parse_num(self._ad(d, 'Lot Size'))
+        units = self._extract_num(self._ad(d, 'No. Units'))
+        price = self._extract_num(self._ad(d, 'Price'))
+        floors = self._extract_num(self._ad(d, 'No. Stories'))
+        gsf = self._extract_num(self._ad(d, 'Building Size'))
+        land_sf = self._extract_num(self._ad(d, 'Lot Size'))
         building_class = self._ad(d, 'Building Class')
         year_built = self._ad(d, 'Year Built')
-        avg_occ = self._parse_num(self._ad(d, 'Average Occupancy'))
+        avg_occ = self._extract_num(self._ad(d, 'Average Occupancy'))
 
         if avg_occ:
             avg_occ = avg_occ/100
@@ -4808,60 +4419,6 @@ class loopnet_dot_com:
         img_tags = soup.find_all('div', class_=class_list)
         img_urls = [tag['data-src'] for tag in img_tags]
         return img_urls
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
 
     def _save_images(self, 
                      img_urls, 
@@ -5020,6 +4577,7 @@ class data_merger:
 
 if __name__ == '__main__':
 
+    # user need to provide these paths 
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
@@ -5028,6 +4586,10 @@ if __name__ == '__main__':
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+
+    ### elliman.com For Sale 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### loopnet.com New York For Sale 
     ldc = loopnet_dot_com('new york', 'new york')
@@ -5040,10 +4602,6 @@ if __name__ == '__main__':
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('philadelphia', 'pennsylvania')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-
-    ### elliman.com For Rent 
-    edc = elliman_dot_com('new york', 'ny')
-    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
