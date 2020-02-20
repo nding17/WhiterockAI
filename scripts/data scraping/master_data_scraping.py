@@ -22,6 +22,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from us import states
 from bs4 import BeautifulSoup
 from urllib import request
 from selenium import webdriver
@@ -1185,8 +1186,8 @@ class elliman_dot_com(dot_com):
 class rent_dot_com(dot_com):
 
     def __init__(self, city, state):
-        self._city = city
-        self._state = state
+        self._city = city.replace(' ', '-').lower()
+        self._state = str(states.lookup(state)).replace(' ','-').lower()
         self._overhead = 'https://www.rent.com'
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
@@ -3666,21 +3667,7 @@ class coldwell_dot_com(dot_com):
         for image_link in listing_content.find_all('img', class_="owl-lazy"):
             image_url.append(image_link.get('data-href'))
 
-        file_root = img_path
-        file_folder = ', '.join([street,city])
-        file_path = os.path.join(file_root, file_folder)
-
-        current_path = os.getcwd() 
-        if not os.path.exists(file_path):
-            os.mkdir(file_path)
-        os.chdir(file_path)
-
-        for i in range(len(image_url)):
-            f= open("{} {}.jpg".format(street, i+1),"wb")
-            f.write(ulb.request.urlopen(image_url[i]).read())
-            f.close
-
-        os.chdir(current_path)
+        self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
             
         return data
 
@@ -3940,7 +3927,7 @@ class loopnet_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city.replace(' ', '-').lower()
-        self._state = state.replace(' ', '-').lower()
+        self._state = str(states.lookup(state)).replace(' ', '-').lower()
         self._url = f'https://www.loopnet.com/{self._state}_multifamily-properties-for-sale/'
         self._browser, _ = self._get_browser('https://www.loopnet.com')
 
@@ -4425,7 +4412,7 @@ if __name__ == '__main__':
     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('new york', 'new york')
+    ldc = loopnet_dot_com('new york', 'ny')
     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     ### compass New York For Rent 
@@ -4433,7 +4420,7 @@ if __name__ == '__main__':
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    rdc = rent_dot_com('new york', 'ny')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
     ### coldwell Philadelphia For Sale
@@ -4448,6 +4435,6 @@ if __name__ == '__main__':
     tdc = trulia_dot_com('philadelphia', 'pa')
     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
-    ### merge all the datafiles into a master datafile 
+    ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
     dm.merge_dfs()
