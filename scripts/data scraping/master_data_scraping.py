@@ -4396,6 +4396,15 @@ class data_merger:
         final_df.to_csv(f'{data_path}/master_scraping_data.csv', index=False)
 
 if __name__ == '__main__':
+    """
+    when you pass in city and state, please make sure
+    the following conditions are met:
+        1. city name spelled in full
+            e.g. new york
+        2. state name spelled in abbreviation
+            e.g. ny (NOT New York)
+    """
+
 
     # user need to provide these paths 
     data_path = '../../data/sample/info'
