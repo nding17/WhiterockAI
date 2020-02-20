@@ -4412,10 +4412,6 @@ if __name__ == '__main__':
 
     is_testing = True
 
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com('philadelphia', 'pa')
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
