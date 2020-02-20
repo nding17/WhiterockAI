@@ -1,7 +1,7 @@
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __status__ = 'complete'
 
 ### package requirements
@@ -22,6 +22,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
+from us import states
 from bs4 import BeautifulSoup
 from urllib import request
 from selenium import webdriver
@@ -29,7 +30,7 @@ from fake_useragent import UserAgent
 from os import listdir
 from os.path import isfile, join
 
-### constant
+### constant, column names etc.
 class CONST:
     # for sale 
     ELLIMAN_HEADER = 'https://www.elliman.com'
@@ -41,7 +42,6 @@ class CONST:
         'ASKING PRICE',
         'BED', 
         'BATH', 
-        'HALF BATH',
         'PROPERTY TYPE',
         'GSF',
         'LISTING ID',
@@ -152,13 +152,13 @@ class CONST:
         'RENT', 
         'BED', 
         'BATH', 
-        'SF', 
+        'UNIT SF', 
         'YEAR BUILT', 
         'PROPERTY TYPE',
         '# UNITS', 
         '# FLOORS',
         'CENTRAL AC', 
-        'WASHER/DRIER',
+        'WASHER/DRYER',
         'LAST PRICE',
         'LINK',
     )
@@ -181,22 +181,50 @@ class CONST:
         'LINK',
     )
 
-### For Sale 
-class elliman_dot_com:
+    COLDWELL_COLNAMES = (
+        'ADDRESS',
+        'CITY', 
+        'STATE', 
+        'ZIP', 
+        'APT #', 
+        'BATH',
+        'BED', 
+        'GSF',
+        'ASKING PRICE', 
+        'LISTING TYPE',
+        'LOT SF', 
+        'YEAR BUILT', 
+        '# FLOORS', 
+        'BASEMENT',
+        'BASEMENT DESC', 
+        'ARCH', 
+        'MATERIAL',
+        'LINK',
+    )
 
-    ############################
-    # class initiation section #
-    ############################
+    HOTPADS_COLNAMES = (
+        'ADDRESS', 
+        'CITY', 
+        'STATE', 
+        'ZIP',
+        'BED', 
+        'BATH', 
+        'UNIT SF',
+        'WASHER/DRYER', 
+        '# FLOORS', 
+        'CENTRAL AC', 
+        'YEAR BUILT', 
+        'FIREPLACE',
+        'LINK',
+        'RENT',
+        'APT #',
+    )
 
-    def __init__(self, city, state):
-        self._apt_urls = []
-        self._apt_data = []
-        self._city = city
-        self._state = state
+### parent class that includes the most commonly used functions 
+class dot_com:
 
-    #############################
-    # private functions section #
-    #############################
+    def __init__(self):
+        pass
 
     def _random_user_agent(self):
         """
@@ -294,6 +322,235 @@ class elliman_dot_com:
             # time to give up, try to find what's going on 
             raise ValueError(f'FAILED to get soup for apt url {url}')
 
+
+    @staticmethod
+    def _build_options():
+        options = webdriver.ChromeOptions()
+        options.accept_untrusted_certs = True
+        options.assume_untrusted_cert_issuer = True
+
+        # chrome configuration
+        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
+        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
+        options.add_argument("--no-sandbox")
+        options.add_argument("--disable-impl-side-painting")
+        options.add_argument("--disable-setuid-sandbox")
+        options.add_argument("--disable-seccomp-filter-sandbox")
+        options.add_argument("--disable-breakpad")
+        options.add_argument("--disable-client-side-phishing-detection")
+        options.add_argument("--disable-cast")
+        options.add_argument("--disable-cast-streaming-hw-encoding")
+        options.add_argument("--disable-cloud-import")
+        options.add_argument("--disable-popup-blocking")
+        options.add_argument("--ignore-certificate-errors")
+        options.add_argument("--disable-session-crashed-bubble")
+        options.add_argument("--disable-ipv6")
+        options.add_argument("--allow-http-screen-capture")
+        options.add_argument("--start-maximized")
+        options.add_argument('--lang=es')
+        options.add_argument("--disable-infobars")  
+
+        return options
+
+    def _get_browser(self, webpage):
+        """
+        A helper function to get the selenium browser in order 
+        to perform the scraping tasks 
+
+        Parameters
+        ----------
+        chromedriver : str
+            the path to the location of the chromedriver 
+
+        Returns
+        -------
+        browser : webdriver.Chrome
+            a chrome web driver 
+
+        wait : WebDriverWait
+            this is wait object that allows the program to hang around for a period
+            of time since we need some time to listen to the server 
+
+        """
+        options = self._build_options()
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        browser.get(webpage)
+        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
+        return browser, wait
+
+    def _recaptcha(self, browser):
+        captcha_iframe = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located(
+                (
+                    By.TAG_NAME, 'iframe'
+                )
+            )
+        )
+
+        ActionChains(browser).move_to_element(captcha_iframe).click().perform()
+
+        # click im not robot
+        captcha_box = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (
+                    By.ID, 'g-recaptcha-response'
+                )
+            )
+        )
+
+        browser.execute_script("arguments[0].click()", captcha_box)
+        time.sleep(120)
+
+    def _extract_num(self, text):
+        """
+        A helper function that extract any number from
+        a text 
+
+        Parameters
+        ----------
+        text : str
+            a string of text that might contains numbers 
+
+        Returns
+        -------
+        num : float
+            the number extracted from the text 
+
+        >>> _extract_num('$1000 per month')
+        1000.0
+        """
+        try:
+            if 'studio' in text.lower():
+                return 0.0
+            text = text.replace(',', '')
+            pattern = r'[-+]?\d*\.\d+|\d+'
+            result = re.findall(pattern, text)[0]
+            return float(result)
+        except:
+            return np.nan
+
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                img_data = requests.get(img_url).content
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    handler.write(img_data)
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
+
+    def write_data(self,
+                   apt_data,
+                   filename,
+                   colnames, 
+                   data_path):
+
+        """
+        
+        Based on the sales type, the scraper will automatically write the apartment data 
+        onto the local machine. Please note that if 'test' is opted out, the size of the 
+        images will become significant. 
+
+        Parameters
+        ----------
+        sales_type : str
+            a handler to tell the function which section you're looking at, e.g. 'buy'
+
+        apt_data : list(object)
+            this is a list of apartment data in raw format and later on will be used 
+            to construct the dataframe 
+
+        data_path : str
+            the string of the path to where you want to store the images 
+
+        Returns
+        -------
+        None
+            the data will be saved onto the local machine 
+
+        """
+
+        # this is the path the OS will go back eventually
+        current_path = os.getcwd() 
+        os.chdir(data_path) # get into the data directory
+
+        # check if the data exists, if not, create a new data file
+        if not os.path.exists(f'{filename}'):
+            df = pd.DataFrame([], columns=colnames)
+            df.to_csv(f'{filename}')
+
+        # continuously write into the existing data file on the local machine 
+        df_new = pd.DataFrame(apt_data, columns=colnames)
+        with open(f'{filename}', 'a') as df_old:
+            df_new.to_csv(df_old, header=False)
+
+        # go back to the path where it is originally located 
+        os.chdir(current_path)
+
+### For Sale 
+class elliman_dot_com(dot_com):
+
+    ############################
+    # class initiation section #
+    ############################
+
+    def __init__(self, city, state):
+        self._apt_urls = []
+        self._apt_data = []
+        self._city = city
+        self._state = state
+
+    #############################
+    # private functions section #
+    #############################
+
     def _get_webpage(self, pg_num):
 
         """
@@ -383,7 +640,7 @@ class elliman_dot_com:
         # keep going until reaching the last page 
         while not stop:
         
-            if test and pg_num == 10:
+            if test and pg_num == 2:
                 break
             
             if pg_num%50 == 0:
@@ -484,64 +741,6 @@ class elliman_dot_com:
         except:
             return None
 
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
-            if not os.path.exists(addr):
-                os.mkdir(addr)
-            os.chdir(addr)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
-
     def _get_address(self, soup):
 
         """
@@ -575,31 +774,6 @@ class elliman_dot_com:
             return street, neighborhood, city
         except:
             return None, None, None
-
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            # pattern to find any number (int or float)
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
 
     def _get_price(self, soup):
 
@@ -792,7 +966,7 @@ class elliman_dot_com:
         street, neighborhood, city = self._get_address(soup)
         state = self._state.upper()
         price = self._get_price(soup)
-        beds, baths, halfbaths = self._get_features(soup)
+        beds, baths, _ = self._get_features(soup)
         htype = self._get_htype(soup)
         sqft = self._get_sqft(soup)
         listid = self._get_list_id(soup)
@@ -805,7 +979,6 @@ class elliman_dot_com:
             price,
             beds, 
             baths, 
-            halfbaths,
             htype,
             sqft,
             listid,
@@ -963,48 +1136,6 @@ class elliman_dot_com:
         if verbose:
             print('all images scraped')
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('elliman_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.ELLIMAN_COLNAMES)
-            df.to_csv('elliman_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.ELLIMAN_COLNAMES)
-        with open('elliman_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
@@ -1024,9 +1155,10 @@ class elliman_dot_com:
             self.scrape_apt_data(batch, verbose=True, test=test)
             self.scrape_apt_images(batch, img_path, verbose=True, test=test)
             apt_data = self.apt_data
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'elliman.csv', CONST.ELLIMAN_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
+
         print('job done, congratulations!')
 
     #####################
@@ -1051,69 +1183,15 @@ class elliman_dot_com:
         return self._apt_data
 
 ### For Rent 
-class rent_dot_com:
+class rent_dot_com(dot_com):
 
     def __init__(self, city, state):
-        self._city = city
-        self._state = state
+        self._city = city.replace(' ', '-').lower()
+        self._state = str(states.lookup(state)).replace(' ','-').lower()
         self._overhead = 'https://www.rent.com'
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
         self._apt_data = []
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
 
     def _get_page_url(self, page_num):
         """
@@ -1448,64 +1526,6 @@ class rent_dot_com:
         except:
             return []
 
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    img_data = request.urlopen(img_url).read()
-                    handler.write(img_data)
-                    handler.close()
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
-
     def _get_apt_info(self, apt_url, img_path):
         """
         Given the apartment URL, scrape the apartment unit's information regardless
@@ -1633,52 +1653,6 @@ class rent_dot_com:
 
         self._apt_data = apt_all_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        sales_type : str
-            a handler to tell the function which section you're looking at, e.g. 'buy'
-
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists(f'rent_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.RENT_COLNAMES)
-            df.to_csv(f'rent_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.RENT_COLNAMES)
-        with open(f'rent_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False, verbose=False):
         self.scrape_apt_urls(test=test, verbose=verbose)
         urls = self.apt_urls
@@ -1694,7 +1668,7 @@ class rent_dot_com:
             # print(batch_urls)
             self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
             data = self.apt_data
-            self.write_data(data, data_path)
+            self.write_data(data, 'rent.csv', CONST.RENT_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         self._browser.close()
@@ -1711,7 +1685,7 @@ class rent_dot_com:
         return self._apt_data
 
 ### For Sale, For Rent
-class trulia_dot_com:
+class trulia_dot_com(dot_com):
 
     ############################
     # class initiation section #
@@ -1764,29 +1738,6 @@ class trulia_dot_com:
 
         return options
 
-    def _recaptcha(self, browser):
-        captcha_iframe = WebDriverWait(browser, 10).until(
-        EC.presence_of_element_located(
-                (
-                    By.TAG_NAME, 'iframe'
-                )
-            )
-        )
-
-        ActionChains(browser).move_to_element(captcha_iframe).click().perform()
-
-        # click im not robot
-        captcha_box = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (
-                    By.ID, 'g-recaptcha-response'
-                )
-            )
-        )
-
-        browser.execute_script("arguments[0].click()", captcha_box)
-        time.sleep(120)
-
     def _get_browser(self, webpage):
         """
         A helper function to get the selenium browser in order 
@@ -1811,7 +1762,6 @@ class trulia_dot_com:
         browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-
         return browser, wait
 
     def _get_buy_webpage(self, pg_num, htype):
@@ -2106,8 +2056,11 @@ class trulia_dot_com:
             a JSON object, a dictionary of dictionaries  
 
         """
-        browser = self._browser
-        browser.get(url)
+        try:
+            browser = self._browser
+            browser.get(url)
+        except:
+            print(browser.current_url)
 
         try:
             robot_check = browser.find_element_by_xpath("//div[@class='content center']")
@@ -2149,66 +2102,6 @@ class trulia_dot_com:
         pics = jdict['props']['homeDetails']['media']['photos']
         urls = [pic['url']['mediumSrc'] for pic in pics]
         return urls
-
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        img_type : str
-            the section of the webpage, namely, 'buy', 'rent' or 'sold'
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder 
-            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
-            if not os.path.exists(addr):
-                os.mkdir(addr)
-            os.chdir(addr)
-
-            # write images inside the apartment folder 
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-            
-            # go back to the original path before the 
-            # function was initiated 
-            os.chdir(current_path)
-            return 1
-        
-        except:
-            return 0
 
     def _get_address(self, jdict):
         
@@ -2521,31 +2414,34 @@ class trulia_dot_com:
         apt_info_data = []
 
         for url in apt_urls:
-            jdict = self._load_json(url)
-            street, city, state, zipcode = self._get_address(jdict)
-            price = self._get_price(jdict)
-            bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
-            space = self._get_space(jdict)
-            features = self._get_apt_features(jdict)
-            prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
+            try:
+                jdict = self._load_json(url)
+                street, city, state, zipcode = self._get_address(jdict)
+                price = self._get_price(jdict)
+                bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
+                space = self._get_space(jdict)
+                features = self._get_apt_features(jdict)
+                prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
 
-            apt_info_data.append([
-                street, 
-                city, 
-                state, 
-                zipcode, 
-                price,
-                bedrooms, 
-                bathrooms,
-                space,
-                prop_type, 
-                lot_size, 
-                year_built, 
-                fireplace, 
-                central_ac,
-                stories,
-                url,
-            ])
+                apt_info_data.append([
+                    street, 
+                    city, 
+                    state, 
+                    zipcode, 
+                    price,
+                    bedrooms, 
+                    bathrooms,
+                    space,
+                    prop_type, 
+                    lot_size, 
+                    year_built, 
+                    fireplace, 
+                    central_ac,
+                    stories,
+                    url,
+                ])
+            except:
+                print(f'failed URL: {url}')
 
         return apt_info_data
 
@@ -2608,34 +2504,6 @@ class trulia_dot_com:
         ]
         
         return section_data
-
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from
-        a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            if 'studio' in text.lower():
-                return 0.0
-            text = text.replace(',', '')
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
 
     def _get_floorplans(self, url):
         
@@ -2700,6 +2568,7 @@ class trulia_dot_com:
                 if test and i==5:
                     break
             except:
+                print(f'failed URL: {apt_url}')
                 continue
 
         return apt_info_data
@@ -3059,61 +2928,14 @@ class trulia_dot_com:
             # write images onto the local machine 
             self._save_images(img_urls, 
                               data_path, 
-                              address)
+                              f'{address}, {self._city.title()}, {self._state.upper()}')
 
         if verbose:
             print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
 
-    def write_data(self,
-                   sales_type,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        sales_type : str
-            a handler to tell the function which section you're looking at, e.g. 'buy'
-
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists(f'trulia_dot_com_{sales_type}.csv'):
-            df = pd.DataFrame([], columns=CONST.TRULIA_COLNAMES[sales_type])
-            df.to_csv(f'trulia_dot_com_{sales_type}.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.TRULIA_COLNAMES[sales_type])
-        with open(f'trulia_dot_com_{sales_type}.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        categories = ['rent', 'buy', 'sold']
+        categories = ['buy', 'rent', 'sold']
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -3135,17 +2957,15 @@ class trulia_dot_com:
                     self.scrape_apt_data(category, url_batch, verbose=True)
                     data = self.apt_data[category]
 
-                    self.write_data(category, data, data_path)
+                    self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
                     self.scrape_apt_images(category, url_batch, img_path, verbose=True)
                 except:
                     print(f'batch {i} failed')
-                    print(f'unscraped URLs: {url_batch}')
                     continue
 
+            self._browser.close()
             print(f'scraping for category - {category} done!')
 
-        self._browser.close()
-        
         print('job done, congratulations!')
 
     #####################
@@ -3170,7 +2990,7 @@ class trulia_dot_com:
         return self._apt_data
 
 ### For Sale
-class remax_dot_com:
+class remax_dot_com(dot_com):
 
     # initialization - users need to specify a city and state 
     def __init__(self, city, state):
@@ -3179,156 +2999,6 @@ class remax_dot_com:
         self._overhead = 'https://www.remax.com'
         self._apt_urls = []
         self._apt_data = []
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-        
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        
-
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 404:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
-
-    def _soup_attempts(self, url, total_attempts=5):
-
-        """
-        A helper function that will make several attempts
-        to obtain a soup to avoid getting blocked
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        total_attempts: int
-            the number of attempts you want to try to obtain the 
-            soup before you already give up. Default is 5 attempts
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage        
-
-        """
-
-        soup = self._get_soup(url)
-
-        # if we get the soup with the first attempt
-        if soup:
-            return soup
-        # if we don't get the soup during our first
-        # attempt
-        else:
-            attempts = 0
-            while attempts < total_attempts:
-                # put the program idle to avoid detection
-                time.sleep(3)
-                soup = self._get_soup(url)
-                if soup:
-                    return soup
-            # time to give up, try to find what's going on 
-            raise ValueError(f'FAILED to get soup for apt url {url}')
 
     def _get_webpage(self):
 
@@ -3393,15 +3063,6 @@ class remax_dot_com:
 
         return apt_urls
 
-    def _parse_num(self, text):
-        text = text.replace(',', '')
-        # extract the numerical price value 
-        pattern = r'[-+]?\d*\.\d+|\d+'
-        number = re.findall(pattern, text)[0]
-        # convert the price to float 
-        number = float(number)
-        return number
-
     def _get_price(self, soup):
 
         """
@@ -3434,7 +3095,7 @@ class remax_dot_com:
                                   .replace(',','')\
                                   .strip()
 
-            price = self._parse_num(price_text)
+            price = self._extract_num(price_text)
             return price
         except:
             return np.nan
@@ -3491,6 +3152,15 @@ class remax_dot_com:
             # if there's any part that's missing in the address part,
             # the whole address becomes useless
             return None, None, None, None
+
+    def _extract_num(self, text):
+        text = text.replace(',', '')
+        # extract the numerical price value 
+        pattern = r'[-+]?\d*\.\d+|\d+'
+        number = re.findall(pattern, text)[0]
+        # convert the price to float 
+        number = float(number)
+        return number
 
     def _get_sideinfo(self, content_tag):
 
@@ -3553,7 +3223,7 @@ class remax_dot_com:
                                .get_text() \
                                .strip()
                 try:
-                    value = self._parse_num(value)
+                    value = self._extract_num(value)
                 except:
                     pass
 
@@ -3657,9 +3327,10 @@ class remax_dot_com:
         tax = self._access_dict(sidict, 'Tax Annual Amount')
         tax_year = self._parse_year(self._access_dict(sidict, 'Tax Year'))
 
-        if 'central' in ac.lower():
-            ac = 1
-        else:
+        try:
+            if 'central' in ac.lower():
+                ac = 1
+        except:
             ac = 0
 
         # package all the features into a list 
@@ -3693,63 +3364,6 @@ class remax_dot_com:
         img_tags = soup.find_all('img', class_='listing-detail-image')
         img_urls = [tag['src'] for tag in img_tags]
         return img_urls
-
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
 
     def _get_apt_info(self, apt_url, img_path):
 
@@ -3855,48 +3469,6 @@ class remax_dot_com:
         
         self._apt_data = apt_all_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('remax_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.REMAX_COLNAMES)
-            df.to_csv('remax_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.REMAX_COLNAMES)
-        with open('remax_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # scrape all the apartment URLs in Philadelphia
         # status update enabled
@@ -3916,7 +3488,7 @@ class remax_dot_com:
         for i, batch_urls in enumerate(urls_chuck):
             self.scrape_apt_data(batch_urls, img_path, verbose=True)
             data = self.apt_data
-            self.write_data(data, data_path)
+            self.write_data(data, 'remax.csv', CONST.REMAX_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         print('job done!')
@@ -3934,7 +3506,7 @@ class remax_dot_com:
         return self._apt_data
 
 ### For Sale 
-class coldwell_dot_com:
+class coldwell_dot_com(dot_com):
 
     def __init__(self, city, state, start_page, end_page):
         self._city = city.lower().replace(' ', '-')
@@ -3979,32 +3551,6 @@ class coldwell_dot_com:
         fp.close
         content = BeautifulSoup(html,"lxml")
         return content
-
-    def _extract_num(self, text):
-        """
-        A helper function that extract any number from a text 
-
-        Parameters
-        ----------
-        text : str
-            a string of text that might contains numbers 
-
-        Returns
-        -------
-        num : float
-            the number extracted from the text 
-
-        >>> _extract_num('$1000 per month')
-        1000.0
-        """
-        try:
-            # pattern to find any number (int or float)
-            text = text.replace(',', '')
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            result = re.findall(pattern, text)[0]
-            return float(result)
-        except:
-            return np.nan
     
     def _get_content(self, url, img_path):
         
@@ -4093,61 +3639,37 @@ class coldwell_dot_com:
                 break
             else:
                 arch_info = 'N/A'
-                
-        listing_detail = {
-            'ADDRESS': street,
-            'CITY': city, 
-            'STATE': state, 
-            'ZIP': zip_code, 
-            'APT #': apt_num, 
-            'BATH': bathrooms,
-            'BED': bedrooms, 
-            'GSF': sqt,
-            'ASKING PRICE': asking_price, 
-            'LISTING TYPE': listing_type,
-            'LOT SF': lot_size, 
-            'YEAR BUILT': year_built, 
-            'FLOORS': floors, 
-            'BASEMENT': base,
-            'BASEMENT DESC': base_desc, 
-            'ARCH': arch_info, 
-            'MATERIAL': material,
-            'LINK': url,
-        }
+
+        data = [
+            street,
+            city, 
+            state, 
+            zip_code, 
+            apt_num, 
+            bathrooms,
+            bedrooms, 
+            sqt,
+            asking_price, 
+            listing_type,
+            lot_size, 
+            year_built, 
+            floors, 
+            base,
+            base_desc, 
+            arch_info, 
+            material,
+            url,
+        ]
 
         ##Scrap all the image for each property and store them into each folder
         ##Please change the file_root accordingly when tested
         image_url = []
-        for image_link in listing_content.find_all('img',class_="owl-lazy"):
+        for image_link in listing_content.find_all('img', class_="owl-lazy"):
             image_url.append(image_link.get('data-href'))
 
-        file_root = img_path
-        file_folder = ', '.join([street,city])
-        file_path = os.path.join(file_root, file_folder)
-
-        current_path = os.getcwd() 
-        if not os.path.exists(file_path):
-            os.mkdir(file_path)
-        os.chdir(file_path)
-
-        for i in range(len(image_url)):
-            f= open("{} {}.jpg".format(street,i+1),"wb")
-            f.write(ulb.request.urlopen(image_url[i]).read())
-            f.close
-
-        os.chdir(current_path)
+        self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
             
-        return listing_detail
-
-    def _get_df(self, content_list, save_to_excel=False):
-        ## Store all the listing info to a dataframe, if choose to save as Excel Spread Sheet, pass True
-        df = pd.DataFrame()
-        for i in range(len(content_list)):
-            temp_df = pd.DataFrame(content_list[i],index=[i])
-            df = pd.concat([df,temp_df],axis=0, ignore_index=True)
-        if not save_to_excel:
-            df.to_excel("Phil_demo_data_2.xlsx")
-        return df
+        return data
 
     def _get_max_page(self):
         url = f'https://www.coldwellbankerhomes.com/{self._state}/{self._city}/?sortId=2&offset=0'
@@ -4176,133 +3698,34 @@ class coldwell_dot_com:
             if test:
                 break
 
-        content_list = []
-        print(f'\ttotal number of aparments to be scraped: {len(listing_link)}')
-        for i, url in enumerate(listing_link):
-            content_list.append(self._get_content(url, img_path))
-            print(f'\tscraping for apartment # {i+1} is done')
-        
-        df = self._get_df(content_list, save_to_excel=True)
-        df.to_csv(f'{data_path}/coldwell_dot_com.csv')
-        print('job done!')
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = listing_link
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = [self._get_content(url, img_path) for url in batch]
+            self.write_data(apt_data, 'coldwell.csv', CONST.COLDWELL_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        print('job done, congratulations!')
 
 ### Compass For Rent
-class compass_dot_com:
+class compass_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city.lower().replace(' ', '-')
         self._state = state.lower()
         self._url = f'https://www.compass.com/for-rent/{self._city}-{self._state}/'
         self._browser, _ = self._get_browser(self._url)
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac O21S X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 254:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
 
     ### get all the apartment URLs 
     def _get_apt_urls(self, test=False):
@@ -4346,19 +3769,6 @@ class compass_dot_com:
 
         return addr, unit, zipcode
 
-    ### parse the number from any string that contains numerical values 
-    def _parse_num(self, text):
-        try:
-            text = text.replace(',', '')
-            # extract the numerical price value 
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            number = re.findall(pattern, text)[0]
-            # convert the price to float 
-            number = float(number)
-            return number
-        except:
-            return None
-
     ### a more protective way to access an element from a dictionary
     ### we don't want our program to break if we can't access the 
     ### dictionary from a key 
@@ -4374,7 +3784,7 @@ class compass_dot_com:
                          .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
         keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
-        values = [self._parse_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
+        values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
         d = dict(zip(keys, values))
         return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
@@ -4384,7 +3794,7 @@ class compass_dot_com:
         sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
                    .find('div', class_='textIntent-title2') \
                    .get_text()
-        sqft = self._parse_num(sqft)
+        sqft = self._extract_num(sqft)
         return sqft
 
     ### property details, including year built and property type 
@@ -4401,8 +3811,8 @@ class compass_dot_com:
             units = soup.find('span', attrs={'data-tn': 'listing-page-building-units'}).get_text()
             stories = soup.find('span', attrs={'data-tn': 'listing-page-building-stories'}).get_text()
 
-            units = int(self._parse_num(units))
-            stories = int(self._parse_num(stories))
+            units = int(self._extract_num(units))
+            stories = int(self._extract_num(stories))
 
             return units, stories
         except:
@@ -4433,7 +3843,7 @@ class compass_dot_com:
             price_tab = soup.find('table', attrs={'data-tn': 'listingHistory-view-eventTable'})
             rows = price_tab.find_all('tr')[1:]
             price_cols = [row.find_all('td')[2].get_text() for row in rows]
-            price_cols = [self._parse_num(col) for col in price_cols]
+            price_cols = [self._extract_num(col) for col in price_cols]
             last_price = list(filter(lambda price: not price==None, price_cols))[0]
             return last_price
         except:
@@ -4444,65 +3854,8 @@ class compass_dot_com:
         img_urls = [itag.find('img')['src'] for itag in img_tags]
         return img_urls
 
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
-
     def _get_apt_data(self, url, img_path):
-        soup = self._get_soup(url)
+        soup = self._soup_attempts(url)
 
         city = self._city.replace('-', ' ').title()
         state = self._state.upper()
@@ -4547,48 +3900,6 @@ class compass_dot_com:
 
         return apt_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
-
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
-
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
-
-        data_path : str
-            the string of the path to where you want to store the images 
-
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
-
-        """
-
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('compass_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.COMPASS_COLNAMES)
-            df.to_csv('compass_dot_com.csv')
-
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.COMPASS_COLNAMES)
-        with open('compass_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
-
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
-
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
         sleep_secs = 15
@@ -4604,7 +3915,7 @@ class compass_dot_com:
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'compass.csv', CONST.COMPASS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4612,81 +3923,13 @@ class compass_dot_com:
         print('job done, congratulations!')
 
 ### Loopnet For Sale
-class loopnet_dot_com:
+class loopnet_dot_com(dot_com):
 
     def __init__(self, city, state):
         self._city = city.replace(' ', '-').lower()
-        self._state = state.replace(' ', '-').lower()
+        self._state = str(states.lookup(state)).replace(' ', '-').lower()
         self._url = f'https://www.loopnet.com/{self._state}_multifamily-properties-for-sale/'
         self._browser, _ = self._get_browser('https://www.loopnet.com')
-
-    def _random_user_agent(self):
-        """
-        A helper function to generate a random header to 
-        avoid getting blocked by the website
-
-        Parameters
-        ----------
-        None
-
-        Returns
-        -------
-        str
-        a random user agent 
-
-        >>> _random_user_agent()
-        'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-        """
-
-        try:
-            ua = UserAgent()
-            return ua.random
-        except:
-            default_ua = 'Mozilla/5.0 (Macintosh; Intel Mac O21S X 10_12_3) \
-                    AppleWebKit/537.36 (KHTML, like Gecko) \
-                    Chrome/58.0.3029.110 Safari/537.36'
-            return default_ua
-
-    def _get_soup(self, url):
-        """
-        This is a helper function that will automatically generate a 
-        BeautifulSoup object based on the given URL of the apartment 
-        webpage
-
-        Parameters
-        ----------
-        url : str
-            the URL of a specific apartment or a general website 
-
-        Returns
-        -------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-        """
-
-        # generate a random header 
-        headers = {'User-Agent': self._random_user_agent()}
-        # send a request and get the soup
-        response = requests.get(url, headers=headers)
-        results = response.content
-        if not response.status_code == 254:
-            soup = BeautifulSoup(results, 'lxml')
-        return soup
-
-    ### parse the number from any string that contains numerical values 
-    def _parse_num(self, text):
-        try:
-            text = text.replace(',', '')
-            # extract the numerical price value 
-            pattern = r'[-+]?\d*\.\d+|\d+'
-            number = re.findall(pattern, text)[0]
-            # convert the price to float 
-            number = float(number)
-            return number
-        except:
-            return None
 
     def _is_portfolio(self, description):
         description = description.lower()
@@ -4697,9 +3940,9 @@ class loopnet_dot_com:
 
     ### get all the urls to access the information of the apartments 
     def _get_apt_urls(self, test=False):
-        soup = self._get_soup(self._url)
+        soup = self._soup_attempts(self._url)
         max_pg = soup.find_all('a', class_='searchPagingBorderless')[-1].text
-        max_pg = int(self._parse_num(max_pg))
+        max_pg = int(self._extract_num(max_pg))
 
         apt_urls = []
 
@@ -4763,19 +4006,19 @@ class loopnet_dot_com:
 
         d = dict(pairs)
 
-        cap_rate = self._parse_num(self._ad(d, 'Cap Rate'))
+        cap_rate = self._extract_num(self._ad(d, 'Cap Rate'))
         if cap_rate:
             cap_rate = cap_rate/100
 
         prop_type = self._ad(d, 'Property Type')
-        units = self._parse_num(self._ad(d, 'No. Units'))
-        price = self._parse_num(self._ad(d, 'Price'))
-        floors = self._parse_num(self._ad(d, 'No. Stories'))
-        gsf = self._parse_num(self._ad(d, 'Building Size'))
-        land_sf = self._parse_num(self._ad(d, 'Lot Size'))
+        units = self._extract_num(self._ad(d, 'No. Units'))
+        price = self._extract_num(self._ad(d, 'Price'))
+        floors = self._extract_num(self._ad(d, 'No. Stories'))
+        gsf = self._extract_num(self._ad(d, 'Building Size'))
+        land_sf = self._extract_num(self._ad(d, 'Lot Size'))
         building_class = self._ad(d, 'Building Class')
         year_built = self._ad(d, 'Year Built')
-        avg_occ = self._parse_num(self._ad(d, 'Average Occupancy'))
+        avg_occ = self._extract_num(self._ad(d, 'Average Occupancy'))
 
         if avg_occ:
             avg_occ = avg_occ/100
@@ -4808,60 +4051,6 @@ class loopnet_dot_com:
         img_tags = soup.find_all('div', class_=class_list)
         img_urls = [tag['data-src'] for tag in img_tags]
         return img_urls
-
-    @staticmethod
-    def _build_options():
-        options = webdriver.ChromeOptions()
-        options.accept_untrusted_certs = True
-        options.assume_untrusted_cert_issuer = True
-
-        # chrome configuration
-        # More: https://github.com/SeleniumHQ/docker-selenium/issues/89
-        # And: https://github.com/SeleniumHQ/docker-selenium/issues/87
-        options.add_argument("--no-sandbox")
-        options.add_argument("--disable-impl-side-painting")
-        options.add_argument("--disable-setuid-sandbox")
-        options.add_argument("--disable-seccomp-filter-sandbox")
-        options.add_argument("--disable-breakpad")
-        options.add_argument("--disable-client-side-phishing-detection")
-        options.add_argument("--disable-cast")
-        options.add_argument("--disable-cast-streaming-hw-encoding")
-        options.add_argument("--disable-cloud-import")
-        options.add_argument("--disable-popup-blocking")
-        options.add_argument("--ignore-certificate-errors")
-        options.add_argument("--disable-session-crashed-bubble")
-        options.add_argument("--disable-ipv6")
-        options.add_argument("--allow-http-screen-capture")
-        options.add_argument("--start-maximized")
-        options.add_argument('--lang=es')
-
-        return options
-
-    def _get_browser(self, webpage):
-        """
-        A helper function to get the selenium browser in order 
-        to perform the scraping tasks 
-
-        Parameters
-        ----------
-        chromedriver : str
-            the path to the location of the chromedriver 
-
-        Returns
-        -------
-        browser : webdriver.Chrome
-            a chrome web driver 
-
-        wait : WebDriverWait
-            this is wait object that allows the program to hang around for a period
-            of time since we need some time to listen to the server 
-
-        """
-        options = self._build_options()
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
-        browser.get(webpage)
-        wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
-        return browser, wait
 
     def _save_images(self, 
                      img_urls, 
@@ -4928,47 +4117,235 @@ class loopnet_dot_com:
 
         return apt_data
 
-    def write_data(self,
-                   apt_data, 
-                   data_path):
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
 
-        """
-        
-        Based on the sales type, the scraper will automatically write the apartment data 
-        onto the local machine. Please note that if 'test' is opted out, the size of the 
-        images will become significant. 
+        # all apartment URLs
+        apt_urls = self._get_apt_urls(test=test)
 
-        Parameters
-        ----------
-        apt_data : list(object)
-            this is a list of apartment data in raw format and later on will be used 
-            to construct the dataframe 
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        data_path : str
-            the string of the path to where you want to store the images 
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, 'loopnet.csv', CONST.LOOPNET_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
 
-        Returns
-        -------
-        None
-            the data will be saved onto the local machine 
+        self._browser.close()
+        print('job done, congratulations!')
 
-        """
+### Hotpads For Rent
+class hotpads_dot_com(dot_com):
 
-        # this is the path the OS will go back eventually
-        current_path = os.getcwd() 
-        os.chdir(data_path) # get into the data directory
-        # check if the data exists, if not, create a new data file
-        if not os.path.exists('loopnet_dot_com.csv'):
-            df = pd.DataFrame([], columns=CONST.LOOPNET_COLNAMES)
-            df.to_csv('loopnet_dot_com.csv')
+    def __init__(self, city, state):
+        self._city = city
+        self._state = state
+        self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
 
-        # continuously write into the existing data file on the local machine 
-        df_new = pd.DataFrame(apt_data, columns=CONST.LOOPNET_COLNAMES)
-        with open('loopnet_dot_com.csv', 'a') as df_old:
-            df_new.to_csv(df_old, header=False)
 
-        # go back to the path where it is originally located 
-        os.chdir(current_path)
+    def _get_apt_urls(self, test=False):
+        browser = self._browser
+        max_pg = browser.find_element_by_xpath("//a[@class='Linker PagerItem PagerContainer-page-number PagerContainer-page-number-total Linker-accent']") \
+                        .text
+
+        max_pg = int(self._extract_num(max_pg))
+
+        apt_urls = []
+
+        for i in range(1, max_pg+1):
+            containers = browser.find_elements_by_xpath("//div[@class='ListingCard-content-container']")
+            atags = [container.find_element_by_tag_name('a') for container in containers]
+            hrefs = [a.get_attribute('href') for a in atags]
+            apt_urls += hrefs
+
+            if test:
+                break
+
+        return apt_urls
+
+    def _get_address(self, browser):
+        addr = browser.find_element_by_tag_name('address') \
+                      .text \
+                      .split('\n')
+
+        if len(addr)==1:
+            addr = browser.find_element_by_xpath("//h1[@class='Text HdpAddress-normal-weight-text Utils-text-overflow Text-sm Text-xlAndUp-md']") \
+                          .text \
+                          .split('\n')
+
+        if len(addr)>1:
+            street = addr[0].strip()
+            region = addr[1].strip().split(',')
+            city = region[0].strip()
+            state = region[1].strip().split(' ')[0]
+            zipcode = region[1].strip().split(' ')[1]
+
+            return street, city, state, zipcode
+
+        else:
+            return None, None, None, None
+
+    def _get_bed_bath_sqft(self, browser):
+        try:
+            header_tag = browser.find_element_by_xpath("//div[@class='ModelFloorplanItem-header']")
+
+            bed = header_tag.find_element_by_xpath("//span[@class='ModelFloorplanItem-detail Utils-bold']") \
+                            .text
+            bed = self._extract_num(bed)
+
+            bath_sqft = header_tag.find_elements_by_xpath("//span[@class='ModelFloorplanItem-bthsqft']")
+            bath = self._extract_num(bath_sqft[0].text)
+            sf = self._extract_num(bath_sqft[1].text)
+
+            return bed, bath, sf
+        except:
+            return None, None, None
+
+    # get a list of (price, unit) tuples 
+    def _get_price_unit(self, browser):
+        empty_units = browser.find_elements_by_xpath("//div[@class='ModelFloorplanItem-empty-unit']")
+        if empty_units:
+            price_unit = []
+            for empty_unit in empty_units:
+                rent = self._extract_num(empty_unit.text)
+                price_unit.append([rent, None])
+        else:
+            price_unit = []
+
+            try:
+                # view more button
+                button_vm = browser.find_element_by_xpath("//*[text()='View more floor plans']")
+                button_vm.click()
+                button_exp = browser.find_element_by_xpath("//div[@class='ModelFloorplanItem-expand']")
+                button_exp.click()
+            except:
+                pass
+
+            non_empty_units = browser.find_elements_by_xpath("//div[@class='ModelFloorplanItem-unit']")
+            for non_empty_unit in non_empty_units:
+                price_unit_lst = non_empty_unit.text \
+                                               .split('\n') \
+
+                rent = self._extract_num(price_unit_lst[0].strip())
+                unit = price_unit_lst[2].strip()
+
+                price_unit.append([rent, unit])
+
+        return price_unit
+
+    def _get_features(self, browser):
+        try:
+            buttons_sm = browser.find_elements_by_xpath("//div[@class='LinkToggle']")
+            for bsm in buttons_sm:
+                bsm.click()
+        except:
+            pass
+
+        feature_tags = browser.find_elements_by_xpath("//li[@class='ListItem']")
+        features = [tag.text for tag in feature_tags if tag.text ]
+
+        wd = 0
+        if ('Washer' in features) or ('Dryer' in features):
+            wd = 1
+
+        stories = None
+        for feature in features:
+            feature = feature.lower()
+            if 'stories:' in feature:
+                stories = self._extract_num(feature.split(':')[1])
+                break
+
+        central_ac = 0
+        for feature in features:
+            feature = feature.lower()
+            if 'central air conditioning' in feature:
+                central_ac = 1
+                break
+
+        year_built = None
+        for feature in features:
+            feature = feature.lower()
+            if 'year built:' in feature:
+                year_built = feature.split(':')[1].strip()
+                break
+
+        fireplace = 0
+        if 'Fireplace' in features:
+            fireplace = 1
+
+        return wd, stories, central_ac, year_built, fireplace
+
+    def _get_img_urls(self, browser):
+        try:
+            max_photos = browser.find_element_by_xpath("//div[@class='PhotoCarousel-item-count-badge']") \
+                                .text \
+                                .split(' ')[-1]
+
+            max_photos = int(self._extract_num(max_photos))
+            for i in range(max_photos-1):
+                button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
+                button_next.click()
+
+            photo_tags = browser.find_elements_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
+            img_urls = [pt.get_attribute('src') for pt in photo_tags]
+            return img_urls
+        except:
+            return []
+
+    def _get_apt_data(self, apt_url, img_path):
+        browser = self._browser
+        browser.get(apt_url)
+        time.sleep(3)
+
+        try:
+            robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
+            if 'Please verify you are a human' in robot_check.text:
+                self._recaptcha(browser)
+        except:
+            pass
+
+        # get the images, this needs to be happening in the beginning
+        # as there are more buttons to be clicked along the way 
+        img_urls = self._get_img_urls(browser)
+
+        street, city, state, zipcode = self._get_address(browser)
+        bed, bath, sf = self._get_bed_bath_sqft(browser)
+        # need to click one button here
+        price_unit = self._get_price_unit(browser)
+        # one more button to be clicked
+        wd, stories, central_ac, year_built, fireplace = self._get_features(browser)
+
+        data = [street, 
+                city, 
+                state, 
+                zipcode,
+                bed, 
+                bath, 
+                sf,
+                wd, 
+                stories, 
+                central_ac, 
+                year_built, 
+                fireplace,
+                apt_url]
+
+        final_data = [data+pu for pu in price_unit]
+        self._save_images(img_urls, img_path, f'{street}, {self._city.title()}, {self._state.upper()}')
+
+        return final_data
+
+    def scrape_apt_data(self, apt_urls, img_path):
+        apt_data = []
+
+        for url in apt_urls:
+            apt_data += self._get_apt_data(url, img_path)
+
+        return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # time of sleep 
@@ -4985,7 +4362,7 @@ class loopnet_dot_com:
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, data_path)
+            self.write_data(apt_data, 'hotpads.csv', CONST.HOTPADS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -5019,7 +4396,17 @@ class data_merger:
         final_df.to_csv(f'{data_path}/master_scraping_data.csv', index=False)
 
 if __name__ == '__main__':
+    """
+    when you pass in city and state, please make sure
+    the following conditions are met:
+        1. city name spelled in full
+            e.g. new york
+        2. state name spelled in abbreviation
+            e.g. ny (NOT New York)
+    """
 
+
+    # user need to provide these paths 
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
@@ -5033,8 +4420,12 @@ if __name__ == '__main__':
     rmdc = remax_dot_com('philadelphia', 'pa')
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
+    ### elliman.com For Sale 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+
     ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('new york', 'new york')
+    ldc = loopnet_dot_com('new york', 'ny')
     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     ### compass New York For Rent 
@@ -5042,17 +4433,21 @@ if __name__ == '__main__':
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    rdc = rent_dot_com('new york', 'ny')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-
-    ### elliman.com For Rent 
-    edc = elliman_dot_com('new york', 'ny')
-    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
-    ### merge all the datafiles into a master datafile 
+    ### hotpads.com For Rent
+    hdc = hotpads_dot_com('philadelphia', 'pa')
+    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+
+    ### trulia.com For Rent and For Sale
+    tdc = trulia_dot_com('philadelphia', 'pa')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
     dm.merge_dfs()
