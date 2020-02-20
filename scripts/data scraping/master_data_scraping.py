@@ -428,6 +428,63 @@ class dot_com:
         except:
             return np.nan
 
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                img_data = requests.get(img_url).content
+                with open(f'img{i}.jpg', 'wb') as handler:
+                    handler.write(img_data)
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
+
     def write_data(self,
                    apt_data,
                    filename,
@@ -682,64 +739,6 @@ class elliman_dot_com(dot_com):
             return imgs_complete
         except:
             return None
-
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
-            if not os.path.exists(addr):
-                os.mkdir(addr)
-            os.chdir(addr)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
 
     def _get_address(self, soup):
 
@@ -1526,64 +1525,6 @@ class rent_dot_com(dot_com):
         except:
             return []
 
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    img_data = request.urlopen(img_url).read()
-                    handler.write(img_data)
-                    handler.close()
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
-
     def _get_apt_info(self, apt_url, img_path):
         """
         Given the apartment URL, scrape the apartment unit's information regardless
@@ -2160,66 +2101,6 @@ class trulia_dot_com(dot_com):
         pics = jdict['props']['homeDetails']['media']['photos']
         urls = [pic['url']['mediumSrc'] for pic in pics]
         return urls
-
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        img_type : str
-            the section of the webpage, namely, 'buy', 'rent' or 'sold'
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder 
-            addr = f'{address}, {self._city.title()}, {self._state.upper()}'
-            if not os.path.exists(addr):
-                os.mkdir(addr)
-            os.chdir(addr)
-
-            # write images inside the apartment folder 
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-            
-            # go back to the original path before the 
-            # function was initiated 
-            os.chdir(current_path)
-            return 1
-        
-        except:
-            return 0
 
     def _get_address(self, jdict):
         
@@ -3046,7 +2927,7 @@ class trulia_dot_com(dot_com):
             # write images onto the local machine 
             self._save_images(img_urls, 
                               data_path, 
-                              address)
+                              f'{address}, {self._city.title()}, {self._state.upper()}')
 
         if verbose:
             print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
@@ -3482,63 +3363,6 @@ class remax_dot_com(dot_com):
         img_tags = soup.find_all('img', class_='listing-detail-image')
         img_urls = [tag['src'] for tag in img_tags]
         return img_urls
-
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
 
     def _get_apt_info(self, apt_url, img_path):
 
@@ -4043,63 +3867,6 @@ class compass_dot_com(dot_com):
         img_urls = [itag.find('img')['src'] for itag in img_tags]
         return img_urls
 
-    def _save_images(self, 
-                     img_urls, 
-                     data_path, 
-                     address):
-
-        """
-        Save all the images into a specific directory given the 
-        downloadable image URLs
-
-        Parameters
-        ----------
-        img_urls : list(str)
-            this is a list of image URLs that you directly download 
-
-        data_path : str
-            the string format of the path to the directory where you
-            want to save all the images
-
-        address : str
-            this is the name of the folder to contain the images of a 
-            specific apartment
-
-        Returns
-        -------
-        status : int
-            if successful, return 1, otherwise, 0
-
-        """
-
-        try:
-            # if address is invalid, discontinue the process
-            if not address:
-                return 0
-
-            # this is the path we want the OS to come back
-            # when it finishes the image saving tasks
-            current_path = os.getcwd()
-            os.chdir(data_path)
-            
-            # create a folder for the apartment if it doesn't
-            # exist inside the section folder
-            if not os.path.exists(address):
-                os.mkdir(address)
-            os.chdir(address)
-
-            # write images inside the apartment folder
-            for i, img_url in enumerate(img_urls):
-                img_data = requests.get(img_url).content
-                with open(f'img{i}.jpg', 'wb') as handler:
-                    handler.write(img_data)
-                    
-            os.chdir(current_path)
-            return 1
-        except:
-            os.chdir(current_path)
-            return 0
-
     def _get_apt_data(self, url, img_path):
         soup = self._soup_attempts(url)
 
@@ -4517,11 +4284,27 @@ class hotpads_dot_com(dot_com):
 
         return wd, stories, central_ac, year_built, fireplace
 
+    def _get_img_urls(self, browser):
+        max_photos = browser.find_element_by_xpath("//div[@class='PhotoCarousel-item-count-badge']") \
+                            .text \
+                            .split(' ')[-1]
+
+        max_photos = int(self._extract_num(max_photos))
+        img_urls = []
+
+        for i in range(max_photos-1):
+            button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
+            button_next.click()
+            photo_tag = browser.find_element_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
+            img_urls.append(photo_tag.get_attribute('src'))
+
+        return img_urls
+
     def _get_apt_data(self, apt_url):
         browser = self._browser
         browser.get(apt_url)
-
         time.sleep(3)
+
         try:
             robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
             if 'Please verify you are a human' in robot_check.text:
@@ -4529,11 +4312,12 @@ class hotpads_dot_com(dot_com):
         except:
             pass
 
+        img_urls = self._get_img_urls(browser)
+        print(img_urls)
+
         street, city, state, zipcode = self._get_address(browser)
         bed, bath, sf = self._get_bed_bath_sqft(browser)
-
         price_unit = self._get_price_unit(browser)
-
         wd, stories, central_ac, year_built, fireplace = self._get_features(browser)
 
         data = [street, 
@@ -4551,6 +4335,7 @@ class hotpads_dot_com(dot_com):
                 apt_url]
 
         final_data = [data+pu for pu in price_unit]
+
         return final_data
 
 ### merge all the files together 
