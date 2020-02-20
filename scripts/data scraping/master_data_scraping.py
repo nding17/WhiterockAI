@@ -1129,8 +1129,10 @@ class elliman_dot_com(dot_com):
                             break
                 # street is the name of the image folder 
                 street, _, _ = self._get_address(soup)
-                # automatically save images onto the local machine 
-                self._save_images(imgs, data_path, street)
+
+                if imgs:
+                    # automatically save images onto the local machine 
+                    self._save_images(imgs, data_path, street)
             except:
                 # time to give up and try to find what's going on
                 raise ValueError(f'FAILED apt: {street}, url: {url}')
@@ -2927,10 +2929,12 @@ class trulia_dot_com(dot_com):
             jdict = self._load_json(url) # extract the json file
             img_urls = self._get_img_urls(jdict) # extract image URLs from the json file
             address = self._get_address(jdict)[0] # name of the folder 
-            # write images onto the local machine 
-            self._save_images(img_urls, 
-                              data_path, 
-                              f'{address}, {self._city.title()}, {self._state.upper()}')
+
+            if img_urls:
+                # write images onto the local machine 
+                self._save_images(img_urls, 
+                                  data_path, 
+                                  f'{address}, {self._city.title()}, {self._state.upper()}')
 
         if verbose:
             print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
@@ -2999,20 +3003,35 @@ class remax_dot_com(dot_com):
         self._city = city
         self._state = state
         self._overhead = 'https://www.remax.com'
+        self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
         self._apt_data = []
 
-    def _get_webpage(self):
+    def _search(self):
+        browser = self._browser
+        searchbox = browser.find_element_by_xpath("//input[@data-test='autocomplete-input']")
+        searchbox.send_keys(f'{self._city.title()}, {self._state.upper()}')
 
-        # for city comes with 2 words, replace the space with -
-        # e.g. 'new york' -> 'new-york'
-        city = self._city.strip().lower().replace(' ', '-')
-        state = self._state.strip().lower().replace(' ', '-')
-        # after the overhead, there's a dangle attached with the 
-        # URL of this website 
-        url = f'https://www.remax.com/homes-for-sale/{state}/{city}/city/4260000'
-        return url
+        dropoff = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                    (
+                        By.XPATH, "//div[@data-test='auto-complete-places']"
+                    )
+                )
+            )
 
+
+        dropoff.click()
+        newpage = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                    (
+                        By.XPATH, "//div[@class='listings-card']"
+                    )
+                )
+        )
+
+        return newpage
+    
     def _get_ensemble_apt_urls(self, test=False):
 
         """
@@ -3039,8 +3058,8 @@ class remax_dot_com(dot_com):
 
         """
 
-        webpage = self._get_webpage()
-        browser, wait = self._get_browser(webpage)
+        browser = self._search()
+
         cookie = browser.find_element_by_xpath('//*[@id="__layout"]/div/div[3]/div/div[2]/button[1]')
         cookie.click()
         apt_urls = []
@@ -3059,8 +3078,10 @@ class remax_dot_com(dot_com):
                 btn_next.click()
 
                 if test:
+                    self._browser.close()
                     break
         except:
+            self._browser.close()
             pass
 
         return apt_urls
@@ -3669,7 +3690,8 @@ class coldwell_dot_com(dot_com):
         for image_link in listing_content.find_all('img', class_="owl-lazy"):
             image_url.append(image_link.get('data-href'))
 
-        self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
+        if image_url:
+            self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
             
         return data
 
@@ -3890,7 +3912,9 @@ class compass_dot_com(dot_com):
         )
 
         img_urls = self._get_image_urls(soup)
-        self._save_images(img_urls, img_path, f"{addr}, {self._city.replace('-', ' ').title()}, {self._state.upper()}")
+
+        if img_urls:
+            self._save_images(img_urls, img_path, f"{addr}, {self._city.replace('-', ' ').title()}, {self._state.upper()}")
 
         return data
 
@@ -3947,7 +3971,6 @@ class loopnet_dot_com(dot_com):
         max_pg = int(self._extract_num(max_pg))
 
         apt_urls = []
-
         for i in range(1, max_pg+1):
             spg = self._get_soup(f'{self._url}{i}/')
             url_tags = spg.find_all('div', class_='listingDescription')
@@ -4337,7 +4360,9 @@ class hotpads_dot_com(dot_com):
                 apt_url]
 
         final_data = [data+pu for pu in price_unit]
-        self._save_images(img_urls, img_path, f'{street}, {self._city.title()}, {self._state.upper()}')
+
+        if img_urls:
+            self._save_images(img_urls, img_path, f'{street}, {self._city.title()}, {self._state.upper()}')
 
         return final_data
 
@@ -4390,7 +4415,6 @@ class apartments_dot_com(dot_com):
         for i in range(1, max_pg+1):
             apts = browser.find_elements_by_xpath("//div[@class='imageContainer carousel slide']")
             
-
 ### merge all the files together 
 class data_merger:
 
@@ -4427,7 +4451,6 @@ if __name__ == '__main__':
             e.g. ny (NOT New York)
     """
 
-
     # user need to provide these paths 
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
@@ -4438,38 +4461,38 @@ if __name__ == '__main__':
     adc = apartments_dot_com('new york', 'ny')
     adc._get_apt_urls()
 
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('philadelphia', 'pa')
-    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('new york', 'ny')
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
-    # ### elliman.com For Sale 
-    # edc = elliman_dot_com('new york', 'ny')
-    # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    ### elliman.com For Sale 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('new york', 'ny')
-    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com('new york', 'ny')
+    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
-    # ### compass New York For Rent 
-    # codc = compass_dot_com('new york', 'ny')
-    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Rent 
+    codc = compass_dot_com('new york', 'ny')
+    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('new york', 'ny')
-    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('new york', 'ny')
+    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('new york', 'ny', 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
 
-    # ### hotpads.com For Rent
-    # hdc = hotpads_dot_com('philadelphia', 'pa')
-    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    ### hotpads.com For Rent
+    hdc = hotpads_dot_com('new york', 'ny')
+    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
-    # ### trulia.com For Rent and For Sale
-    # tdc = trulia_dot_com('philadelphia', 'pa')
-    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    ### trulia.com For Rent and For Sale
+    tdc = trulia_dot_com('new york', 'ny')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
-    # ### merge all the datafiles into a master data file 
-    # dm = data_merger(data_path)
-    # dm.merge_dfs()
+    ### merge all the datafiles into a master data file 
+    dm = data_merger(data_path)
+    dm.merge_dfs()
