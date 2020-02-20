@@ -4416,38 +4416,38 @@ if __name__ == '__main__':
 
     is_testing = True
 
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('philadelphia', 'pa')
-    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('philadelphia', 'pa')
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
-    # ### elliman.com For Sale 
-    # edc = elliman_dot_com('new york', 'ny')
-    # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    ### elliman.com For Sale 
+    edc = elliman_dot_com('new york', 'ny')
+    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('new york', 'new york')
-    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com('new york', 'new york')
+    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
-    # ### compass New York For Rent 
-    # codc = compass_dot_com('new york', 'ny')
-    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Rent 
+    codc = compass_dot_com('new york', 'ny')
+    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('philadelphia', 'pennsylvania')
-    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('philadelphia', 'pennsylvania')
+    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
-    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
-    # ### trulia.com For Rent and For Sale
-    # tdc = trulia_dot_com('philadelphia', 'pa')
-    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-
-    # ### merge all the datafiles into a master datafile 
-    # dm = data_merger(data_path)
-    # dm.merge_dfs()
-
+    ### hotpads.com For Rent
     hdc = hotpads_dot_com('philadelphia', 'pa')
     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
+    ### trulia.com For Rent and For Sale
+    tdc = trulia_dot_com('philadelphia', 'pa')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    ### merge all the datafiles into a master datafile 
+    dm = data_merger(data_path)
+    dm.merge_dfs()
