@@ -1,7 +1,7 @@
 __author__ = 'Naili Ding'
 __email__ = 'nd2588@columbia.edu'
 __maintainer__ = 'Naili Ding'
-__version__ = '1.0.1'
+__version__ = '1.1.0'
 __status__ = 'complete'
 
 ### package requirements
@@ -4161,7 +4161,7 @@ class hotpads_dot_com(dot_com):
         self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
 
 
-    def _get_apt_urls(self):
+    def _get_apt_urls(self, test=False):
         browser = self._browser
         max_pg = browser.find_element_by_xpath("//a[@class='Linker PagerItem PagerContainer-page-number PagerContainer-page-number-total Linker-accent']") \
                         .text
@@ -4174,7 +4174,10 @@ class hotpads_dot_com(dot_com):
             containers = browser.find_elements_by_xpath("//div[@class='ListingCard-content-container']")
             atags = [container.find_element_by_tag_name('a') for container in containers]
             hrefs = [a.get_attribute('href') for a in atags]
-            apt_urls += hrefs 
+            apt_urls += hrefs
+
+            if test:
+                break
 
         return apt_urls
 
@@ -4182,6 +4185,11 @@ class hotpads_dot_com(dot_com):
         addr = browser.find_element_by_tag_name('address') \
                       .text \
                       .split('\n')
+
+        if len(addr)==1:
+            addr = browser.find_element_by_xpath("//h1[@class='Text HdpAddress-normal-weight-text Utils-text-overflow Text-sm Text-xlAndUp-md']") \
+                          .text \
+                          .split('\n')
 
         if len(addr)>1:
             street = addr[0].strip()
@@ -4191,6 +4199,7 @@ class hotpads_dot_com(dot_com):
             zipcode = region[1].strip().split(' ')[1]
 
             return street, city, state, zipcode
+
         else:
             return None, None, None, None
 
@@ -4336,9 +4345,39 @@ class hotpads_dot_com(dot_com):
                 apt_url]
 
         final_data = [data+pu for pu in price_unit]
-        self._save_images(img_urls, img_path, f'{street}, {city.title()}, {state.upper()}')
-
+        self._save_images(img_urls, img_path, f'{street}, {self._city.title()}, {self._state.upper()}')
+        
         return final_data
+
+    def scrape_apt_data(self, apt_urls, img_path):
+        apt_data = []
+
+        for url in apt_urls:
+            apt_data.append(self._get_apt_data(url, img_path))
+
+        return apt_data
+
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = self._get_apt_urls(test=test)
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, 'hotpads.csv', CONST.LOOPNET_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        self._browser.close()
+        print('job done, congratulations!')
 
 ### merge all the files together 
 class data_merger:
@@ -4407,6 +4446,6 @@ if __name__ == '__main__':
     # dm.merge_dfs()
 
     hdc = hotpads_dot_com('philadelphia', 'pa')
-    url = 'https://hotpads.com/franklin-tower-residences-philadelphia-pa-19102-1md83r6/pad?lat=40.0025&lon=-75.1180&orderBy=experimentScore&page=3&z=11'
-    hdc._get_apt_data(url, '../../data/sample/images/hotpads')
+    hdc._get_apt_data('https://hotpads.com/1220-sansom-street-philadelphia-pa-19107-sm08ga/pad', f'{img_path}/hotpads')
+    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
