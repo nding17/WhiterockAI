@@ -4290,17 +4290,15 @@ class hotpads_dot_com(dot_com):
                             .split(' ')[-1]
 
         max_photos = int(self._extract_num(max_photos))
-        img_urls = []
-
         for i in range(max_photos-1):
             button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
             button_next.click()
-            photo_tag = browser.find_element_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
-            img_urls.append(photo_tag.get_attribute('src'))
 
+        photo_tags = browser.find_elements_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
+        img_urls = [pt.get_attribute('src') for pt in photo_tags]
         return img_urls
 
-    def _get_apt_data(self, apt_url):
+    def _get_apt_data(self, apt_url, img_path):
         browser = self._browser
         browser.get(apt_url)
         time.sleep(3)
@@ -4312,12 +4310,15 @@ class hotpads_dot_com(dot_com):
         except:
             pass
 
+        # get the images, this needs to be happening in the beginning
+        # as there are more buttons to be clicked along the way 
         img_urls = self._get_img_urls(browser)
-        print(img_urls)
 
         street, city, state, zipcode = self._get_address(browser)
         bed, bath, sf = self._get_bed_bath_sqft(browser)
+        # need to click one button here
         price_unit = self._get_price_unit(browser)
+        # one more button to be clicked
         wd, stories, central_ac, year_built, fireplace = self._get_features(browser)
 
         data = [street, 
@@ -4335,6 +4336,7 @@ class hotpads_dot_com(dot_com):
                 apt_url]
 
         final_data = [data+pu for pu in price_unit]
+        self._save_images(img_urls, img_path, f'{street}, {city.title()}, {state.upper()}')
 
         return final_data
 
@@ -4405,5 +4407,6 @@ if __name__ == '__main__':
     # dm.merge_dfs()
 
     hdc = hotpads_dot_com('philadelphia', 'pa')
-    hdc._get_apt_data('https://hotpads.com/franklin-tower-residences-philadelphia-pa-19102-1md83r6/pad?lat=40.0025&lon=-75.1180&orderBy=experimentScore&page=3&z=11')
+    url = 'https://hotpads.com/franklin-tower-residences-philadelphia-pa-19102-1md83r6/pad?lat=40.0025&lon=-75.1180&orderBy=experimentScore&page=3&z=11'
+    hdc._get_apt_data(url, '../../data/sample/images/hotpads')
 
