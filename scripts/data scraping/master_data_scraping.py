@@ -4430,7 +4430,6 @@ if __name__ == '__main__':
             e.g. ny (NOT New York)
     """
 
-
     # user need to provide these paths 
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
