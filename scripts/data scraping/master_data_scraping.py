@@ -151,13 +151,13 @@ class CONST:
         'RENT', 
         'BED', 
         'BATH', 
-        'SF', 
+        'UNIT SF', 
         'YEAR BUILT', 
         'PROPERTY TYPE',
         '# UNITS', 
         '# FLOORS',
         'CENTRAL AC', 
-        'WASHER/DRIER',
+        'WASHER/DRYER',
         'LAST PRICE',
         'LINK',
     )
@@ -199,6 +199,24 @@ class CONST:
         'ARCH', 
         'MATERIAL',
         'LINK',
+    )
+
+    HOTPADS_COLNAMES = (
+        'ADDRESS', 
+        'CITY', 
+        'STATE', 
+        'ZIP',
+        'BED', 
+        'BATH', 
+        'UNIT SF',
+        'WASHER/DRYER', 
+        '# FLOORS', 
+        'CENTRAL AC', 
+        'YEAR BUILT', 
+        'FIREPLACE',
+        'LINK',
+        'RENT',
+        'APT #',
     )
 
 ### parent class that includes the most commonly used functions 
@@ -329,6 +347,7 @@ class dot_com:
         options.add_argument("--allow-http-screen-capture")
         options.add_argument("--start-maximized")
         options.add_argument('--lang=es')
+        options.add_argument("--disable-infobars")  
 
         return options
 
@@ -357,6 +376,29 @@ class dot_com:
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
+
+    def _recaptcha(self, browser):
+        captcha_iframe = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located(
+                (
+                    By.TAG_NAME, 'iframe'
+                )
+            )
+        )
+
+        ActionChains(browser).move_to_element(captcha_iframe).click().perform()
+
+        # click im not robot
+        captcha_box = WebDriverWait(browser, 10).until(
+            EC.presence_of_element_located(
+                (
+                    By.ID, 'g-recaptcha-response'
+                )
+            )
+        )
+
+        browser.execute_script("arguments[0].click()", captcha_box)
+        time.sleep(120)
 
     def _extract_num(self, text):
         """
@@ -1780,29 +1822,6 @@ class trulia_dot_com(dot_com):
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
 
-    def _recaptcha(self, browser):
-        captcha_iframe = WebDriverWait(browser, 10).until(
-        EC.presence_of_element_located(
-                (
-                    By.TAG_NAME, 'iframe'
-                )
-            )
-        )
-
-        ActionChains(browser).move_to_element(captcha_iframe).click().perform()
-
-        # click im not robot
-        captcha_box = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (
-                    By.ID, 'g-recaptcha-response'
-                )
-            )
-        )
-
-        browser.execute_script("arguments[0].click()", captcha_box)
-        time.sleep(120)
-
     def _get_buy_webpage(self, pg_num, htype):
 
         """
@@ -2095,8 +2114,11 @@ class trulia_dot_com(dot_com):
             a JSON object, a dictionary of dictionaries  
 
         """
-        browser = self._browser
-        browser.get(url)
+        try:
+            browser = self._browser
+            browser.get(url)
+        except:
+            print(browser.current_url)
 
         try:
             robot_check = browser.find_element_by_xpath("//div[@class='content center']")
@@ -2510,31 +2532,34 @@ class trulia_dot_com(dot_com):
         apt_info_data = []
 
         for url in apt_urls:
-            jdict = self._load_json(url)
-            street, city, state, zipcode = self._get_address(jdict)
-            price = self._get_price(jdict)
-            bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
-            space = self._get_space(jdict)
-            features = self._get_apt_features(jdict)
-            prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
+            try:
+                jdict = self._load_json(url)
+                street, city, state, zipcode = self._get_address(jdict)
+                price = self._get_price(jdict)
+                bedrooms, bathrooms = self._get_bedrooms_bathrooms(jdict)
+                space = self._get_space(jdict)
+                features = self._get_apt_features(jdict)
+                prop_type, lot_size, year_built, fireplace, central_ac, stories = self._open_features(features)
 
-            apt_info_data.append([
-                street, 
-                city, 
-                state, 
-                zipcode, 
-                price,
-                bedrooms, 
-                bathrooms,
-                space,
-                prop_type, 
-                lot_size, 
-                year_built, 
-                fireplace, 
-                central_ac,
-                stories,
-                url,
-            ])
+                apt_info_data.append([
+                    street, 
+                    city, 
+                    state, 
+                    zipcode, 
+                    price,
+                    bedrooms, 
+                    bathrooms,
+                    space,
+                    prop_type, 
+                    lot_size, 
+                    year_built, 
+                    fireplace, 
+                    central_ac,
+                    stories,
+                    url,
+                ])
+            except:
+                print(f'failed URL: {url}')
 
         return apt_info_data
 
@@ -2661,6 +2686,7 @@ class trulia_dot_com(dot_com):
                 if test and i==5:
                     break
             except:
+                print(f'failed URL: {apt_url}')
                 continue
 
         return apt_info_data
@@ -3053,13 +3079,11 @@ class trulia_dot_com(dot_com):
                     self.scrape_apt_images(category, url_batch, img_path, verbose=True)
                 except:
                     print(f'batch {i} failed')
-                    print(f'unscraped URLs: {url_batch}')
                     continue
 
             self._browser.close()
             print(f'scraping for category - {category} done!')
 
-        
         print('job done, congratulations!')
 
     #####################
@@ -4369,6 +4393,166 @@ class hotpads_dot_com(dot_com):
         self._state = state
         self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
 
+
+    def _get_apt_urls(self):
+        browser = self._browser
+        max_pg = browser.find_element_by_xpath("//a[@class='Linker PagerItem PagerContainer-page-number PagerContainer-page-number-total Linker-accent']") \
+                        .text
+
+        max_pg = int(self._extract_num(max_pg))
+
+        apt_urls = []
+
+        for i in range(1, max_pg+1):
+            containers = browser.find_elements_by_xpath("//div[@class='ListingCard-content-container']")
+            atags = [container.find_element_by_tag_name('a') for container in containers]
+            hrefs = [a.get_attribute('href') for a in atags]
+            apt_urls += hrefs 
+
+        return apt_urls
+
+    def _get_address(self, browser):
+        addr = browser.find_element_by_tag_name('address') \
+                      .text \
+                      .split('\n')
+
+        if len(addr)>1:
+            street = addr[0].strip()
+            region = addr[1].strip().split(',')
+            city = region[0].strip()
+            state = region[1].strip().split(' ')[0]
+            zipcode = region[1].strip().split(' ')[1]
+
+            return street, city, state, zipcode
+        else:
+            return None, None, None, None
+
+    def _get_bed_bath_sqft(self, browser):
+        try:
+            header_tag = browser.find_element_by_xpath("//div[@class='ModelFloorplanItem-header']")
+
+            bed = header_tag.find_element_by_xpath("//span[@class='ModelFloorplanItem-detail Utils-bold']") \
+                            .text
+            bed = self._extract_num(bed)
+
+            bath_sqft = header_tag.find_elements_by_xpath("//span[@class='ModelFloorplanItem-bthsqft']")
+            bath = self._extract_num(bath_sqft[0].text)
+            sf = self._extract_num(bath_sqft[1].text)
+
+            return bed, bath, sf
+        except:
+            return None, None, None
+
+    # get a list of (price, unit) tuples 
+    def _get_price_unit(self, browser):
+        empty_units = browser.find_elements_by_xpath("//div[@class='ModelFloorplanItem-empty-unit']")
+        if empty_units:
+            price_unit = []
+            for empty_unit in empty_units:
+                rent = self._extract_num(empty_unit.text)
+                price_unit.append([rent, None])
+        else:
+            price_unit = []
+
+            try:
+                # view more button
+                button_vm = browser.find_element_by_xpath("//*[text()='View more floor plans']")
+                button_vm.click()
+                button_exp = browser.find_element_by_xpath("//div[@class='ModelFloorplanItem-expand']")
+                button_exp.click()
+            except:
+                pass
+
+            non_empty_units = browser.find_elements_by_xpath("//div[@class='ModelFloorplanItem-unit']")
+            for non_empty_unit in non_empty_units:
+                price_unit_lst = non_empty_unit.text \
+                                               .split('\n') \
+
+                rent = self._extract_num(price_unit_lst[0].strip())
+                unit = price_unit_lst[2].strip()
+
+                price_unit.append([rent, unit])
+
+        return price_unit
+
+    def _get_features(self, browser):
+        try:
+            buttons_sm = browser.find_elements_by_xpath("//div[@class='LinkToggle']")
+            for bsm in buttons_sm:
+                bsm.click()
+        except:
+            pass
+
+        feature_tags = browser.find_elements_by_xpath("//li[@class='ListItem']")
+        features = [tag.text for tag in feature_tags if tag.text ]
+
+        wd = 0
+        if ('Washer' in features) or ('Dryer' in features):
+            wd = 1
+
+        stories = None
+        for feature in features:
+            feature = feature.lower()
+            if 'stories:' in feature:
+                stories = self._extract_num(feature.split(':')[1])
+                break
+
+        central_ac = 0
+        for feature in features:
+            feature = feature.lower()
+            if 'central air conditioning' in feature:
+                central_ac = 1
+                break
+
+        year_built = None
+        for feature in features:
+            feature = feature.lower()
+            if 'year built:' in feature:
+                year_built = int(feature.split(':')[1].strip())
+                break
+
+        fireplace = 0
+        if 'Fireplace' in features:
+            fireplace = 1
+
+        return wd, stories, central_ac, year_built, fireplace
+
+    def _get_apt_data(self, apt_url):
+        browser = self._browser
+        browser.get(apt_url)
+
+        time.sleep(3)
+        try:
+            robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
+            if 'Please verify you are a human' in robot_check.text:
+                self._recaptcha(browser)
+        except:
+            pass
+
+        street, city, state, zipcode = self._get_address(browser)
+        bed, bath, sf = self._get_bed_bath_sqft(browser)
+
+        price_unit = self._get_price_unit(browser)
+
+        wd, stories, central_ac, year_built, fireplace = self._get_features(browser)
+
+        data = [street, 
+                city, 
+                state, 
+                zipcode,
+                bed, 
+                bath, 
+                sf,
+                wd, 
+                stories, 
+                central_ac, 
+                year_built, 
+                fireplace,
+                apt_url]
+
+        final_data = [data+pu for pu in price_unit]
+        return final_data
+
 ### merge all the files together 
 class data_merger:
 
@@ -4403,10 +4587,6 @@ if __name__ == '__main__':
 
     is_testing = True
 
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com('philadelphia', 'pa')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-
     # ### remax.com Philadelphia For Sale
     # rmdc = remax_dot_com('philadelphia', 'pa')
     # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
@@ -4431,6 +4611,14 @@ if __name__ == '__main__':
     # cdc = coldwell_dot_com('philadelphia', 'pa', 1, 'max')
     # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
+    # ### trulia.com For Rent and For Sale
+    # tdc = trulia_dot_com('philadelphia', 'pa')
+    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
     # ### merge all the datafiles into a master datafile 
     # dm = data_merger(data_path)
     # dm.merge_dfs()
+
+    hdc = hotpads_dot_com('philadelphia', 'pa')
+    hdc._get_apt_data('https://hotpads.com/franklin-tower-residences-philadelphia-pa-19102-1md83r6/pad?lat=40.0025&lon=-75.1180&orderBy=experimentScore&page=3&z=11')
+
