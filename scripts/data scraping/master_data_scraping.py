@@ -4284,7 +4284,7 @@ class hotpads_dot_com(dot_com):
         for feature in features:
             feature = feature.lower()
             if 'year built:' in feature:
-                year_built = int(feature.split(':')[1].strip())
+                year_built = feature.split(':')[1].strip()
                 break
 
         fireplace = 0
@@ -4294,18 +4294,21 @@ class hotpads_dot_com(dot_com):
         return wd, stories, central_ac, year_built, fireplace
 
     def _get_img_urls(self, browser):
-        max_photos = browser.find_element_by_xpath("//div[@class='PhotoCarousel-item-count-badge']") \
-                            .text \
-                            .split(' ')[-1]
+        try:
+            max_photos = browser.find_element_by_xpath("//div[@class='PhotoCarousel-item-count-badge']") \
+                                .text \
+                                .split(' ')[-1]
 
-        max_photos = int(self._extract_num(max_photos))
-        for i in range(max_photos-1):
-            button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
-            button_next.click()
+            max_photos = int(self._extract_num(max_photos))
+            for i in range(max_photos-1):
+                button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
+                button_next.click()
 
-        photo_tags = browser.find_elements_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
-        img_urls = [pt.get_attribute('src') for pt in photo_tags]
-        return img_urls
+            photo_tags = browser.find_elements_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
+            img_urls = [pt.get_attribute('src') for pt in photo_tags]
+            return img_urls
+        except:
+            return []
 
     def _get_apt_data(self, apt_url, img_path):
         browser = self._browser
@@ -4346,14 +4349,14 @@ class hotpads_dot_com(dot_com):
 
         final_data = [data+pu for pu in price_unit]
         self._save_images(img_urls, img_path, f'{street}, {self._city.title()}, {self._state.upper()}')
-        
+
         return final_data
 
     def scrape_apt_data(self, apt_urls, img_path):
         apt_data = []
 
         for url in apt_urls:
-            apt_data.append(self._get_apt_data(url, img_path))
+            apt_data += self._get_apt_data(url, img_path)
 
         return apt_data
 
@@ -4372,7 +4375,7 @@ class hotpads_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'hotpads.csv', CONST.LOOPNET_COLNAMES, data_path)
+            self.write_data(apt_data, 'hotpads.csv', CONST.HOTPADS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4446,6 +4449,5 @@ if __name__ == '__main__':
     # dm.merge_dfs()
 
     hdc = hotpads_dot_com('philadelphia', 'pa')
-    hdc._get_apt_data('https://hotpads.com/1220-sansom-street-philadelphia-pa-19107-sm08ga/pad', f'{img_path}/hotpads')
-    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
