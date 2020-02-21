@@ -222,11 +222,27 @@ class CONST:
         'APT #',
     )
 
+    ### city name spelled in full, e.g. new york
+    ### state name spelled in abbreviation, e.g. ny
+    CITY_NAMES ={
+        'nyc': {
+            'city': 'new york',
+            'state': 'ny',
+        },
+
+        'philadelphia': {
+            'city': 'philadelphia',
+            'state': 'pa',
+        }
+
+    }
+
 ### parent class that includes the most commonly used functions 
 class dot_com:
 
-    def __init__(self):
-        pass
+    def __init__(self, city):
+        self._city = CONST.CITY_NAMES[city]['city']
+        self._state = CONST.CITY_NAMES[city]['state']
 
     def _random_user_agent(self):
         """
@@ -543,11 +559,10 @@ class elliman_dot_com(dot_com):
     # class initiation section #
     ############################
 
-    def __init__(self, city, state):
+    def __init__(self, city):
+        dot_com.__init__(self, city)
         self._apt_urls = []
         self._apt_data = []
-        self._city = city
-        self._state = state
 
     #############################
     # private functions section #
@@ -1189,9 +1204,10 @@ class elliman_dot_com(dot_com):
 ### For Rent 
 class rent_dot_com(dot_com):
 
-    def __init__(self, city, state):
-        self._city = city.replace(' ', '-').lower()
-        self._state = str(states.lookup(state)).replace(' ','-').lower()
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._city = self._city.replace(' ', '-').lower()
+        self._state = str(states.lookup(self._state)).replace(' ', '-').lower()
         self._overhead = 'https://www.rent.com'
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
@@ -1695,9 +1711,8 @@ class trulia_dot_com(dot_com):
     # class initiation section #
     ############################
 
-    def __init__(self, city, state):
-        self._city = city
-        self._state = state
+    def __init__(self, city):
+        dot_com.__init__(self, city)
         self._apt_urls = {
             'buy': [],
             'rent': [],
@@ -2999,9 +3014,8 @@ class trulia_dot_com(dot_com):
 class remax_dot_com(dot_com):
 
     # initialization - users need to specify a city and state 
-    def __init__(self, city, state):
-        self._city = city
-        self._state = state
+    def __init__(self, city):
+        dot_com.__init__(self, city)
         self._overhead = 'https://www.remax.com'
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
@@ -3531,9 +3545,10 @@ class remax_dot_com(dot_com):
 ### For Sale 
 class coldwell_dot_com(dot_com):
 
-    def __init__(self, city, state, start_page, end_page):
-        self._city = city.lower().replace(' ', '-')
-        self._state = state.lower()
+    def __init__(self, city, start_page, end_page):
+        dot_com.__init__(self, city)
+        self._city = self._city.lower().replace(' ', '-')
+        self._state = self._state.lower()
         self._start_page = start_page
         self._end_page = end_page
 
@@ -3745,9 +3760,10 @@ class coldwell_dot_com(dot_com):
 ### Compass For Rent
 class compass_dot_com(dot_com):
 
-    def __init__(self, city, state):
-        self._city = city.lower().replace(' ', '-')
-        self._state = state.lower()
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._city = self._city.lower().replace(' ', '-')
+        self._state = self._state.lower()
         self._url = f'https://www.compass.com/for-rent/{self._city}-{self._state}/'
         self._browser, _ = self._get_browser(self._url)
 
@@ -3951,9 +3967,10 @@ class compass_dot_com(dot_com):
 ### Loopnet For Sale
 class loopnet_dot_com(dot_com):
 
-    def __init__(self, city, state):
-        self._city = city.replace(' ', '-').lower()
-        self._state = str(states.lookup(state)).replace(' ', '-').lower()
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._city = self._city.replace(' ', '-').lower()
+        self._state = str(states.lookup(self._state)).replace(' ', '-').lower()
         self._url = f'https://www.loopnet.com/{self._state}_multifamily-properties-for-sale/'
         self._browser, _ = self._get_browser('https://www.loopnet.com')
 
@@ -4167,9 +4184,9 @@ class loopnet_dot_com(dot_com):
 ### Hotpads For Rent
 class hotpads_dot_com(dot_com):
 
-    def __init__(self, city, state):
-        self._city = city
-        self._state = state
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._city = self._city.replace(' ', '-')
         self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
 
 
@@ -4399,7 +4416,8 @@ class hotpads_dot_com(dot_com):
 ### Apartments For Rent
 class apartments_dot_com(dot_com):
 
-    def __init__(self, city, state):
+    def __init__(self, city):
+        dot_com.__init__(self, city)
         self._city = city.replace(' ', '-').lower()
         self._state = state.lower()
         self._url = f'https://www.apartments.com/{self._city}-{self._state}/'
@@ -4550,6 +4568,8 @@ if __name__ == '__main__':
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
+    # to run the scraping for the entire webpage 
+    # turn this to False
     is_testing = True
 
     ### apartments.com New York For Rent
