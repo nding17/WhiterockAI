@@ -4423,6 +4423,7 @@ class apartments_dot_com(dot_com):
         self._url = f'https://www.apartments.com/{self._city}-{self._state}/'
         self._browser, _ = self._get_browser(self._url)
 
+    # scrape the apartment urls for the entire webpage 
     def _get_apt_urls(self, test=False):
         browser = self._browser
         max_pg = browser.find_element_by_xpath("//nav[@id='paging']") \
@@ -4438,6 +4439,7 @@ class apartments_dot_com(dot_com):
 
         return apt_urls
 
+    # address information, street, city, state, zipcode 
     def _get_address(self, browser):
         addr_tags = browser.find_element_by_xpath("//div[@class='propertyAddress']") \
                            .find_elements_by_tag_name("span")
@@ -4449,6 +4451,7 @@ class apartments_dot_com(dot_com):
 
         return street, city, state, zipcode
 
+    # get important data for a rental apartment
     def _get_essentials(self, browser):
         table = browser.find_element_by_xpath("//table[@class='availabilityTable  ']")
         rows = table.find_elements_by_tag_name('tr')
@@ -4488,6 +4491,7 @@ class apartments_dot_com(dot_com):
 
         return edata
 
+    # get property information data
     def _get_prop_info(self, amenities):
         prop = amenities.find_element_by_xpath("//div[@class='specList propertyFeatures js-spec shuffle-item filtered']") \
                         .find_elements_by_tag_name('li')
@@ -4510,12 +4514,28 @@ class apartments_dot_com(dot_com):
 
         return year_built, num_units, num_stories
 
+    def _get_add_ons(self, amenities):
+        add_ons = amenities.find_element_by_xpath("//h3[text()='Features']/parent::div") \
+                           .find_elements_by_tag_name('li')
+
+        lst = [a.text.strip('•\n') for a in add_ons]
+        fireplace, wd = 0, 0
+
+        for elem in lst:
+            if 'fireplace' in elem.lower():
+                fireplace = 1
+            if 'washer/dryer' in elem.lower():
+                wd = 1
+
+        return fireplace, wd
+
     def _get_features(self, browser):
         try:
             amenities = browser.find_element_by_xpath("//div[@data-analytics-name='amenities']")
             print(self._get_prop_info(amenities))
+            print(self._get_add_ons(amenities))
         except:
-            return None, None, 
+            return None, None
 
     def _get_apt_data(self, apt_url):
         browser = self._browser
