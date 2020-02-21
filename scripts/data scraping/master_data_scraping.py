@@ -4456,6 +4456,8 @@ class apartments_dot_com(dot_com):
             browser.get(f'{self._url}{i}/')
             apts = browser.find_elements_by_xpath("//li/article")
             apt_urls += [apt.get_attribute('data-url') for apt in apts]
+            if test:
+                break
 
         return apt_urls
 
@@ -4474,47 +4476,47 @@ class apartments_dot_com(dot_com):
     # get important data for a rental apartment
     def _get_essentials(self, browser):
         try:
-            table = browser.find_element_by_xpath("//table[@class='availabilityTable  ']")
-        except:
-            table = browser.find_element_by_xpath("//table[@class='availabilityTable basic oneRental']")
+            table = browser.find_element_by_xpath("//table[contains(@class, 'availabilityTable')]")
 
-        rows = table.find_elements_by_tag_name('tr')
-        rows_data = [[col.text for col in row.find_elements_by_tag_name('td')] for row in rows]
-        rows_data = filter(lambda row: row != [], rows_data)
+            rows = table.find_elements_by_tag_name('tr')
+            rows_data = [[col.text for col in row.find_elements_by_tag_name('td')] for row in rows]
+            rows_data = filter(lambda row: row != [], rows_data)
 
-        def _clean_row_data(row):
-            row_cleaned = []
-            for elem in row:
-                if 'view' in elem.lower():
-                    continue
-                elif 'available' in elem.lower():
-                    continue
-                elif '' == elem.lower():
-                    continue
-                else:
-                    row_cleaned.append(elem)
-            return row_cleaned
-
-        def _essential_data(row):
-            bed = self._extract_num(row[0])
-            bath = self._extract_num(row[1])
-            rent = self._extract_num(row[2])
-            sf, unit = None, None
-
-            if len(row)>3:
-                for r in row[3:]:
-                    if 'sq ft' in r.lower():
-                        sf = self._extract_num(r)
+            def _clean_row_data(row):
+                row_cleaned = []
+                for elem in row:
+                    if 'view' in elem.lower():
+                        continue
+                    elif 'available' in elem.lower():
+                        continue
+                    elif '' == elem.lower():
+                        continue
                     else:
-                        unit = r
+                        row_cleaned.append(elem)
+                return row_cleaned
 
-            data = [bed, bath, rent, sf, unit,]
-            return data
+            def _essential_data(row):
+                bed = self._extract_num(row[0])
+                bath = self._extract_num(row[1])
+                rent = self._extract_num(row[2])
+                sf, unit = None, None
 
-        rdata = [_clean_row_data(row) for row in rows_data]
-        edata = [_essential_data(row) for row in rdata]
+                if len(row)>3:
+                    for r in row[3:]:
+                        if 'sq ft' in r.lower():
+                            sf = self._extract_num(r)
+                        else:
+                            unit = r
 
-        return edata
+                data = [bed, bath, rent, sf, unit,]
+                return data
+
+            rdata = [_clean_row_data(row) for row in rows_data]
+            edata = [_essential_data(row) for row in rdata]
+
+            return edata
+        except:
+            return [[None, None, None, None, None]]
 
     # get property information data
     def _get_prop_info(self, amenities):
@@ -4758,6 +4760,8 @@ if __name__ == '__main__':
     """
 
     # user need to provide these paths 
+    # please also make sure you have the sub-folders
+    # under img_path, for example, remax, rent etc. 
     data_path = '../../data/sample/info'
     img_path = '../../data/sample/images'
 
@@ -4765,9 +4769,9 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
-    # ### apartments.com New York For Rent
-    # adc = apartments_dot_com('nyc')
-    # adc._get_apt_data('https://www.apartments.com/the-max-new-york-ny/24f34qb/', f'{img_path}/apartments')
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com('nyc')
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
     # ### remax.com Philadelphia For Sale
     # rmdc = remax_dot_com('nyc')
