@@ -4418,8 +4418,8 @@ class apartments_dot_com(dot_com):
 
     def __init__(self, city):
         dot_com.__init__(self, city)
-        self._city = city.replace(' ', '-').lower()
-        self._state = state.lower()
+        self._city = self._city.replace(' ', '-').lower()
+        self._state = self._state.lower()
         self._url = f'https://www.apartments.com/{self._city}-{self._state}/'
         self._browser, _ = self._get_browser(self._url)
 
@@ -4573,7 +4573,7 @@ if __name__ == '__main__':
     is_testing = True
 
     ### apartments.com New York For Rent
-    adc = apartments_dot_com('new york', 'ny')
+    adc = apartments_dot_com('nyc')
     adc._get_apt_data('https://www.apartments.com/the-max-new-york-ny/24f34qb/')
 
     # ### remax.com Philadelphia For Sale
