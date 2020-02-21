@@ -4453,9 +4453,14 @@ class apartments_dot_com(dot_com):
 
     # get important data for a rental apartment
     def _get_essentials(self, browser):
-        table = browser.find_element_by_xpath("//table[@class='availabilityTable  ']")
+        try:
+            table = browser.find_element_by_xpath("//table[@class='availabilityTable  ']")
+        except:
+            table = browser.find_element_by_xpath("//table[@class='availabilityTable basic oneRental']")
+
         rows = table.find_elements_by_tag_name('tr')
         rows_data = [[col.text for col in row.find_elements_by_tag_name('td')] for row in rows]
+        rows_data = filter(lambda row: row != [], rows_data)
 
         def _clean_row_data(row):
             row_cleaned = []
@@ -4493,60 +4498,77 @@ class apartments_dot_com(dot_com):
 
     # get property information data
     def _get_prop_info(self, amenities):
-        prop = amenities.find_element_by_xpath("//div[@class='specList propertyFeatures js-spec shuffle-item filtered']") \
-                        .find_elements_by_tag_name('li')
+        try:
+            prop = amenities.find_element_by_xpath("//div[@class='specList propertyFeatures js-spec shuffle-item filtered']") \
+                            .find_elements_by_tag_name('li')
 
-        lst = [p.text.strip('•\n') for p in prop]
-        year_built, num_units, num_floors = None, None, None
+            lst = [p.text.strip('•\n') for p in prop]
+            year_built, num_units, num_floors = None, None, None
 
-        for l in lst:
-            if 'built in' in l.lower():
-                year_built = l.lower().strip('built in').strip()
+            for l in lst:
+                if 'built in' in l.lower():
+                    year_built = l.lower().strip('built in').strip()
 
-            if 'units' in l.lower() and 'stories' in l.lower():
-                units_stories = l.lower().split('/')
+                if 'units' in l.lower() and 'stories' in l.lower():
+                    units_stories = l.lower().split('/')
 
-                for elem in units_stories:
-                    if 'units' in elem.lower():
-                        num_units = self._extract_num(elem)
-                    if 'stories' in elem.lower():
-                        num_stories = self._extract_num(elem)
+                    for elem in units_stories:
+                        if 'units' in elem.lower():
+                            num_units = self._extract_num(elem)
+                        if 'stories' in elem.lower():
+                            num_stories = self._extract_num(elem)
 
-        return year_built, num_units, num_stories
+            return year_built, num_units, num_stories
+        except:
+            return None, None, None
 
     def _get_add_ons(self, amenities):
-        add_ons = amenities.find_element_by_xpath("//h3[text()='Features']/parent::div") \
-                           .find_elements_by_tag_name('li')
+        try:
+            add_ons = amenities.find_element_by_xpath("//h3[text()='Features']/parent::div") \
+                               .find_elements_by_tag_name('li')
 
-        lst = [a.text.strip('•\n') for a in add_ons]
-        fireplace, wd = 0, 0
+            lst = [a.text.strip('•\n') for a in add_ons]
+            fireplace, wd = 0, 0
 
-        for elem in lst:
-            if 'fireplace' in elem.lower():
-                fireplace = 1
-            if 'washer/dryer' in elem.lower():
-                wd = 1
+            for elem in lst:
+                if 'fireplace' in elem.lower():
+                    fireplace = 1
+                if 'washer/dryer' in elem.lower():
+                    wd = 1
 
-        return fireplace, wd
+            return fireplace, wd
+        except:
+            return None, None
 
     def _get_features(self, browser):
         try:
             amenities = browser.find_element_by_xpath("//div[@data-analytics-name='amenities']")
-            print(self._get_prop_info(amenities))
-            print(self._get_add_ons(amenities))
+            year_built, num_units, num_stories = self._get_prop_info(amenities)
+            fireplace, wd = self._get_add_ons(amenities)
+            return year_built, num_units, num_stories, fireplace, wd
         except:
-            return None, None
+            return None, None, None, None, None
 
     def _get_apt_data(self, apt_url):
         browser = self._browser
         browser.get(apt_url)
         street, city, state, zipcode = self._get_address(browser)
-        address = [street, city, state, zipcode]
-        essentials = self._get_essentials(browser)
+        year_built, num_units, num_stories, fireplace, wd = self._get_features(browser)
+        
+        data = [street, 
+                city, 
+                state, 
+                zipcode, 
+                year_built, 
+                num_units, 
+                num_stories, 
+                fireplace, 
+                wd]
 
-        # print(street, city, state, zipcode)
-        # print(essentials)
-        self._get_features(browser)
+        essentials = self._get_essentials(browser)
+        final_data = [data+edata for edata in essentials]
+        
+        return final_data
 
 ### merge all the files together 
 class data_merger:
