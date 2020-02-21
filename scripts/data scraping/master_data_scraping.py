@@ -16,6 +16,7 @@ import json
 import random
 import datetime
 import urllib
+import calendar
 
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
@@ -4506,6 +4507,14 @@ class apartments_dot_com(dot_com):
                         if 'sq ft' in r.lower():
                             sf = self._extract_num(r)
                         else:
+                            months = [m.lower() for m in list(calendar.month_abbr)]
+                            # check if the string contins any string
+                            # of month abbreviation
+                            is_month = any(m in r.lower() for m in months)
+
+                            if (not is_month) and ('new' not in r.lower()):
+                                continue
+
                             unit = r
 
                 data = [bed, bath, rent, sf, unit,]
@@ -4678,16 +4687,33 @@ class apartments_dot_com(dot_com):
 
             button_view.click()
 
-            gallery = WebDriverWait(browser, 10).until(
-                EC.presence_of_element_located(
-                        (
-                            By.XPATH, "//ul[@class='nano-content']"
+            img_urls = []
+
+            try:
+                nav = WebDriverWait(browser, 10).until(
+                    EC.presence_of_element_located(
+                            (
+                                By.XPATH, "//div[@class='tabWrapper']"
+                            )
                         )
                     )
-            )
+                tabs = nav.find_elements_by_tag_name('a')
+            except:
+                print('no photos')
 
-            img_tags = gallery.find_elements_by_xpath('li')
-            img_urls = [tag.find_element_by_tag_name('img').get_attribute('src') for tag in img_tags]
+            for tab in tabs:
+                tab.click()
+                gallery = WebDriverWait(browser, 10).until(
+                    EC.presence_of_element_located(
+                            (
+                                By.XPATH, "//ul[@class='nano-content']"
+                            )
+                        )
+                )
+
+                img_tags = gallery.find_elements_by_xpath('li')
+                urls = [tag.find_element_by_tag_name('img').get_attribute('src') for tag in img_tags]
+                img_urls += urls
 
             return img_urls
         except:
