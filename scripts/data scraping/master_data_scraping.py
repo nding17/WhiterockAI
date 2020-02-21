@@ -15,6 +15,7 @@ import time
 import json
 import random
 import datetime
+import urllib
 
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver import ActionChains
@@ -4522,6 +4523,7 @@ class apartments_dot_com(dot_com):
         except:
             return None, None, None
 
+    # get the add-on features of an apartment such as washer/dryer, fireplace etc.
     def _get_add_ons(self, amenities):
         try:
             add_ons = amenities.find_element_by_xpath("//h3[text()='Features']/parent::div") \
@@ -4540,6 +4542,7 @@ class apartments_dot_com(dot_com):
         except:
             return None, None
 
+    # return an ensemble of all the features of the apartment 
     def _get_features(self, browser):
         try:
             amenities = browser.find_element_by_xpath("//div[@data-analytics-name='amenities']")
@@ -4549,7 +4552,8 @@ class apartments_dot_com(dot_com):
         except:
             return None, None, None, None, None
 
-    def _get_apt_data(self, apt_url):
+    # grab all the apartment data all at once 
+    def _get_apt_data(self, apt_url, img_path):
         browser = self._browser
         browser.get(apt_url)
         street, city, state, zipcode = self._get_address(browser)
@@ -4567,8 +4571,105 @@ class apartments_dot_com(dot_com):
 
         essentials = self._get_essentials(browser)
         final_data = [data+edata for edata in essentials]
-        
+
+        img_urls = self._get_img_urls(browser)
+    
+        if img_urls:
+            self._save_images(img_urls, img_path, f'{street}, {city.title()}, {state.upper()}')
+
         return final_data
+
+    def _save_images(self, 
+                     img_urls, 
+                     data_path, 
+                     address):
+
+        """
+        Save all the images into a specific directory given the 
+        downloadable image URLs
+
+        Parameters
+        ----------
+        img_urls : list(str)
+            this is a list of image URLs that you directly download 
+
+        data_path : str
+            the string format of the path to the directory where you
+            want to save all the images
+
+        address : str
+            this is the name of the folder to contain the images of a 
+            specific apartment
+
+        Returns
+        -------
+        status : int
+            if successful, return 1, otherwise, 0
+
+        """
+
+        try:
+            # if address is invalid, discontinue the process
+            if not address:
+                return 0
+
+            # this is the path we want the OS to come back
+            # when it finishes the image saving tasks
+            current_path = os.getcwd()
+            os.chdir(data_path)
+            
+            # create a folder for the apartment if it doesn't
+            # exist inside the section folder
+            if not os.path.exists(address):
+                os.mkdir(address)
+            os.chdir(address)
+
+            # write images inside the apartment folder
+            for i, img_url in enumerate(img_urls):
+                browser = self._browser
+                browser.get(img_url)
+                browser.save_screenshot(f'img{i}.jpg')
+                    
+            os.chdir(current_path)
+            return 1
+        except:
+            os.chdir(current_path)
+            return 0
+
+    # get the image urls of an apartment
+    def _get_img_urls(self, browser):
+        try:
+            total_imgs = browser.find_element_by_xpath("//div[@class='caption']") \
+                                .text
+            total_imgs = int(self._extract_num(total_imgs))
+
+            button_g = browser.find_element_by_xpath("//li[@class='item paidImageLarge']")
+            button_g.click()
+
+            button_view = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable(
+                        (
+                            By.XPATH, "//div[@class='headerUtilities'][@id='headerUtilities']"
+                        )
+                    )
+            )
+
+            button_view.click()
+
+            gallery = WebDriverWait(browser, 10).until(
+                EC.presence_of_element_located(
+                        (
+                            By.XPATH, "//ul[@class='nano-content']"
+                        )
+                    )
+            )
+
+            img_tags = gallery.find_elements_by_xpath('li')
+            img_urls = [tag.find_element_by_tag_name('img').get_attribute('src') for tag in img_tags]
+
+            return img_urls
+        except:
+            return []
 
 ### merge all the files together 
 class data_merger:
@@ -4614,40 +4715,40 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com('nyc')
-    adc._get_apt_data('https://www.apartments.com/the-max-new-york-ny/24f34qb/')
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com('nyc')
+    # adc._get_apt_data('https://www.apartments.com/the-max-new-york-ny/24f34qb/', f'{img_path}/apartments')
 
     # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('new york', 'ny')
+    # rmdc = remax_dot_com('nyc')
     # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
     # ### elliman.com For Sale 
-    # edc = elliman_dot_com('new york', 'ny')
+    # edc = elliman_dot_com('nyc')
     # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('new york', 'ny')
+    # ldc = loopnet_dot_com('nyc')
     # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     # ### compass New York For Rent 
-    # codc = compass_dot_com('new york', 'ny')
+    # codc = compass_dot_com('nyc')
     # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('new york', 'ny')
+    # rdc = rent_dot_com('nyc')
     # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
     # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('new york', 'ny', 1, 'max')
+    # cdc = coldwell_dot_com('nyc', 1, 'max')
     # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
 
     # ### hotpads.com For Rent
-    # hdc = hotpads_dot_com('new york', 'ny')
+    # hdc = hotpads_dot_com('nyc')
     # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
     # ### trulia.com For Rent and For Sale
-    # tdc = trulia_dot_com('new york', 'ny')
+    # tdc = trulia_dot_com('nyc')
     # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
     # ### merge all the datafiles into a master data file 
