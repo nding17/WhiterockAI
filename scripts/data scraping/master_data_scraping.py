@@ -4420,7 +4420,63 @@ class apartments_dot_com(dot_com):
 
         return apt_urls
 
-    
+    def _get_address(self, browser):
+        addr_tags = browser.find_element_by_xpath("//div[@class='propertyAddress']") \
+                           .find_elements_by_tag_name("span")
+
+        street = addr_tags[0].text.strip()
+        city = addr_tags[1].text.strip()
+        state = addr_tags[2].text.strip()
+        zipcode = addr_tags[3].text.strip()
+
+        return street, city, state, zipcode
+
+    def _get_essentials(self, browser):
+        table = browser.find_element_by_xpath("//table[@class='availabilityTable  ']")
+        rows = table.find_elements_by_tag_name('tr')
+        rows_data = [[col.text for col in row.find_elements_by_tag_name('td')] for row in rows]
+
+        def _clean_row_data(row):
+            row_cleaned = []
+            for elem in row:
+                if 'view' in elem.lower():
+                    continue
+                elif 'available' in elem.lower():
+                    continue
+                elif '' == elem.lower():
+                    continue
+                else:
+                    row_cleaned.append(elem)
+            return row_cleaned
+
+        def _essential_data(row):
+            bed = self._extract_num(row[0])
+            bath = self._extract_num(row[1])
+            rent = self._extract_num(row[2])
+            sf, unit = None, None
+
+            if len(row)>3:
+                for r in row[3:]:
+                    if 'sq ft' in r.lower():
+                        sf = self._extract_num(r)
+                    else:
+                        unit = r
+
+            data = [bed, bath, rent, sf, unit,]
+            return data
+
+        rdata = [_clean_row_data(row) for row in rows_data]
+        edata = [_essential_data(row) for row in rdata]
+        
+        return edata
+
+    def _get_apt_data(self, apt_url):
+        browser = self._browser
+        browser.get(apt_url)
+        street, city, state, zipcode = self._get_address(browser)
+        print(street, city, state, zipcode)
+
+        self._get_essentials(browser)
 
 ### merge all the files together 
 class data_merger:
@@ -4466,7 +4522,7 @@ if __name__ == '__main__':
 
     ### apartments.com New York For Rent
     adc = apartments_dot_com('new york', 'ny')
-    print(adc._get_apt_urls())
+    adc._get_apt_data('https://www.apartments.com/the-max-new-york-ny/24f34qb/')
 
     # ### remax.com Philadelphia For Sale
     # rmdc = remax_dot_com('new york', 'ny')
