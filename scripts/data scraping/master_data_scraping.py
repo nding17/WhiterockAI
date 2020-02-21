@@ -4503,18 +4503,10 @@ class apartments_dot_com(dot_com):
                 sf, unit = None, None
 
                 if len(row)>3:
-                    for r in row[3:]:
+                    for r in row[3:5]:
                         if 'sq ft' in r.lower():
                             sf = self._extract_num(r)
                         else:
-                            months = [m.lower() for m in list(calendar.month_abbr)]
-                            # check if the string contins any string
-                            # of month abbreviation
-                            is_month = any(m in r.lower() for m in months)
-
-                            if (not is_month) and ('new' not in r.lower()):
-                                continue
-
                             unit = r
 
                 data = [bed, bath, rent, sf, unit,]
