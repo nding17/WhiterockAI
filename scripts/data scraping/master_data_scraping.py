@@ -223,6 +223,25 @@ class CONST:
         'APT #',
     )
 
+    # for rent 
+    APARTMENTS_COLNAMES = (
+        'ADDRESS', 
+        'CITY', 
+        'STATE', 
+        'ZIP', 
+        'YEAR BUILT', 
+        '# UNITS', 
+        '# FLOORS', 
+        'FIREPLACE', 
+        'WASHER/DRYER',
+        'LINK',
+        'BED', 
+        'BATH', 
+        'RENT', 
+        'UNIT SF', 
+        'APT #',
+    )
+
     ### city name spelled in full, e.g. new york
     ### state name spelled in abbreviation, e.g. ny
     CITY_NAMES ={
@@ -4567,7 +4586,8 @@ class apartments_dot_com(dot_com):
                 num_units, 
                 num_stories, 
                 fireplace, 
-                wd]
+                wd,
+                apt_url]
 
         essentials = self._get_essentials(browser)
         final_data = [data+edata for edata in essentials]
@@ -4670,6 +4690,36 @@ class apartments_dot_com(dot_com):
             return img_urls
         except:
             return []
+
+    def scrape_apt_data(self, apt_urls, img_path):
+        apt_data = []
+
+        for url in apt_urls:
+            apt_data += self._get_apt_data(url, img_path)
+
+        return apt_data
+
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = self._get_apt_urls(test=test)
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, 'apartments.csv', CONST.APARTMENTS_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        self._browser.close()
+        print('job done, congratulations!')
 
 ### merge all the files together 
 class data_merger:
