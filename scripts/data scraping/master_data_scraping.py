@@ -4869,13 +4869,17 @@ class berkshire_dot_com(dot_com):
                                  .split('\n')
 
             street = address_lst[0].strip()
-            region_lst = address_lst[1].split(',')
-            city = region_lst[0].strip()
-            state = region_lst[1].strip().split(' ')[0].strip()
-            zipcode = region_lst[1].strip().split(' ')[1].strip()
+            if ',' in address_lst[1]:
+                region_lst = address_lst[1].split(',')
+                city = region_lst[0].strip()
+                state = region_lst[1].strip().split(' ')[0].strip()
+                zipcode = region_lst[1].strip().split(' ')[1].strip()
+            else:
+                city = self._city.title()
+                state = self._state.upper()
+                zipcode = address_lst[1].strip().split(' ')[1].strip()
 
             dataa = [street, city, state, zipcode]
-
             return dataa
         except:
             return [None, None, None, None]
@@ -4982,7 +4986,11 @@ class berkshire_dot_com(dot_com):
 
         img_urls = self._get_img_urls(browser)
         if img_urls:
-            self._save_images(img_urls, img_path, f'{dataa[0]}, {dataa[1].title()}, {dataa[2].upper()}')
+            try:
+                fn = f'{dataa[0]}, {dataa[1].title()}, {dataa[2].upper()}'
+                self._save_images(img_urls, img_path, fn)
+            except:
+                print('invalid address')
 
         return final_data
 
