@@ -277,7 +277,6 @@ class CONST:
             'city': 'philadelphia',
             'state': 'pa',
         }
-
     }
 
 ### parent class that includes the most commonly used functions 
