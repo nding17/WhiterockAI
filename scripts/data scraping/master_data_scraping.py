@@ -4749,15 +4749,23 @@ class berkshire_dot_com(dot_com):
         self._url = 'https://www.bhhsthepreferredrealty.com/'
         self._browser, _ = self._get_browser(self._url)
 
+    def _accept_cookies(self, browser):
+        cookies = WebDriverWait(browser, 20).until(
+            EC.element_to_be_clickable(
+                    (
+                        By.XPATH, "//button[@title='Accept Cookies Button']"
+                    )
+                )
+            )
+        cookies.click()
+
     def _search(self, browser):
-        cookie = browser.find_element_by_xpath("//button[@title='Accept Cookies Button']")
-        cookie.click()
-        
+        self._accept_cookies(browser)   
         query = f'{self._city.title()}, {self._state.upper()}'
         sbar = browser.find_element_by_xpath("//input[@class='cmp-search-suggester__input']")
         sbar.send_keys(query)
         
-        dropoff = WebDriverWait(browser, 10).until(
+        dropoff = WebDriverWait(browser, 20).until(
             EC.element_to_be_clickable(
                     (
                         By.XPATH, f"//li[contains(text(),'"+query+"')]"
@@ -4770,6 +4778,34 @@ class berkshire_dot_com(dot_com):
     def _get_apt_urls(self, test=False):
         browser = self._browser
         self._search(browser)
+
+        self._accept_cookies(browser)
+        apt_urls = []
+
+        next_page_tag = "//a[@class='cmp-search-results-pagination__arrow" \
+        " cmp-search-results-pagination__arrow--next d-none d-lg-inline-block']"
+
+        try:
+            while True:
+                apts = browser.find_elements_by_xpath("//section[@class='cmp-property-tile']")
+                urls = [apt.find_element_by_tag_name('a').get_attribute('href') for apt in apts]
+                apt_urls += urls
+
+                next_page = WebDriverWait(browser, 20).until(
+                    EC.element_to_be_clickable(
+                            (
+                                By.XPATH, next_page_tag
+                            )
+                        )
+                    )
+
+                next_page.click()
+
+                if test:
+                    break
+
+        except:
+            return apt_urls
 
 ### merge all the files together 
 class data_merger:
@@ -4818,7 +4854,7 @@ if __name__ == '__main__':
     is_testing = True
 
     bdc = berkshire_dot_com('philadelphia')
-    bdc._get_apt_urls()
+    print(bdc._get_apt_urls())
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
