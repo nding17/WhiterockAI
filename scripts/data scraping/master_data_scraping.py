@@ -573,6 +573,15 @@ class dot_com:
         # go back to the path where it is originally located 
         os.chdir(current_path)
 
+    ### a more protective way to access an element from a dictionary
+    ### we don't want our program to break if we can't access the 
+    ### dictionary from a key 
+    def _ad(self, d, k):
+        try:
+            return d[k]
+        except:
+            return None
+
 ### For Sale 
 class elliman_dot_com(dot_com):
 
@@ -3829,15 +3838,6 @@ class compass_dot_com(dot_com):
 
         return addr, unit, zipcode
 
-    ### a more protective way to access an element from a dictionary
-    ### we don't want our program to break if we can't access the 
-    ### dictionary from a key 
-    def _ad(self, d, k):
-        try:
-            return d[k]
-        except:
-            return None
-
     ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
         price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
@@ -4030,15 +4030,6 @@ class loopnet_dot_com(dot_com):
         city = addr_list[1].strip()
         state = addr_list[2].strip()
         return street, city, state
-
-    ### a more protective way to access an element from a dictionary
-    ### we don't want our program to break if we can't access the 
-    ### dictionary from a key 
-    def _ad(self, d, k):
-        try:
-            return d[k]
-        except:
-            return None
 
     def _unpack_row(self, row_tag):
         cells = row_tag.find_all('td')
@@ -4832,16 +4823,88 @@ class berkshire_dot_com(dot_com):
                              .text \
                              .split('\n')
 
-        return address_lst
+        street = address_lst[0].strip()
+        region_lst = address_lst[1].split(',')
+        city = region_lst[0].strip()
+        state = region_lst[1].strip().split(' ')[0].strip()
+        zipcode = region_lst[1].strip().split(' ')[1].strip()
+
+        return street, city, state, zipcode
+
+    def _get_prop_details(self, browser):
+        keys = browser.find_elements_by_xpath("//div[@class='td label']")
+        values = browser.find_elements_by_xpath("//div[@class='td']") 
+
+        ks = [k.text.strip() for k in keys]
+        vs = [v.text.strip().replace('\n', ' | ') for v in values]
+
+        pairs = list(zip(ks, vs))
+
+        for i, pair in enumerate(pairs):
+            key, value = pair[0], pair[1]
+            if key == 'Year Built' and 'Source' in value:
+                # if the year is not a numerical value
+                # delete it since their are two 'year built'
+                del pairs[i]
+
+        d = dict(pairs)
+
+        beds = self._extract_num(self._ad(d, 'Beds'))
+        bath = self._extract_num(self._ad(d, 'Full Baths'))
+        year_built = self._ad(d, 'Year Built')
+        sf = self._extract_num(self._ad(d, 'Sq. Ft.'))
+        prop_type = self._ad(d, 'Type')
+        stroies = self._extract_num(self._ad(d, 'Stories'))
+        
+        central_ac = 0
+        if self._ad(d, 'Central Air') == 'Y':
+            central_ac = 1
+
+        waterfront = 0
+        if self._ad(d, 'Waterfront') == 'Y':
+            waterfront = 1
+
+        tax = None
+        tax_info = self._ad(d, 'Tax Information')
+        if tax_info:
+            if 'Annual Amount:' in tax_info:
+                tax = self._extract_num(tax_info.split('Annual Amount:')[1])
+
+        land_sf = None
+        lot_size = self._ad(d, 'Lot Size')
+        if lot_size:
+            if ('Sq. Ft.' in lot_size) and ('acres' in lot_size):
+                land_sf = self._extract_num(lot_size.split('Sq. Ft.,')[1])
+            if ('Sq. Ft.' in lot_size) and ('acres' not in lot_size):
+                land_sf = self._extract_num(lot_size)/43560
+            if ('Sq. Ft.' not in lot_size) and ('acres' in lot_size):
+                land_sf = self._extract_num(lot_size)
+
+        datap = [
+            beds,
+            bath,
+            year_built,
+            sf,
+            prop_type,
+            stroies,
+            central_ac,
+            waterfront,
+            tax,
+            land_sf,
+        ]
+
+        return datap
 
     def _get_apt_data(self, apt_url):
         browser = self._browser
         browser.get(apt_url)
 
-        img_urls = self._get_img_urls(browser)
-        # address = self._get_address(browser)
-        # print(address)
+        street, city, state, zipcode = self._get_address(browser)
+        d = self._get_prop_details(browser)
 
+        img_urls = self._get_img_urls(browser)
+
+        return d 
 
 ### merge all the files together 
 class data_merger:
@@ -4890,8 +4953,8 @@ if __name__ == '__main__':
     is_testing = True
 
     bdc = berkshire_dot_com('philadelphia')
-    bdc._get_apt_urls()
-    # print(bdc._get_apt_data("https://www.bhhs.com/prime-real-estate-pa311/pa/1911-walnut-street-4801-philadelphia-19103/pid-2184552355?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=1&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA311%26LeadBrand%3D11413102141000010000"))
+    # bdc._get_apt_urls()
+    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/2314-south-street-philadelphia-19146/pid-2197003784?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=5&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000"))
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
