@@ -4813,23 +4813,27 @@ class berkshire_dot_com(dot_com):
 
         button_exp = browser.find_element_by_xpath("//a[@class='btn btn-expand']")
         button_exp.click()
-        gallery = browser.find_element_by_xpath("//section[@class='cmp-property-details-image-gallery']") \
-                         .get_attribute('data-images-to-load')
-
-        return gallery
+        gallery = browser.find_elements_by_xpath("//img[@src='data:']")
+        img_urls = [img.get_attribute('data-image') for img in gallery]
+        return img_urls
 
     def _get_address(self, browser):
-        address_lst = browser.find_element_by_xpath("//div[@class='address']") \
-                             .text \
-                             .split('\n')
+        try:
+            address_lst = browser.find_element_by_xpath("//div[@class='address']") \
+                                 .text \
+                                 .split('\n')
 
-        street = address_lst[0].strip()
-        region_lst = address_lst[1].split(',')
-        city = region_lst[0].strip()
-        state = region_lst[1].strip().split(' ')[0].strip()
-        zipcode = region_lst[1].strip().split(' ')[1].strip()
+            street = address_lst[0].strip()
+            region_lst = address_lst[1].split(',')
+            city = region_lst[0].strip()
+            state = region_lst[1].strip().split(' ')[0].strip()
+            zipcode = region_lst[1].strip().split(' ')[1].strip()
 
-        return street, city, state, zipcode
+            dataa = [street, city, state, zipcode]
+
+            return dataa
+        except:
+            return [None, None, None, None]
 
     def _get_prop_details(self, browser):
         keys = browser.find_elements_by_xpath("//div[@class='td label']")
@@ -4886,7 +4890,7 @@ class berkshire_dot_com(dot_com):
             if ('Sq. Ft.' not in lot_size) and ('acres' in lot_size):
                 land_sf = self._extract_num(lot_size)
 
-        datap = [
+        dataf = [
             beds,
             bath,
             year_built,
@@ -4900,18 +4904,41 @@ class berkshire_dot_com(dot_com):
             land_sf,
         ]
 
-        return datap
+        return dataf
 
-    def _get_apt_data(self, apt_url):
+    def _get_price_data(self, browser):
+        try:
+            summary = browser.find_element_by_xpath("//div[@class='cmp-property-details-main-attributes-summary__content']")
+            asking_price = summary.find_element_by_xpath("//div[@class='price']").text
+            asking_price = self._extract_num(asking_price)
+
+            last_price = None
+            history_prices = browser.find_elements_by_xpath("//td[@class='price']")
+            if len(history_prices)>1:
+                history_prices = [self._extract_num(hp.get_attribute('data-price')) for hp in history_prices]
+                for i, price in enumerate(history_prices):
+                    if price == asking_price:
+                        del history_prices[i]
+                last_price = history_prices[0]
+
+            return [asking_price, last_price]
+        except:
+            return [None, None]
+
+    def _get_apt_data(self, apt_url, img_path):
         browser = self._browser
         browser.get(apt_url)
 
-        street, city, state, zipcode = self._get_address(browser)
-        d = self._get_prop_details(browser)
+        dataa = self._get_address(browser)
+        dataf = self._get_prop_details(browser)
+        datap = self._get_price_data(browser)
+        final_data = dataa+datap+dataf
 
         img_urls = self._get_img_urls(browser)
+        if img_urls:
+            self._save_images(img_urls, img_path, f'{dataa[0]}, {dataa[1].title()}, {dataa[2].upper()}')
 
-        return d 
+        return final_data
 
 ### merge all the files together 
 class data_merger:
@@ -4961,7 +4988,7 @@ if __name__ == '__main__':
 
     bdc = berkshire_dot_com('philadelphia')
     # bdc._get_apt_urls()
-    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/139-elfreths-alley-philadelphia-19106/pid-2173523183?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=2&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000"))
+    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/139-elfreths-alley-philadelphia-19106/pid-2173523183?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=2&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000", f'{img_path}/berkshire'))
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
