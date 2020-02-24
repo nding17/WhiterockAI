@@ -4765,7 +4765,8 @@ class berkshire_dot_com(dot_com):
         sbar = browser.find_element_by_xpath("//input[@class='cmp-search-suggester__input']")
         sbar.send_keys(query)
         
-        dropoff = WebDriverWait(browser, 20).until(
+        # wait until the drop off list appears 
+        dropoff = WebDriverWait(browser, 30).until(
             EC.element_to_be_clickable(
                     (
                         By.XPATH, f"//li[contains(text(),'"+query+"')]"
@@ -4782,10 +4783,13 @@ class berkshire_dot_com(dot_com):
         self._accept_cookies(browser)
         apt_urls = []
 
+        # tag for the next page button
         next_page_tag = "//a[@class='cmp-search-results-pagination__arrow" \
         " cmp-search-results-pagination__arrow--next d-none d-lg-inline-block']"
 
         try:
+            # repeatly hitting the next page button until reaching 
+            # the end of the page 
             while True:
                 apts = browser.find_elements_by_xpath("//section[@class='cmp-property-tile']")
                 urls = [apt.find_element_by_tag_name('a').get_attribute('href') for apt in apts]
@@ -4802,11 +4806,30 @@ class berkshire_dot_com(dot_com):
                 next_page.click()
 
                 if test:
-                    break
+                    return apt_urls
 
         except:
+            # now we know the last page of the apartments 
+            # we are looking for is reached 
             return apt_urls
 
+    def _get_img_urls(self, browser):
+        img_urls = []
+
+        button_exp = browser.find_element_by_xpath("//a[@class='btn btn-expand']")
+        button_exp.click()
+        gallery = browser.find_element_by_xpath("//section[@class='cmp-property-details-image-gallery']") \
+                         .get_attribute('data-images-to-load')
+
+        return gallery
+
+    def _get_apt_data(self, apt_url):
+        browser = self._browser
+        browser.get(apt_url)
+
+        img_urls = self._get_img_urls(browser)
+
+        
 ### merge all the files together 
 class data_merger:
 
@@ -4854,7 +4877,7 @@ if __name__ == '__main__':
     is_testing = True
 
     bdc = berkshire_dot_com('philadelphia')
-    print(bdc._get_apt_urls())
+    print(bdc._get_apt_data("https://www.bhhs.com/prime-real-estate-pa311/pa/1911-walnut-street-4801-philadelphia-19103/pid-2184552355?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=1&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA311%26LeadBrand%3D11413102141000010000"))
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
