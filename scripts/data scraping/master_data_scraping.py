@@ -194,7 +194,7 @@ class CONST:
         'BED', 
         'GSF',
         'ASKING PRICE', 
-        'LISTING TYPE',
+        'PROPERTY TYPE',
         'LOT SF', 
         'YEAR BUILT', 
         '# FLOORS', 
@@ -241,6 +241,28 @@ class CONST:
         'RENT', 
         'UNIT SF', 
         'APT #',
+    )
+
+    # for sale
+    BERKSHIRE_COLNAMES = (
+        'ADDRESS', 
+        'CITY', 
+        'STATE', 
+        'ZIP',
+        'ASKING PRICE', 
+        'LAST PRICE',
+        'BED',
+        'BATH',
+        'YEAR BUILT',
+        'GSF',
+        'PROPERTY TYPE',
+        '# FLOORS',
+        'CENTRAL AC',
+        'WATERFRONT',
+        'FIREPLACE',
+        'TAX AMOUNT',
+        'LAND SF',
+        'LINK',
     )
 
     ### city name spelled in full, e.g. new york
@@ -4759,6 +4781,7 @@ class berkshire_dot_com(dot_com):
         query = f'{self._city.title()}, {self._state.upper()}'
         sbar = browser.find_element_by_xpath("//input[@class='cmp-search-suggester__input']")
         sbar.send_keys(query)
+        sbar.send_keys(Keys.ENTER)
         
         # wait until the drop off list appears 
         dropoff = WebDriverWait(browser, 30).until(
@@ -4932,13 +4955,44 @@ class berkshire_dot_com(dot_com):
         dataa = self._get_address(browser)
         dataf = self._get_prop_details(browser)
         datap = self._get_price_data(browser)
-        final_data = dataa+datap+dataf
+        datau = [apt_url]
+        final_data = dataa+datap+dataf+datau
 
         img_urls = self._get_img_urls(browser)
         if img_urls:
             self._save_images(img_urls, img_path, f'{dataa[0]}, {dataa[1].title()}, {dataa[2].upper()}')
 
         return final_data
+
+    def scrape_apt_data(self, apt_urls, img_path):
+        apt_data = []
+
+        for url in apt_urls:
+            apt_data.append(self._get_apt_data(url, img_path))
+
+        return apt_data
+
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = self._get_apt_urls(test=test)
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, 'berkshire.csv', CONST.BERKSHIRE_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        self._browser.close()
+        print('job done, congratulations!')
 
 ### merge all the files together 
 class data_merger:
@@ -4987,8 +5041,7 @@ if __name__ == '__main__':
     is_testing = True
 
     bdc = berkshire_dot_com('philadelphia')
-    # bdc._get_apt_urls()
-    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/139-elfreths-alley-philadelphia-19106/pid-2173523183?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=2&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000", f'{img_path}/berkshire'))
+    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
