@@ -4851,13 +4851,16 @@ class berkshire_dot_com(dot_com):
             return apt_urls
 
     def _get_img_urls(self, browser):
-        img_urls = []
+        try:
+            img_urls = []
 
-        button_exp = browser.find_element_by_xpath("//a[@class='btn btn-expand']")
-        button_exp.click()
-        gallery = browser.find_elements_by_xpath("//img[@src='data:']")
-        img_urls = [img.get_attribute('data-image') for img in gallery]
-        return img_urls
+            button_exp = browser.find_element_by_xpath("//a[@class='btn btn-expand']")
+            button_exp.click()
+            gallery = browser.find_elements_by_xpath("//img[@src='data:']")
+            img_urls = [img.get_attribute('data-image') for img in gallery]
+            return img_urls
+        except:
+            return []
 
     def _get_address(self, browser):
         try:
@@ -5059,45 +5062,46 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
-    bdc = berkshire_dot_com('philadelphia')
+    # berkshire hathaway New York For Sale
+    bdc = berkshire_dot_com('nyc')
     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
 
-    # ### apartments.com New York For Rent
-    # adc = apartments_dot_com('nyc')
-    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com('nyc')
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com('nyc')
-    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('nyc')
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
-    # ### elliman.com For Sale 
-    # edc = elliman_dot_com('nyc')
-    # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    ### elliman.com For Sale 
+    edc = elliman_dot_com('nyc')
+    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com('nyc')
-    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com('nyc')
+    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
-    # ### compass New York For Rent 
-    # codc = compass_dot_com('nyc')
-    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Rent 
+    codc = compass_dot_com('nyc')
+    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com('nyc')
-    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com('nyc')
+    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com('nyc', 1, 'max')
-    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com('nyc', 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
 
-    # ### hotpads.com For Rent
-    # hdc = hotpads_dot_com('nyc')
-    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    ### hotpads.com For Rent
+    hdc = hotpads_dot_com('nyc')
+    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
-    # ### trulia.com For Rent and For Sale
-    # tdc = trulia_dot_com('nyc')
-    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    ### trulia.com For Rent and For Sale
+    tdc = trulia_dot_com('nyc')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
-    # ### merge all the datafiles into a master data file 
-    # dm = data_merger(data_path)
-    # dm.merge_dfs()
+    ### merge all the datafiles into a master data file 
+    dm = data_merger(data_path)
+    dm.merge_dfs()
