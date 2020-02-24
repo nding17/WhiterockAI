@@ -3055,7 +3055,6 @@ class remax_dot_com(dot_com):
                 )
             )
 
-
         dropoff.click()
         newpage = WebDriverWait(browser, 10).until(
             EC.presence_of_element_located(
@@ -4742,6 +4741,36 @@ class apartments_dot_com(dot_com):
         self._browser.close()
         print('job done, congratulations!')
 
+### Berkshire Hathaway For Sale
+class berkshire_dot_com(dot_com):
+
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._url = 'https://www.bhhsthepreferredrealty.com/'
+        self._browser, _ = self._get_browser(self._url)
+
+    def _search(self, browser):
+        cookie = browser.find_element_by_xpath("//button[@title='Accept Cookies Button']")
+        cookie.click()
+        
+        query = f'{self._city.title()}, {self._state.upper()}'
+        sbar = browser.find_element_by_xpath("//input[@class='cmp-search-suggester__input']")
+        sbar.send_keys(query)
+        
+        dropoff = WebDriverWait(browser, 10).until(
+            EC.element_to_be_clickable(
+                    (
+                        By.XPATH, f"//li[contains(text(),'"+query+"')]"
+                    )
+                )
+            )
+
+        dropoff.click()
+
+    def _get_apt_urls(self, test=False):
+        browser = self._browser
+        self._search(browser)
+
 ### merge all the files together 
 class data_merger:
 
@@ -4788,42 +4817,45 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com('nyc')
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    bdc = berkshire_dot_com('philadelphia')
+    bdc._get_apt_urls()
 
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('nyc')
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com('nyc')
+    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
-    ### elliman.com For Sale 
-    edc = elliman_dot_com('nyc')
-    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com('nyc')
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('nyc')
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    # ### elliman.com For Sale 
+    # edc = elliman_dot_com('nyc')
+    # edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
-    ### compass New York For Rent 
-    codc = compass_dot_com('nyc')
-    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com('nyc')
+    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('nyc')
-    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    # ### compass New York For Rent 
+    # codc = compass_dot_com('nyc')
+    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('nyc', 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com('nyc')
+    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
-    ### hotpads.com For Rent
-    hdc = hotpads_dot_com('nyc')
-    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com('nyc', 1, 'max')
+    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
 
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com('nyc')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    # ### hotpads.com For Rent
+    # hdc = hotpads_dot_com('nyc')
+    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
-    ### merge all the datafiles into a master data file 
-    dm = data_merger(data_path)
-    dm.merge_dfs()
+    # ### trulia.com For Rent and For Sale
+    # tdc = trulia_dot_com('nyc')
+    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    # ### merge all the datafiles into a master data file 
+    # dm = data_merger(data_path)
+    # dm.merge_dfs()
