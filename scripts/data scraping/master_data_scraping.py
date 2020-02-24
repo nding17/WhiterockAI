@@ -4776,23 +4776,42 @@ class berkshire_dot_com(dot_com):
             print('no cookies to be accpted')
             pass
 
+    # instead of inputting a fixed URL, use Selenium
+    # to search the keyword would be much more bug-free
     def _search(self, browser):
         self._accept_cookies(browser)   
         query = f'{self._city.title()}, {self._state.upper()}'
         sbar = browser.find_element_by_xpath("//input[@class='cmp-search-suggester__input']")
+        sbar.clear()
         sbar.send_keys(query)
-        sbar.send_keys(Keys.ENTER)
         
-        # wait until the drop off list appears 
-        dropoff = WebDriverWait(browser, 30).until(
-            EC.element_to_be_clickable(
-                    (
-                        By.XPATH, f"//li[contains(text(),'"+query+"')]"
+        try:
+            # wait until the drop off list appears 
+            dropoff = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable(
+                        (
+                            By.XPATH, f"//li[contains(text(),'"+query+"')]"
+                        )
                     )
                 )
-            )
 
-        dropoff.click()
+            dropoff.click()
+        except:
+            # drop off list does not appear as expected
+            # input the query again
+            sbar.clear()
+            sbar.send_keys(query)
+
+            # wait until the drop off list appears 
+            dropoff = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable(
+                        (
+                            By.XPATH, f"//li[contains(text(),'"+query+"')]"
+                        )
+                    )
+                )
+
+            dropoff.click()
 
     def _get_apt_urls(self, test=False):
         browser = self._browser
