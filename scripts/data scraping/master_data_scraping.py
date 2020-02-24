@@ -4746,18 +4746,22 @@ class berkshire_dot_com(dot_com):
 
     def __init__(self, city):
         dot_com.__init__(self, city)
-        self._url = 'https://www.bhhsthepreferredrealty.com/'
+        self._url = 'https://www.bhhs.com/'
         self._browser, _ = self._get_browser(self._url)
 
     def _accept_cookies(self, browser):
-        cookies = WebDriverWait(browser, 20).until(
-            EC.element_to_be_clickable(
-                    (
-                        By.XPATH, "//button[@title='Accept Cookies Button']"
+        try:
+            cookies = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable(
+                        (
+                            By.XPATH, "//button[@title='Accept Cookies Button']"
+                        )
                     )
                 )
-            )
-        cookies.click()
+            cookies.click()
+        except:
+            print('no cookies to be accpted')
+            pass
 
     def _search(self, browser):
         self._accept_cookies(browser)   
@@ -4823,13 +4827,22 @@ class berkshire_dot_com(dot_com):
 
         return gallery
 
+    def _get_address(self, browser):
+        address_lst = browser.find_element_by_xpath("//div[@class='address']") \
+                             .text \
+                             .split('\n')
+
+        return address_lst
+
     def _get_apt_data(self, apt_url):
         browser = self._browser
         browser.get(apt_url)
 
         img_urls = self._get_img_urls(browser)
+        # address = self._get_address(browser)
+        # print(address)
 
-        
+
 ### merge all the files together 
 class data_merger:
 
@@ -4877,7 +4890,8 @@ if __name__ == '__main__':
     is_testing = True
 
     bdc = berkshire_dot_com('philadelphia')
-    print(bdc._get_apt_data("https://www.bhhs.com/prime-real-estate-pa311/pa/1911-walnut-street-4801-philadelphia-19103/pid-2184552355?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=1&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA311%26LeadBrand%3D11413102141000010000"))
+    bdc._get_apt_urls()
+    # print(bdc._get_apt_data("https://www.bhhs.com/prime-real-estate-pa311/pa/1911-walnut-street-4801-philadelphia-19103/pid-2184552355?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=1&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA311%26LeadBrand%3D11413102141000010000"))
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
