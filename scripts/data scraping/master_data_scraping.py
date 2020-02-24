@@ -419,23 +419,23 @@ class dot_com:
 
     def _recaptcha(self, browser):
         captcha_iframe = WebDriverWait(browser, 10).until(
-        EC.presence_of_element_located(
-                (
-                    By.TAG_NAME, 'iframe'
+            EC.presence_of_element_located(
+                    (
+                        By.TAG_NAME, 'iframe'
+                    )
                 )
             )
-        )
 
         ActionChains(browser).move_to_element(captcha_iframe).click().perform()
 
         # click im not robot
         captcha_box = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                (
-                    By.ID, 'g-recaptcha-response'
+                EC.presence_of_element_located(
+                    (
+                        By.ID, 'g-recaptcha-response'
+                    )
                 )
             )
-        )
 
         browser.execute_script("arguments[0].click()", captcha_box)
         time.sleep(120)
@@ -3063,7 +3063,7 @@ class remax_dot_com(dot_com):
                         By.XPATH, "//div[@class='listings-card']"
                     )
                 )
-        )
+            )
 
         return newpage
     
@@ -4675,7 +4675,7 @@ class apartments_dot_com(dot_com):
                             By.XPATH, "//div[@class='headerUtilities'][@id='headerUtilities']"
                         )
                     )
-            )
+                )
 
             button_view.click()
 
@@ -4689,6 +4689,7 @@ class apartments_dot_com(dot_com):
                             )
                         )
                     )
+                
                 tabs = nav.find_elements_by_tag_name('a')
             except:
                 print('no photos')
@@ -4701,7 +4702,7 @@ class apartments_dot_com(dot_com):
                                 By.XPATH, "//ul[@class='nano-content']"
                             )
                         )
-                )
+                    )
 
                 img_tags = gallery.find_elements_by_xpath('li')
                 urls = [tag.find_element_by_tag_name('img').get_attribute('src') for tag in img_tags]
