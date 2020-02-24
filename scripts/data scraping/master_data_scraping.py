@@ -4864,6 +4864,12 @@ class berkshire_dot_com(dot_com):
         if self._ad(d, 'Waterfront') == 'Y':
             waterfront = 1
 
+        fireplace = 0
+        fp = self._ad(d, 'Fireplace')
+        if fp:
+            if 'N' not in fp:
+                fireplace = 1
+
         tax = None
         tax_info = self._ad(d, 'Tax Information')
         if tax_info:
@@ -4889,6 +4895,7 @@ class berkshire_dot_com(dot_com):
             stroies,
             central_ac,
             waterfront,
+            fireplace,
             tax,
             land_sf,
         ]
@@ -4954,7 +4961,7 @@ if __name__ == '__main__':
 
     bdc = berkshire_dot_com('philadelphia')
     # bdc._get_apt_urls()
-    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/2314-south-street-philadelphia-19146/pid-2197003784?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=5&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000"))
+    print(bdc._get_apt_data("https://www.bhhs.com/fox-and-roach-realtors-pa301/pa/139-elfreths-alley-philadelphia-19106/pid-2173523183?SearchInput=Philadelphia%20PA&SearchType=City&PropertyType=1%2C2%2C9&ListingStatus=1&NewListing=false&ApplicationType=FOR_SALE&Sort=PRICE_DESCENDING&PageSize=20&Page=2&SearchParameter=Philadelphia%2C%20PA&CoverageLat=39.98494339&CoverageLon=-75.10035706&CoverageCity=Philadelphia&CoverageState=PA&lead=CompanyKey%3DPA301%26LeadBrand%3D11413100431000010000"))
 
     # ### apartments.com New York For Rent
     # adc = apartments_dot_com('nyc')
