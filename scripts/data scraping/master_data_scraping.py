@@ -269,12 +269,12 @@ class CONST:
     ### city name spelled in full, e.g. new york
     ### state name spelled in abbreviation, e.g. ny
     CITY_NAMES ={
-        'nyc': {
+        'NYC': {
             'city': 'new york',
             'state': 'ny',
         },
 
-        'philadelphia': {
+        'PHL': {
             'city': 'philadelphia',
             'state': 'pa',
         }
@@ -5010,11 +5010,11 @@ class data_merger:
     def __init__(self, data_path):
         self._data_path = data_path
 
-    def merge_dfs(self):
+    def merge_super_dfs(self):
         files = [f for f in listdir(self._data_path) \
                     if isfile(join(self._data_path, f)) \
                         and '.csv' in f \
-                        and not 'master_scraping_data.csv' == f]
+                        and 'Super_Master_File' not in f]
         dfs = []
 
         for file in files:
@@ -5030,9 +5030,15 @@ class data_merger:
 
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
-        
+
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'{data_path}/Supper_Master_File {date_today}.csv', index=False)
+        final_df.to_csv(f'{data_path}/Super_Master_File {date_today}.csv', index=False)
+
+    def merge_forsale_dfs(self):
+        pass
+
+    def merge_forrent_dfs(self):
+        pass
 
 if __name__ == '__main__':
     """
@@ -5055,45 +5061,45 @@ if __name__ == '__main__':
     is_testing = True
 
     ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('nyc')
+    rmdc = remax_dot_com('PHL')
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
     # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com('nyc')
+    bdc = berkshire_dot_com('PHL')
     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
 
     ### apartments.com New York For Rent
-    adc = apartments_dot_com('nyc')
+    adc = apartments_dot_com('PHL')
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
     ### elliman.com For Sale 
-    edc = elliman_dot_com('nyc')
+    edc = elliman_dot_com('PHL')
     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('nyc')
+    ldc = loopnet_dot_com('PHL')
     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     ### compass New York For Rent 
-    codc = compass_dot_com('nyc')
+    codc = compass_dot_com('PHL')
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('nyc')
+    rdc = rent_dot_com('PHL')
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
     ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('nyc', 1, 'max')
+    cdc = coldwell_dot_com('PHL', 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
     ### hotpads.com For Rent
-    hdc = hotpads_dot_com('nyc')
+    hdc = hotpads_dot_com('PHL')
     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
     ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com('nyc')
+    tdc = trulia_dot_com('PHL')
     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
     ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
-    dm.merge_dfs()
+    dm.merge_super_dfs()
