@@ -5132,6 +5132,7 @@ class data_merger:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
                              error_bad_lines=False)
+            df['ADDRESS'] = df['ADDRESS'].astype(str)
             dfs.append(df)
 
         final_df = pd.concat(dfs, 
@@ -5159,6 +5160,7 @@ class data_merger:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
                              error_bad_lines=False)
+            df['ADDRESS'] = df['ADDRESS'].astype(str)
             dfs.append(df)
 
         final_df = pd.concat(dfs, 
@@ -5186,6 +5188,7 @@ class data_merger:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
                              error_bad_lines=False)
+            df['ADDRESS'] = df['ADDRESS'].astype(str)
             dfs.append(df)
 
         final_df = pd.concat(dfs, 
@@ -5234,7 +5237,6 @@ if __name__ == '__main__':
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
     ### elliman.com For Sale 
-
     if major_city == 'NYC':
         edc = elliman_dot_com(major_city)
         edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
