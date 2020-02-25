@@ -298,7 +298,12 @@ class CONST:
         'PHL': {
             'city': 'philadelphia',
             'state': 'pa',
-        }
+        },
+
+        'CHI': {
+            'city': 'chicago',
+            'state': 'il'
+        },
     }
 
 ### parent class that includes the most commonly used functions 
@@ -1784,7 +1789,7 @@ class trulia_dot_com(dot_com):
     # class initiation section #
     ############################
 
-    def __init__(self, city):
+    def __init__(self, city, cat):
         dot_com.__init__(self, city)
         self._apt_urls = {
             'buy': [],
@@ -1797,6 +1802,7 @@ class trulia_dot_com(dot_com):
             'sold': [],
         }
         self._browser, _ = self._get_browser(CONST.TRULIA_OVERHEAD)
+        self._cat = cat
 
     #############################
     # private functions section #
@@ -2975,7 +2981,7 @@ class trulia_dot_com(dot_com):
 
     def scraping_pipeline(self, data_path, img_path, test=False):
         # different sales categories 
-        categories = ['buy', 'rent', 'sold']
+        categories = [self._cat]
 
         # scrape different streams of apartments iteratively 
         # could be optimized by parallel programming 
@@ -3042,6 +3048,9 @@ class remax_dot_com(dot_com):
         if self._city == 'philadelphia':
             phi_url = 'https://www.remax.com/homes-for-sale/PA/Philadelphia/city/4260000'
             self._browser, _ = self._get_browser(phi_url)
+        if self._city == 'chicago':
+            chi_url = 'https://www.remax.com/homes-for-sale/IL/Chicago/city/1714000'
+            self._browser, _ = self._get_browser(chi_url)
         self._apt_urls = []
         self._apt_data = []
     
@@ -5200,62 +5209,74 @@ if __name__ == '__main__':
             e.g. ny (NOT New York)
     """
 
+    major_city = 'CHI'
+
     # user need to provide these paths 
     # please also make sure you have the sub-folders
     # under img_path, for example, remax, rent etc. 
-    data_path = '../../data/sample/info'
-    img_path = '../../data/sample/images'
+    data_path = f'../../data/sample/{major_city}/info'
+    img_path = f'../../data/sample/{major_city}/images'
 
     # to run the scraping for the entire webpage 
     # turn this to False
     is_testing = True
 
     ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('PHL')
+    rmdc = remax_dot_com(major_city)
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
     # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com('PHL')
+    bdc = berkshire_dot_com(major_city)
     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
 
     ### apartments.com New York For Rent
-    adc = apartments_dot_com('PHL')
+    adc = apartments_dot_com(major_city)
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
     ### elliman.com For Sale 
-    edc = elliman_dot_com('PHL')
-    edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+
+    if major_city == 'NYC':
+        edc = elliman_dot_com(major_city)
+        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
     ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com('PHL')
+    ldc = loopnet_dot_com(major_city)
     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     ### compass New York For Rent 
-    codc = compass_dot_com('PHL')
+    codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### compass New York For Sale 
-    codcv2 = compass_fs_dot_com('PHL')
+    codcv2 = compass_fs_dot_com(major_city)
     codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com('PHL')
+    rdc = rent_dot_com(major_city)
     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
 
     ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com('PHL', 1, 'max')
+    cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
     ### hotpads.com For Rent
-    hdc = hotpads_dot_com('PHL')
+    hdc = hotpads_dot_com(major_city)
     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
 
     ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com('PHL')
+    tdc = trulia_dot_com(major_city, 'buy')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    ### trulia.com For Rent and For Rent
+    tdc = trulia_dot_com(major_city, 'rent')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    ### trulia.com For Rent and Sold
+    tdc = trulia_dot_com(major_city, 'sold')
     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
 
     ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
-    dm.merge_super_dfs('PHL')
-    dm.merge_forsale_dfs('PHL')
-    dm.merge_forrent_dfs('PHL')
+    dm.merge_super_dfs(major_city)
+    dm.merge_forsale_dfs(major_city)
+    dm.merge_forrent_dfs(major_city)
