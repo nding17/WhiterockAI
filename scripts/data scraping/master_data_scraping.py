@@ -130,7 +130,7 @@ class CONST:
         'CITY', 
         'STATE', 
         'ZIP',
-        'PRICE',
+        'ASKING PRICE',
         'BED',
         'BATH',
         'FIREPLACE',
@@ -166,6 +166,27 @@ class CONST:
         'LINK',
     )
 
+    COMPASS_FS_COLNAMES = (
+        'CITY',
+        'STATE',
+        'ADDRESS',
+        'ZIP',
+        'ASKING PRICE', 
+        'BED', 
+        'BATH',
+        'GSF',
+        'YEAR BUILT', 
+        'PROPERTY TYPE',
+        'CENTRAL AC', 
+        'WATERFRONT', 
+        '# FLOORS', 
+        'LAND SF', 
+        'TAX AMOUNT', 
+        'TAX YEAR', 
+        'MATERIAL',
+        'LINK',
+    )
+
     # for sale 
     LOOPNET_COLNAMES = (
         'ADDRESS', 
@@ -174,7 +195,7 @@ class CONST:
         'CAP RATE',
         'PROPERTY TYPE',
         '# UNITS',
-        'PRICE',
+        'ASKING PRICE',
         '# FLOORS',
         'GSF',
         'LAND SF',
@@ -3842,30 +3863,39 @@ class compass_dot_com(dot_com):
 
     ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
-        price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
-                         .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
+        try:
+            price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
+                             .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
-        keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
-        values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
+            keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
+            values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
-        d = dict(zip(keys, values))
-        return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
+            d = dict(zip(keys, values))
+            return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Bath')
+        except:
+            return None, None, None
 
     ### get the square foot of the apartment, this is different from gross square foot 
     def _get_sf(self, soup):
-        sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
-                   .find('div', class_='textIntent-title2') \
-                   .get_text()
-        sqft = self._extract_num(sqft)
-        return sqft
+        try:
+            sqft = soup.find('div', attrs={'data-tn': 'listing-page-summary-sq-ft'}) \
+                       .find('div', class_='textIntent-title2') \
+                       .get_text()
+            sqft = self._extract_num(sqft)
+            return sqft
+        except:
+            return None
 
     ### property details, including year built and property type 
     def _get_prop_details(self, soup):
-        rows = soup.find_all('tr', class_='keyDetails-text')
-        keys = [row.find_all('td')[0].get_text() for row in rows]
-        values = [row.find_all('td')[1].get_text() for row in rows]
-        d = dict(zip(keys, values))
-        return self._ad(d,'Year Built'), self._ad(d,'Compass Type')
+        try:
+            rows = soup.find_all('tr', class_='keyDetails-text')
+            keys = [row.find_all('td')[0].get_text() for row in rows]
+            values = [row.find_all('td')[1].get_text() for row in rows]
+            d = dict(zip(keys, values))
+            return self._ad(d,'Year Built'), self._ad(d,'Compass Type')
+        except:
+            return None, None
 
     ### building details, including number of units and number of floors 
     def _get_building_details(self, soup):
@@ -3980,6 +4010,130 @@ class compass_dot_com(dot_com):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
             self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
+            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+            time.sleep(15) # rest for a few seconds after each batch job done
+
+        self._browser.close()
+        print('job done, congratulations!')
+
+### Compass For Sale
+class compass_fs_dot_com(compass_dot_com):
+
+    ### slightly different initialization
+    ### the majority are the same except for the URL 
+    def __init__(self, city):
+        dot_com.__init__(self, city)
+        self._city = self._city.lower().replace(' ', '-')
+        self._state = self._state.lower()
+        self._url = f'https://www.compass.com/homes-for-sale/{self._city}-{self._state}/'
+        self._browser, _ = self._get_browser(self._url)
+
+    ### get the price details from the apartments, including price, bath and beds
+    def _get_price(self, soup):
+        price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
+                         .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
+
+        keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
+        values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
+
+        d = dict(zip(keys, values))
+        return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Baths') # this is what's different from for rent 
+
+    ### fetch the amenity details
+    def _get_amenities(self, soup):
+        try:
+            elems = soup.find_all('div', class_='property-information__FieldSection-sc-1il5vdr-7 kTiQQm textIntent-caption1')
+
+            ks = [e.text.split(':')[0].strip() for e in elems]
+            vs = [e.text.split(':')[1].strip() for e in elems]
+            d = dict(zip(ks, vs))
+
+            def _y_n(text):
+                try:
+                    if 'yes' in text.lower():
+                        return 1
+                    if 'no' in text.lower():
+                        return 0
+                except:
+                    return None
+
+            central_ac = _y_n(self._ad(d, 'Central Air'))
+            waterfront = _y_n(self._ad(d, 'Waterfront'))
+
+            stories = self._extract_num(self._ad(d, 'Levels Count'))
+
+            land_sf = self._extract_num(self._ad(d, 'Lot Size Acres'))
+
+            if land_sf == np.nan:
+                land_sf = self._extract_num(self._ad(d, 'Lot SQFT'))
+                if not land_sf == np.nan:
+                    land_sf = land_sf / 43560
+
+            tax_amount = self._extract_num(self._ad(d, 'Tax Annual Amount'))
+            tax_year = self._ad(d, 'Tax Year')
+            material = self._ad(d, 'Construction Materials')
+
+            return central_ac, waterfront, stories, land_sf, tax_amount, tax_year, material
+        except:
+            return None, None, None, None, None, None, None
+
+    ### get the apartment data for sale; there's some minor differences with
+    ### Compass for rent 
+    def _get_apt_data(self, url, img_path):
+        soup = self._soup_attempts(url)
+
+        city = self._city.replace('-', ' ').title()
+        state = self._state.upper()
+        addr, _, zipcode = self._get_address(soup)
+        price, beds, bath = self._get_price(soup)
+        sqft = self._get_sf(soup)
+        yrbuilt, rtype = self._get_prop_details(soup)
+        central_ac, waterfront, stories, land_sf, tax_amount, tax_year, material = self._get_amenities(soup)
+
+        data = [
+            city,
+            state,
+            addr,
+            zipcode,
+            price, 
+            beds, 
+            bath,
+            sqft,
+            yrbuilt, 
+            rtype,
+            central_ac, 
+            waterfront, 
+            stories, 
+            land_sf, 
+            tax_amount, 
+            tax_year, 
+            material,
+            url,
+        ]
+
+        img_urls = self._get_image_urls(soup)
+
+        if img_urls:
+            self._save_images(img_urls, img_path, f"{addr}, {self._city.replace('-', ' ').title()}, {self._state.upper()}")
+
+        return data
+
+    def scraping_pipeline(self, data_path, img_path, test=False):
+        # time of sleep 
+        sleep_secs = 15
+
+        # all apartment URLs
+        apt_urls = self._get_apt_urls(test=test)
+
+        # divide the apartment URLs list into small batches 
+        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+
+        # batch jobs start
+        print(f'total number of batches: {len(url_batches)}')
+        for i, batch in enumerate(url_batches):
+            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+            apt_data = self.scrape_apt_data(batch, img_path)
+            self.write_data(apt_data, 'compass_forsale.csv', CONST.COMPASS_FS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -5133,6 +5287,10 @@ if __name__ == '__main__':
     ### compass New York For Rent 
     codc = compass_dot_com('PHL')
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+
+    ### compass New York For Sale 
+    codcv2 = compass_fs_dot_com('PHL')
+    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
 
     ### rent.com Philadelphia For Rent
     rdc = rent_dot_com('PHL')
