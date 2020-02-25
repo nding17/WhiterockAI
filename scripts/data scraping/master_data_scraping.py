@@ -5140,7 +5140,7 @@ class data_merger:
         files = [f for f in listdir(self._data_path) \
                     if isfile(join(self._data_path, f)) \
                         and '.csv' in f \
-                        and 'forrent' in f \
+                        and ('forrent' in f or 'rent' in f) \
                         and 'Super_Master_File' not in f \
                         and 'property_to_estimate' not in f \
                         and 'Rent_Master' not in f]
@@ -5167,7 +5167,7 @@ class data_merger:
         files = [f for f in listdir(self._data_path) \
                     if isfile(join(self._data_path, f)) \
                         and '.csv' in f \
-                        and 'forsale' in f \
+                        and ('forsale' in f or 'buy' in f) \
                         and 'Super_Master_File' not in f \
                         and 'property_to_estimate' not in f \
                         and 'Rent_Master' not in f]
