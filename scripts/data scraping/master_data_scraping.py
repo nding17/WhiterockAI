@@ -31,6 +31,7 @@ from selenium import webdriver
 from fake_useragent import UserAgent
 from os import listdir
 from os.path import isfile, join
+from lycleaner import Address_cleaner
 
 ### constant, column names etc.
 class CONST:
@@ -5016,10 +5017,13 @@ class data_merger:
                         and not 'master_scraping_data.csv' == f]
         dfs = []
 
+        cleaner = Address_cleaner()
+
         for file in files:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
                              error_bad_lines=False)
+            df['ADDRESS'] = cleaner.easy_clean(df['ADDRESS'].str.upper())
             dfs.append(df)
 
         final_df = pd.concat(dfs, 
@@ -5027,7 +5031,9 @@ class data_merger:
                              ignore_index=True, 
                              sort=False)
 
-        final_df.to_csv(f'{data_path}/master_scraping_data.csv', index=False)
+        date_today = str(datetime.date.today())
+
+        final_df.to_csv(f'{data_path}/Supper_Master_File {date_today}.csv', index=False)
 
 if __name__ == '__main__':
     """
