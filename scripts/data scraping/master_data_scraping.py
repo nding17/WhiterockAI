@@ -5079,7 +5079,7 @@ if __name__ == '__main__':
 
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com('nyc', 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=False)
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
 
     ### hotpads.com For Rent
     hdc = hotpads_dot_com('nyc')
