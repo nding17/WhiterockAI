@@ -5030,6 +5030,7 @@ class data_merger:
 
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
+        
         date_today = str(datetime.date.today())
         final_df.to_csv(f'{data_path}/Supper_Master_File {date_today}.csv', index=False)
 
