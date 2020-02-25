@@ -3067,34 +3067,13 @@ class remax_dot_com(dot_com):
     # initialization - users need to specify a city and state 
     def __init__(self, city):
         dot_com.__init__(self, city)
-        self._overhead = 'https://www.remax.com'
+        if self._city == 'new york':
+            self._overhead = 'https://www.remax.com/homes-for-sale/NY/New-York/city/3651000'
+        if self._city == 'philadelphia':
+            self._overhead = 'https://www.remax.com/homes-for-sale/PA/Philadelphia/city/4260000'
         self._browser, _ = self._get_browser(self._overhead)
         self._apt_urls = []
         self._apt_data = []
-
-    def _search(self):
-        browser = self._browser
-        searchbox = browser.find_element_by_xpath("//input[@data-test='autocomplete-input']")
-        searchbox.send_keys(f'{self._city.title()}, {self._state.upper()}')
-
-        dropoff = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                    (
-                        By.XPATH, "//div[@data-test='auto-complete-places']"
-                    )
-                )
-            )
-
-        dropoff.click()
-        newpage = WebDriverWait(browser, 10).until(
-            EC.presence_of_element_located(
-                    (
-                        By.XPATH, "//div[@class='listings-card']"
-                    )
-                )
-            )
-
-        return newpage
     
     def _get_ensemble_apt_urls(self, test=False):
 
@@ -3122,7 +3101,7 @@ class remax_dot_com(dot_com):
 
         """
 
-        browser = self._search()
+        browser = self._browser
 
         cookie = browser.find_element_by_xpath('//*[@id="__layout"]/div/div[3]/div/div[2]/button[1]')
         cookie.click()
@@ -5069,6 +5048,10 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com('nyc')
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+
     # berkshire hathaway New York For Sale
     bdc = berkshire_dot_com('nyc')
     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
@@ -5076,10 +5059,6 @@ if __name__ == '__main__':
     ### apartments.com New York For Rent
     adc = apartments_dot_com('nyc')
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com('nyc')
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
     ### elliman.com For Sale 
     edc = elliman_dot_com('nyc')
