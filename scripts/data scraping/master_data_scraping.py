@@ -1226,7 +1226,7 @@ class elliman_dot_com(dot_com):
             self.scrape_apt_data(batch, verbose=True, test=test)
             self.scrape_apt_images(batch, img_path, verbose=True, test=test)
             apt_data = self.apt_data
-            self.write_data(apt_data, 'elliman.csv', CONST.ELLIMAN_COLNAMES, data_path)
+            self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -1740,7 +1740,7 @@ class rent_dot_com(dot_com):
             # print(batch_urls)
             self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
             data = self.apt_data
-            self.write_data(data, 'rent.csv', CONST.RENT_COLNAMES, data_path)
+            self.write_data(data, 'rent_forrent.csv', CONST.RENT_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         self._browser.close()
@@ -3556,7 +3556,7 @@ class remax_dot_com(dot_com):
         for i, batch_urls in enumerate(urls_chuck):
             self.scrape_apt_data(batch_urls, img_path, verbose=True)
             data = self.apt_data
-            self.write_data(data, 'remax.csv', CONST.REMAX_COLNAMES, data_path)
+            self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
             print(f'batch {i} finished running')
 
         print('job done!')
@@ -3782,7 +3782,7 @@ class coldwell_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = [self._get_content(url, img_path) for url in batch]
-            self.write_data(apt_data, 'coldwell.csv', CONST.COLDWELL_COLNAMES, data_path)
+            self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -3979,7 +3979,7 @@ class compass_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'compass.csv', CONST.COMPASS_COLNAMES, data_path)
+            self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4187,7 +4187,7 @@ class loopnet_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'loopnet.csv', CONST.LOOPNET_COLNAMES, data_path)
+            self.write_data(apt_data, 'loopnet_forsale.csv', CONST.LOOPNET_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4419,7 +4419,7 @@ class hotpads_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'hotpads.csv', CONST.HOTPADS_COLNAMES, data_path)
+            self.write_data(apt_data, 'hotpads_forrent.csv', CONST.HOTPADS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4727,7 +4727,7 @@ class apartments_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'apartments.csv', CONST.APARTMENTS_COLNAMES, data_path)
+            self.write_data(apt_data, 'apartments_forrent.csv', CONST.APARTMENTS_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -4997,7 +4997,7 @@ class berkshire_dot_com(dot_com):
         for i, batch in enumerate(url_batches):
             print(f'batch {i} starts, there are {len(batch)} apartment URLs')
             apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'berkshire.csv', CONST.BERKSHIRE_COLNAMES, data_path)
+            self.write_data(apt_data, 'berkshire_forsale.csv', CONST.BERKSHIRE_COLNAMES, data_path)
             print(f'batch {i} done, sleep {sleep_secs} seconds\n')
             time.sleep(15) # rest for a few seconds after each batch job done
 
@@ -5010,11 +5010,13 @@ class data_merger:
     def __init__(self, data_path):
         self._data_path = data_path
 
-    def merge_super_dfs(self):
+    def merge_super_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
                     if isfile(join(self._data_path, f)) \
                         and '.csv' in f \
-                        and 'Super_Master_File' not in f]
+                        and 'Super_Master_File' not in f \
+                        and 'property_to_estimate' not in f \
+                        and 'Rent_Master' not in f]
         dfs = []
 
         for file in files:
@@ -5032,13 +5034,61 @@ class data_merger:
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
 
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'{data_path}/Super_Master_File {date_today}.csv', index=False)
+        final_df.to_csv(f'{data_path}/{city} Super_Master_File {date_today}.csv', index=False)
 
-    def merge_forsale_dfs(self):
-        pass
+    def merge_forrent_dfs(self, city):
+        files = [f for f in listdir(self._data_path) \
+                    if isfile(join(self._data_path, f)) \
+                        and '.csv' in f \
+                        and 'forrent' in f \
+                        and 'Super_Master_File' not in f \
+                        and 'property_to_estimate' not in f \
+                        and 'Rent_Master' not in f]
+        dfs = []
 
-    def merge_forrent_dfs(self):
-        pass
+        for file in files:
+            df = pd.read_csv(f'{data_path}/{file}',
+                             index_col=0,
+                             error_bad_lines=False)
+            dfs.append(df)
+
+        final_df = pd.concat(dfs, 
+                             axis=0, 
+                             ignore_index=True, 
+                             sort=False)
+
+        cleaner = Address_cleaner()
+        final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
+
+        date_today = str(datetime.date.today())
+        final_df.to_csv(f'{data_path}/{city} Rent_Master [bylocation;addresses] {date_today}.csv', index=False)
+
+    def merge_forsale_dfs(self, city):
+        files = [f for f in listdir(self._data_path) \
+                    if isfile(join(self._data_path, f)) \
+                        and '.csv' in f \
+                        and 'forsale' in f \
+                        and 'Super_Master_File' not in f \
+                        and 'property_to_estimate' not in f \
+                        and 'Rent_Master' not in f]
+        dfs = []
+
+        for file in files:
+            df = pd.read_csv(f'{data_path}/{file}',
+                             index_col=0,
+                             error_bad_lines=False)
+            dfs.append(df)
+
+        final_df = pd.concat(dfs, 
+                             axis=0, 
+                             ignore_index=True, 
+                             sort=False)
+
+        cleaner = Address_cleaner()
+        final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
+
+        date_today = str(datetime.date.today())
+        final_df.to_csv(f'{data_path}/property_to_estimate_{city} {date_today}.csv', index=False)
 
 if __name__ == '__main__':
     """
@@ -5102,4 +5152,6 @@ if __name__ == '__main__':
 
     ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
-    dm.merge_super_dfs()
+    dm.merge_super_dfs('PHL')
+    dm.merge_forsale_dfs('PHL')
+    dm.merge_forrent_dfs('PHL')
