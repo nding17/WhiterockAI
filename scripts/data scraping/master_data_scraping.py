@@ -5265,42 +5265,42 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
     
-    # ### remax.com Philadelphia For Sale
-    # rmdc = remax_dot_com(major_city)
-    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com(major_city)
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
-    # ### apartments.com New York For Rent
-    # adc = apartments_dot_com(major_city)
-    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com(major_city)
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
     
-    # ### compass New York For Rent 
-    # codc = compass_dot_com(major_city)
-    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Rent 
+    codc = compass_dot_com(major_city)
+    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
-    # ### compass New York For Sale 
-    # codcv2 = compass_fs_dot_com(major_city)
-    # codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Sale 
+    codcv2 = compass_fs_dot_com(major_city)
+    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
-    # # berkshire hathaway New York For Sale
-    # bdc = berkshire_dot_com(major_city)
-    # bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+    # berkshire hathaway New York For Sale
+    bdc = berkshire_dot_com(major_city)
+    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
     
-    # ### elliman.com For Sale 
-    # if major_city == 'NYC':
-    #     edc = elliman_dot_com(major_city)
-    #     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    ### elliman.com For Sale 
+    if major_city == 'NYC':
+        edc = elliman_dot_com(major_city)
+        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
     
-    # ### loopnet.com New York For Sale 
-    # ldc = loopnet_dot_com(major_city)
-    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com(major_city)
+    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
     
-    # ### rent.com Philadelphia For Rent
-    # rdc = rent_dot_com(major_city)
-    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com(major_city)
+    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
     
-    # ### coldwell Philadelphia For Sale
-    # cdc = coldwell_dot_com(major_city, 1, 'max')
-    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+    ### coldwell Philadelphia For Sale
+    cdc = coldwell_dot_com(major_city, 1, 'max')
+    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
     
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
