@@ -462,7 +462,6 @@ class dot_com:
         """
         options = self._build_options()
 
-        # alternative option for Windows users 
         # chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
         # browser = webdriver.Chrome(executable_path = chrome_path, options=options)
 
@@ -4521,8 +4520,26 @@ class hotpads_dot_com(dot_com):
     def scrape_apt_data(self, apt_urls, img_path):
         apt_data = []
 
-        for url in apt_urls:
-            apt_data += self._get_apt_data(url, img_path)
+        for apt_url in apt_urls:
+            browser = self._browser
+            browser.get(apt_url)
+            time.sleep(3)
+    
+            try:
+                robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
+                if 'Please verify you are a human' in robot_check.text:
+                    self._recaptcha(browser)
+            except:
+                pass
+            
+            try:
+                multi_units = browser.find_elements_by_xpath("//div[@class='BuildingUnitCard']")
+                unit_urls = [unit.find_element_by_tag_name('a') \
+                                 .get_attribute('href') for unit in multi_units]
+                for unit_url in unit_urls:
+                    apt_data += self._get_apt_data(unit_url, img_path)
+            except:
+                apt_data += self._get_apt_data(apt_url, img_path)
 
         return apt_data
 
@@ -5248,42 +5265,42 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
     
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com(major_city)
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
-    ### compass New York For Rent 
-    codc = compass_dot_com(major_city)
-    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com(major_city)
+    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
     
-    ### compass New York For Sale 
-    codcv2 = compass_fs_dot_com(major_city)
-    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    # ### compass New York For Rent 
+    # codc = compass_dot_com(major_city)
+    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    # ### compass New York For Sale 
+    # codcv2 = compass_fs_dot_com(major_city)
+    # codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
-    # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com(major_city)
-    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+    # # berkshire hathaway New York For Sale
+    # bdc = berkshire_dot_com(major_city)
+    # bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
     
-    ### elliman.com For Sale 
-    if major_city == 'NYC':
-        edc = elliman_dot_com(major_city)
-        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    # ### elliman.com For Sale 
+    # if major_city == 'NYC':
+    #     edc = elliman_dot_com(major_city)
+    #     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
     
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com(major_city)
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com(major_city)
+    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
     
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com(major_city)
-    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com(major_city)
+    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
     
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com(major_city, 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com(major_city, 1, 'max')
+    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
     
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
