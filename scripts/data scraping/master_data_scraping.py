@@ -5302,21 +5302,33 @@ if __name__ == '__main__':
     cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
     
-    ### hotpads.com For Rent
-    hdc = hotpads_dot_com(major_city)
-    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    try:
+        ### hotpads.com For Rent
+        hdc = hotpads_dot_com(major_city)
+        hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    except:
+        print('hotpads failed')
     
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com(major_city, 'buy')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    try:
+        ### trulia.com For Rent and For Sale
+        tdc = trulia_dot_com(major_city, 'buy')
+        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    except:
+        print('trulia, for sale failed')
     
-    ### trulia.com For Rent and For Rent
-    tdc = trulia_dot_com(major_city, 'rent')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    try:
+        ### trulia.com For Rent and For Rent
+        tdc = trulia_dot_com(major_city, 'rent')
+        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    except:
+        print('trulia, for rent failed')
     
-    ### trulia.com For Rent and Sold
-    tdc = trulia_dot_com(major_city, 'sold')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    try:
+        ### trulia.com For Rent and Sold
+        tdc = trulia_dot_com(major_city, 'sold')
+        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+    except:
+        print('trulia, sold failed')
     
     ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
