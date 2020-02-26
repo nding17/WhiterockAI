@@ -3898,8 +3898,15 @@ class compass_dot_com(dot_com):
 
     def _get_image_urls(self, soup):
         img_tags = soup.find_all('div', attrs={'data-tn': 'undefined-gallery-navigation-navigation-image'})
-        img_urls = [itag.find('img')['src'] for itag in img_tags]
-        return img_urls
+        if img_tags:
+            try:
+                img_urls = [itag.find('img')['src'] for itag in img_tags]
+                return img_urls
+            except:
+                img_urls = [itag.find('img')['data-src'] for itag in img_tags]
+                return img_urls
+        else:
+            return []
 
     def _get_apt_data(self, url, img_path):
         soup = self._soup_attempts(url)
@@ -5224,26 +5231,26 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
 
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com(major_city)
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
 
-    # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com(major_city)
-    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+    # # berkshire hathaway New York For Sale
+    # bdc = berkshire_dot_com(major_city)
+    # bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
 
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com(major_city)
+    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
 
-    ### elliman.com For Sale 
-    if major_city == 'NYC':
-        edc = elliman_dot_com(major_city)
-        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+    # ### elliman.com For Sale 
+    # if major_city == 'NYC':
+    #     edc = elliman_dot_com(major_city)
+    #     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
 
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com(major_city)
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com(major_city)
+    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
 
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
