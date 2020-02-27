@@ -42,7 +42,7 @@ class cleaning_instructions:
         },
         'BUILDING CLASS AT PRESENT': {
             'delete': 0,
-            'new name': 'BLDG CLASS ',
+            'new name': 'BLDG CLASS',
         },
         'ADDRESS': {
             'delete': 0,
@@ -96,41 +96,6 @@ class cleaning_instructions:
             'delete': 0,
             'new name': 'SALE DATE',
         },
-    }
-
-    NYC_SALES_PROCESSING = {
-        'APARTMENT NUMBER': ['#'],
-        'GSF': ['<850'],
-        'LAND SF': ['0'],
-        'SALE PRICE': ['<25000'],
-        'BLDG CLASS ': [
-                'A8',
-                'C6',
-                'C8',
-                'C9',
-                'CM',
-                'D',
-                'E',
-                'F',
-                'G',
-                'H',
-                'I',
-                'J',
-                'K',
-                'L',
-                'M',
-                'N',
-                'O',
-                'P',
-                'Q',
-                'R',
-                'T',
-                'U',
-                'V',
-                'W',
-                'Y',
-                'Z',
-            ]
     }
 
     instructions = {
@@ -261,6 +226,9 @@ class cleaning_pipeline:
         # this is the sales data in raw format
         df_sm = pd.concat(dfs, axis=0, ignore_index=True)
 
+        return df_sm
+
+    def _clean_sales_data(self, df_sm):
         cl = cleaning_instructions() # cleaning instructions for sales data
         ins = cl.instructions['NYC_SALES_CLEANING']
 
@@ -282,6 +250,26 @@ class cleaning_pipeline:
 
         return df_smcl
 
+    def _process_sales_data(self, df_smcl):
+
+        drop_index = df_smcl[df_smcl['APT #']=='#'].index.tolist() + \
+                     df_smcl[df_smcl['GSF']<850].index.tolist() + \
+                     df_smcl[df_smcl['LAND SF']==0].index.tolist() + \
+                     df_smcl[df_smcl['SALE PRICE']<25000].index.tolist() + \
+                     df_smcl[df_smcl['BLDG CLASS'].isin([
+                        'A8', 'C6', 'C8', 'C9', 'CM', 'D', 'E', 'F',
+                        'G', 'H', 'I', 'J', 'K',  'L', 'M', 'N', 'O', 
+                        'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'Y', 'Z'])].index.tolist()
+
+        df_smps = df_smcl.drop(drop_index).reset_index(drop=True)
+        return df_smps
+
+    def pipeline_sales_data(self):
+        df_sm = self._extract_sales_data()
+        df_smcl = self._clean_sales_data(df_sm)
+        df_smps = self._process_sales_data(df_smcl)
+        return df_smps
+
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    cp._extract_sales_data()
+    print(cp.pipeline_sales_data())
