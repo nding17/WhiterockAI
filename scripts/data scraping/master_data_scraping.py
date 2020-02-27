@@ -5290,7 +5290,7 @@ if __name__ == '__main__':
             e.g. ny (NOT New York)
     """
 
-    major_city = 'CHI'
+    major_city = 'PHL'
     
     # user need to provide these paths 
     # please also make sure you have the sub-folders
@@ -5304,8 +5304,7 @@ if __name__ == '__main__':
     
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com(major_city)
-    rmdc._get_ensemble_apt_urls(test=False)
-    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
     ### apartments.com New York For Rent
     adc = apartments_dot_com(major_city)
