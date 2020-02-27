@@ -223,28 +223,29 @@ class cleaning_pipeline:
             df = pd.read_excel(link, header=4) # column names appear starting from row 5
             dfs.append(df)
 
+        # this is the sales data in raw format
         df_sm = pd.concat(dfs, axis=0, ignore_index=True)
-        
-        cl = cleaning_instructions()
+
+        cl = cleaning_instructions() # cleaning instructions for sales data
         ins = cl.instructions['NYC_SALES_CLEANING']
 
-        orig_cols = list(ins.keys())
-        df_new = df_sm.copy()[orig_cols]
+        orig_cols = list(ins.keys()) # original column names to be updated 
+        df_smcl = df_sm.copy()[orig_cols] # sales data cleaned 
         
         for column in orig_cols:
             if ins[column]['delete'] == 1:
-                df_new = df_new.drop([column], axis=1)
+                df_smcl = df_smcl.drop([column], axis=1)
             if ins[column]['delete'] == 0:
-                df_new = df_new.rename(columns={column: ins[column]['new name']})
+                df_smcl = df_smcl.rename(columns={column: ins[column]['new name']})
         
-        df_new = df_new.reindex(df_new.columns.tolist(), axis=1) \
-                       .astype(dtype={'SALE DATE': str})
+        df_smcl = df_smcl.reindex(df_smcl.columns.tolist(), axis=1) \
+                         .astype(dtype={'SALE DATE': str})
         
-        df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False) \
+        df_smcl['SALE DATE'] = pd.to_datetime(df_smcl['SALE DATE'])
+        df_smcl = df_smcl.sort_values(by=['SALE DATE'], ascending=False) \
                        .reset_index(drop=True)
-        
-        return df_new
+
+        return df_smcl
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
