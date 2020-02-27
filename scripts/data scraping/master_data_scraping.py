@@ -1252,9 +1252,12 @@ class elliman_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0 # record where it failed and re-establish connections
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 self.scrape_apt_data(batch, verbose=True, test=test)
                 self.scrape_apt_images(batch, img_path, verbose=True, test=test)
@@ -1262,10 +1265,19 @@ class elliman_dot_com(dot_com):
                 self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
                 print(f'batch {i} done, sleep {sleep_secs} seconds\n')
                 time.sleep(15) # rest for a few seconds after each batch job done
-
             print('job done, congratulations!')
+
         except:
-            print('elliman failed')
+            print('elliman failed, trying to re-establish connection')
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                self.scrape_apt_data(batch, verbose=True, test=test)
+                self.scrape_apt_images(batch, img_path, verbose=True, test=test)
+                apt_data = self.apt_data
+                self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+            print('job done, congratulations!')
 
     #####################
     # public attributes #
@@ -1769,20 +1781,29 @@ class rent_dot_com(dot_com):
             # the csv file once the batch job is finished
             urls_chunk = np.array_split(urls, int(len(urls)//10))
 
+            failed_point = 0 # record where the program gets stuck and re-connect
+
             # running the batch and keep saving the intermediary 
             # results from the data scraping jobs 
             # each batch contains 10 URLs, but this could be modified
             for i, batch_urls in enumerate(urls_chunk):
-                # print(batch_urls)
+                failed_point = i
                 self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
                 data = self.apt_data
                 self.write_data(data, 'rent_forrent.csv', CONST.RENT_COLNAMES, data_path)
                 print(f'batch {i} finished running')
-
             self._browser.close()
             print('job finished!')
         except:
-            print('rent failed')
+            print('rent failed, trying to re-establish connection')
+
+            for i, batch_urls in enumerate(urls_chunk[failed_point:]):
+                self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
+                data = self.apt_data
+                self.write_data(data, 'rent_forrent.csv', CONST.RENT_COLNAMES, data_path)
+                print(f'batch {i+failed_point} finished running')
+            self._browser.close()
+            print('job finished!')
 
     @property
     def apt_urls(self):
@@ -2994,40 +3015,55 @@ class trulia_dot_com(dot_com):
     def scraping_pipeline(self, data_path, img_path, test=False):
         try:
             # different sales categories 
-            categories = [self._cat]
+            categories = self._cat
 
             # scrape different streams of apartments iteratively 
             # could be optimized by parallel programming 
-            for category in categories:
-                print(f'scraping for category - {category} starts!')
-                self.scrape_apt_urls(category, test=test, verbose=True)
+            print(f'scraping for category - {category} starts!')
+            self.scrape_apt_urls(category, test=test, verbose=True)
 
             # divide the apartment URLs list into small batches 
             # in case the program crashes
-            for category in categories:
-                apt_urls = tdc.apt_urls[category]
-                url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
+            apt_urls = tdc.apt_urls[category]
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
-                # batch jobs start
-                print(f'a total number of {len(url_batches)} batches, category={category}')
-                for i, url_batch in enumerate(url_batches):
-                    try:
-                        print(f'batch {i} starts')
-                        self.scrape_apt_data(category, url_batch, verbose=True)
-                        data = self.apt_data[category]
+            failed_point = 0
 
-                        self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
-                        self.scrape_apt_images(category, url_batch, img_path, verbose=True)
-                    except:
-                        print(f'batch {i} failed')
-                        continue
+            # batch jobs start
+            print(f'a total number of {len(url_batches)} batches, category={category}')
+            for i, url_batch in enumerate(url_batches):
+                try:
+                    failed_point = i
+                    print(f'batch {i} starts')
+                    self.scrape_apt_data(category, url_batch, verbose=True)
+                    data = self.apt_data[category]
 
-                self._browser.close()
-                print(f'scraping for category - {category} done!')
+                    self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
+                    self.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                except:
+                    print(f'batch {i} failed')
+                    continue
 
-            print('job done, congratulations!')
+            self._browser.close()
+            print(f'scraping for category - {category} done!')
+
         except:
-            print('trulia failed')
+            print('trulia failed, trying to re-establish connection')
+
+            for i, url_batch in enumerate(url_batches[failed_point:]):
+                try:
+                    print(f'batch {i+failed_point} starts')
+                    self.scrape_apt_data(category, url_batch, verbose=True)
+                    data = self.apt_data[category]
+
+                    self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
+                    self.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                except:
+                    print(f'batch {i+failed_point} failed')
+                    continue
+
+            self._browser.close()
+            print(f'scraping for category - {category} done!')
 
     #####################
     # public attributes #
@@ -3543,12 +3579,15 @@ class remax_dot_com(dot_com):
             # the csv file once the batch job is finished
             urls_chuck = np.array_split(urls, int(len(urls))//20)
 
+            failed_point = 0 # trying to re-connect and record where it failed
+
             print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
             # running the batch and keep saving the intermediary 
             # results from the data scraping jobs 
             # each batch contains 10 URLs, but this could be modified
             for i, batch_urls in enumerate(urls_chuck):
+                failed_point = i
                 self.scrape_apt_data(batch_urls, img_path, verbose=True)
                 data = self.apt_data
                 self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
@@ -3556,7 +3595,14 @@ class remax_dot_com(dot_com):
 
             print('job done!')
         except:
-            print('remax failed')
+            print('remax failed, trying to re-establish connection')
+
+            for i, batch_urls in enumerate(urls_chuck[failed_point:]):
+                self.scrape_apt_data(batch_urls, img_path, verbose=True)
+                data = self.apt_data
+                self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
+                print(f'batch {i+failed_point} finished running')
+            print('job done!')
 
     @property
     def apt_urls(self):
@@ -3775,9 +3821,12 @@ class coldwell_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0 # record where the program breaks
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = [self._get_content(url, img_path) for url in batch]
                 self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
@@ -3786,7 +3835,16 @@ class coldwell_dot_com(dot_com):
 
             print('job done, congratulations!')
         except:
-            print('coldwell failed')
+            print('coldwell failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = [self._get_content(url, img_path) for url in batch]
+                self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            print('job done, congratulations!')
 
 ### Compass For Rent
 class compass_dot_com(dot_com):
@@ -3991,9 +4049,12 @@ class compass_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
@@ -4003,7 +4064,17 @@ class compass_dot_com(dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('compass for rent failed')
+            print('compass for rent failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### Compass For Sale
 class compass_fs_dot_com(compass_dot_com):
@@ -4118,9 +4189,12 @@ class compass_fs_dot_com(compass_dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'compass_forsale.csv', CONST.COMPASS_FS_COLNAMES, data_path)
@@ -4130,7 +4204,17 @@ class compass_fs_dot_com(compass_dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('compass for sale failed')
+            print('compass for sale failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'compass_forsale.csv', CONST.COMPASS_FS_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### Loopnet For Sale
 class loopnet_dot_com(dot_com):
@@ -4329,9 +4413,12 @@ class loopnet_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0 # record where the program breaks for reconnection
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'loopnet_forsale.csv', CONST.LOOPNET_COLNAMES, data_path)
@@ -4341,7 +4428,17 @@ class loopnet_dot_com(dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('loopnet failed')
+            print('loopnet failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'loopnet_forsale.csv', CONST.LOOPNET_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### Hotpads For Rent
 class hotpads_dot_com(dot_com):
@@ -4582,9 +4679,12 @@ class hotpads_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0 # record the break point
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'hotpads_forrent.csv', CONST.HOTPADS_COLNAMES, data_path)
@@ -4594,7 +4694,17 @@ class hotpads_dot_com(dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('hotpads failed')
+            print('hotpads failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'hotpads_forrent.csv', CONST.HOTPADS_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### Apartments For Rent
 class apartments_dot_com(dot_com):
@@ -4904,9 +5014,12 @@ class apartments_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'apartments_forrent.csv', CONST.APARTMENTS_COLNAMES, data_path)
@@ -4916,7 +5029,17 @@ class apartments_dot_com(dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('apartments failed')
+            print('apartments failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'apartments_forrent.csv', CONST.APARTMENTS_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### Berkshire Hathaway For Sale
 class berkshire_dot_com(dot_com):
@@ -5177,9 +5300,12 @@ class berkshire_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
+            failed_point = 0
+
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
+                failed_point = i
                 print(f'batch {i} starts, there are {len(batch)} apartment URLs')
                 apt_data = self.scrape_apt_data(batch, img_path)
                 self.write_data(apt_data, 'berkshire_forsale.csv', CONST.BERKSHIRE_COLNAMES, data_path)
@@ -5189,7 +5315,17 @@ class berkshire_dot_com(dot_com):
             self._browser.close()
             print('job done, congratulations!')
         except:
-            print('berkshire failed')
+            print('berkshire failed, trying to re-establish connection')
+
+            for i, batch in enumerate(url_batches[failed_point:]):
+                print(f'batch {i+failed_point} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'berkshire_forsale.csv', CONST.BERKSHIRE_COLNAMES, data_path)
+                print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            self._browser.close()
+            print('job done, congratulations!')
 
 ### merge all the files together 
 class data_merger:
