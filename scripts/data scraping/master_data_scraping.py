@@ -3883,21 +3883,6 @@ class compass_dot_com(dot_com):
     def _get_apt_urls(self, test=False):
         apt_urls = []
         browser = self._browser
-        # try:
-        #     while True:
-        #         # search all the tags in the gallary, usually 20 apartments per page
-        #         atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
-        #         hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
-        #         apt_urls += hrefs
-        #         button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']") # click through the right button
-        #         button.click() # click until the last possible right arrow 
-
-        #         if test == True:
-        #             return apt_urls
-        # except:
-        #     # if the last page is reached then we can return all the apartment urls that link to the 
-        #     # apartments 
-        #     return apt_urls
 
         max_pg = browser.find_elements_by_xpath("//button[@class='cx-enclosedBtn cx-enclosedBtn--xs']")[-1]
         max_pg = int(self._extract_num(max_pg.text))
