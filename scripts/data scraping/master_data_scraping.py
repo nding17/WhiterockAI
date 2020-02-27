@@ -1239,29 +1239,33 @@ class elliman_dot_com(dot_com):
             print('all images scraped')
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
 
-        # scrape all the apartment URLs
-        # notice the test is opted out here
-        self.scrape_apt_urls(verbose=True, test=test)
-        apt_urls = self.apt_urls # fetch the apartment URLs
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # scrape all the apartment URLs
+            # notice the test is opted out here
+            self.scrape_apt_urls(verbose=True, test=test)
+            apt_urls = self.apt_urls # fetch the apartment URLs
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            self.scrape_apt_data(batch, verbose=True, test=test)
-            self.scrape_apt_images(batch, img_path, verbose=True, test=test)
-            apt_data = self.apt_data
-            self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        print('job done, congratulations!')
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                self.scrape_apt_data(batch, verbose=True, test=test)
+                self.scrape_apt_images(batch, img_path, verbose=True, test=test)
+                apt_data = self.apt_data
+                self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
+
+            print('job done, congratulations!')
+        except:
+            print('elliman failed')
 
     #####################
     # public attributes #
@@ -1757,25 +1761,28 @@ class rent_dot_com(dot_com):
         self._apt_data = apt_all_data
 
     def scraping_pipeline(self, data_path, img_path, test=False, verbose=False):
-        self.scrape_apt_urls(test=test, verbose=verbose)
-        urls = self.apt_urls
-        # in order to avoid crashes and loses all your data
-        # divide the list of URLs in batches and keep updating
-        # the csv file once the batch job is finished
-        urls_chunk = np.array_split(urls, int(len(urls)//10))
+        try:
+            self.scrape_apt_urls(test=test, verbose=verbose)
+            urls = self.apt_urls
+            # in order to avoid crashes and loses all your data
+            # divide the list of URLs in batches and keep updating
+            # the csv file once the batch job is finished
+            urls_chunk = np.array_split(urls, int(len(urls)//10))
 
-        # running the batch and keep saving the intermediary 
-        # results from the data scraping jobs 
-        # each batch contains 10 URLs, but this could be modified
-        for i, batch_urls in enumerate(urls_chunk):
-            # print(batch_urls)
-            self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
-            data = self.apt_data
-            self.write_data(data, 'rent_forrent.csv', CONST.RENT_COLNAMES, data_path)
-            print(f'batch {i} finished running')
+            # running the batch and keep saving the intermediary 
+            # results from the data scraping jobs 
+            # each batch contains 10 URLs, but this could be modified
+            for i, batch_urls in enumerate(urls_chunk):
+                # print(batch_urls)
+                self.scrape_apt_data(batch_urls, img_path, verbose=verbose)
+                data = self.apt_data
+                self.write_data(data, 'rent_forrent.csv', CONST.RENT_COLNAMES, data_path)
+                print(f'batch {i} finished running')
 
-        self._browser.close()
-        print('job finished!')
+            self._browser.close()
+            print('job finished!')
+        except:
+            print('rent failed')
 
     @property
     def apt_urls(self):
@@ -2985,39 +2992,42 @@ class trulia_dot_com(dot_com):
             print(f'images in a total number of {len(apt_urls)} apartments have been scraped')
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # different sales categories 
-        categories = [self._cat]
+        try:
+            # different sales categories 
+            categories = [self._cat]
 
-        # scrape different streams of apartments iteratively 
-        # could be optimized by parallel programming 
-        for category in categories:
-            print(f'scraping for category - {category} starts!')
-            self.scrape_apt_urls(category, test=test, verbose=True)
+            # scrape different streams of apartments iteratively 
+            # could be optimized by parallel programming 
+            for category in categories:
+                print(f'scraping for category - {category} starts!')
+                self.scrape_apt_urls(category, test=test, verbose=True)
 
-        # divide the apartment URLs list into small batches 
-        # in case the program crashes
-        for category in categories:
-            apt_urls = tdc.apt_urls[category]
-            url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
+            # divide the apartment URLs list into small batches 
+            # in case the program crashes
+            for category in categories:
+                apt_urls = tdc.apt_urls[category]
+                url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
-            # batch jobs start
-            print(f'a total number of {len(url_batches)} batches, category={category}')
-            for i, url_batch in enumerate(url_batches):
-                try:
-                    print(f'batch {i} starts')
-                    self.scrape_apt_data(category, url_batch, verbose=True)
-                    data = self.apt_data[category]
+                # batch jobs start
+                print(f'a total number of {len(url_batches)} batches, category={category}')
+                for i, url_batch in enumerate(url_batches):
+                    try:
+                        print(f'batch {i} starts')
+                        self.scrape_apt_data(category, url_batch, verbose=True)
+                        data = self.apt_data[category]
 
-                    self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
-                    self.scrape_apt_images(category, url_batch, img_path, verbose=True)
-                except:
-                    print(f'batch {i} failed')
-                    continue
+                        self.write_data(data, f'trulia_{category}.csv', CONST.TRULIA_COLNAMES[category], data_path)
+                        self.scrape_apt_images(category, url_batch, img_path, verbose=True)
+                    except:
+                        print(f'batch {i} failed')
+                        continue
 
-            self._browser.close()
-            print(f'scraping for category - {category} done!')
+                self._browser.close()
+                print(f'scraping for category - {category} done!')
 
-        print('job done, congratulations!')
+            print('job done, congratulations!')
+        except:
+            print('trulia failed')
 
     #####################
     # public attributes #
@@ -3519,28 +3529,31 @@ class remax_dot_com(dot_com):
         self._apt_data = apt_all_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # scrape all the apartment URLs in Philadelphia
-        # status update enabled
-        self.scrape_apt_urls(test=test)
-        urls = self.apt_urls
+        try:
+            # scrape all the apartment URLs in Philadelphia
+            # status update enabled
+            self.scrape_apt_urls(test=test)
+            urls = self.apt_urls
 
-        # in order to avoid crashes and loses all your data
-        # divide the list of URLs in batches and keep updating
-        # the csv file once the batch job is finished
-        urls_chuck = np.array_split(urls, int(len(urls))//20)
+            # in order to avoid crashes and loses all your data
+            # divide the list of URLs in batches and keep updating
+            # the csv file once the batch job is finished
+            urls_chuck = np.array_split(urls, int(len(urls))//20)
 
-        print(f'batch jobs started, {len(urls_chuck)} batches in total')
+            print(f'batch jobs started, {len(urls_chuck)} batches in total')
 
-        # running the batch and keep saving the intermediary 
-        # results from the data scraping jobs 
-        # each batch contains 10 URLs, but this could be modified
-        for i, batch_urls in enumerate(urls_chuck):
-            self.scrape_apt_data(batch_urls, img_path, verbose=True)
-            data = self.apt_data
-            self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
-            print(f'batch {i} finished running')
+            # running the batch and keep saving the intermediary 
+            # results from the data scraping jobs 
+            # each batch contains 10 URLs, but this could be modified
+            for i, batch_urls in enumerate(urls_chuck):
+                self.scrape_apt_data(batch_urls, img_path, verbose=True)
+                data = self.apt_data
+                self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
+                print(f'batch {i} finished running')
 
-        print('job done!')
+            print('job done!')
+        except:
+            print('remax failed')
 
     @property
     def apt_urls(self):
@@ -3731,43 +3744,46 @@ class coldwell_dot_com(dot_com):
         return int(max_pg)
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        print(f'Coldwell Bankers For Sale - Start Scraping!')
-        if self._end_page == 'max':
-            self._end_page = self._get_max_page()
+        try:
+            print(f'Coldwell Bankers For Sale - Start Scraping!')
+            if self._end_page == 'max':
+                self._end_page = self._get_max_page()
 
-        ## Test the function and integrate the results
-        url_list = ['https://www.coldwellbankerhomes.com/{}/{}?sortId=2&offset={}' \
-                    .format(self._state, self._city, (i-1)*24) \
-                    for i in range(self._start_page, self._end_page+1)]
+            ## Test the function and integrate the results
+            url_list = ['https://www.coldwellbankerhomes.com/{}/{}?sortId=2&offset={}' \
+                        .format(self._state, self._city, (i-1)*24) \
+                        for i in range(self._start_page, self._end_page+1)]
 
-        listing_link = []
+            listing_link = []
 
-        for url in url_list:
-            content = self._get_link_content(url)
-            for listing in content.find_all('div', class_="address notranslate"):
-                listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
-            if test:
-                break
+            for url in url_list:
+                content = self._get_link_content(url)
+                for listing in content.find_all('div', class_="address notranslate"):
+                    listing_link.append('https://www.coldwellbankerhomes.com'+listing.find('a')['href'])
+                if test:
+                    break
 
-        # time of sleep 
-        sleep_secs = 15
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = listing_link
+            # all apartment URLs
+            apt_urls = listing_link
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = [self._get_content(url, img_path) for url in batch]
-            self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = [self._get_content(url, img_path) for url in batch]
+                self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        print('job done, congratulations!')
+            print('job done, congratulations!')
+        except:
+            print('coldwell failed')
 
 ### Compass For Rent
 class compass_dot_com(dot_com):
@@ -3962,26 +3978,29 @@ class compass_dot_com(dot_com):
         return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'compass_forrent.csv', CONST.COMPASS_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('compass for rent failed')
 
 ### Compass For Sale
 class compass_fs_dot_com(compass_dot_com):
@@ -4086,26 +4105,29 @@ class compass_fs_dot_com(compass_dot_com):
         return data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'compass_forsale.csv', CONST.COMPASS_FS_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'compass_forsale.csv', CONST.COMPASS_FS_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('compass for sale failed')
 
 ### Loopnet For Sale
 class loopnet_dot_com(dot_com):
@@ -4294,26 +4316,29 @@ class loopnet_dot_com(dot_com):
         return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'loopnet_forsale.csv', CONST.LOOPNET_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'loopnet_forsale.csv', CONST.LOOPNET_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('loopnet failed')
 
 ### Hotpads For Rent
 class hotpads_dot_com(dot_com):
@@ -4544,26 +4569,29 @@ class hotpads_dot_com(dot_com):
         return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'hotpads_forrent.csv', CONST.HOTPADS_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'hotpads_forrent.csv', CONST.HOTPADS_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('hotpads failed')
 
 ### Apartments For Rent
 class apartments_dot_com(dot_com):
@@ -4863,26 +4891,29 @@ class apartments_dot_com(dot_com):
         return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'apartments_forrent.csv', CONST.APARTMENTS_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'apartments_forrent.csv', CONST.APARTMENTS_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('apartments failed')
 
 ### Berkshire Hathaway For Sale
 class berkshire_dot_com(dot_com):
@@ -5133,26 +5164,29 @@ class berkshire_dot_com(dot_com):
         return apt_data
 
     def scraping_pipeline(self, data_path, img_path, test=False):
-        # time of sleep 
-        sleep_secs = 15
+        try:
+            # time of sleep 
+            sleep_secs = 15
 
-        # all apartment URLs
-        apt_urls = self._get_apt_urls(test=test)
+            # all apartment URLs
+            apt_urls = self._get_apt_urls(test=test)
 
-        # divide the apartment URLs list into small batches 
-        url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            # divide the apartment URLs list into small batches 
+            url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-        # batch jobs start
-        print(f'total number of batches: {len(url_batches)}')
-        for i, batch in enumerate(url_batches):
-            print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-            apt_data = self.scrape_apt_data(batch, img_path)
-            self.write_data(apt_data, 'berkshire_forsale.csv', CONST.BERKSHIRE_COLNAMES, data_path)
-            print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-            time.sleep(15) # rest for a few seconds after each batch job done
+            # batch jobs start
+            print(f'total number of batches: {len(url_batches)}')
+            for i, batch in enumerate(url_batches):
+                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                apt_data = self.scrape_apt_data(batch, img_path)
+                self.write_data(apt_data, 'berkshire_forsale.csv', CONST.BERKSHIRE_COLNAMES, data_path)
+                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                time.sleep(15) # rest for a few seconds after each batch job done
 
-        self._browser.close()
-        print('job done, congratulations!')
+            self._browser.close()
+            print('job done, congratulations!')
+        except:
+            print('berkshire failed')
 
 ### merge all the files together 
 class data_merger:
@@ -5302,33 +5336,21 @@ if __name__ == '__main__':
     cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
     
-    try:
-        ### hotpads.com For Rent
-        hdc = hotpads_dot_com(major_city)
-        hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
-    except:
-        print('hotpads failed')
+    ### hotpads.com For Rent
+    hdc = hotpads_dot_com(major_city)
+    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
     
-    try:
-        ### trulia.com For Rent and For Sale
-        tdc = trulia_dot_com(major_city, 'buy')
-        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    except:
-        print('trulia, for sale failed')
+    ### trulia.com For Rent and For Sale
+    tdc = trulia_dot_com(major_city, 'buy')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
     
-    try:
-        ### trulia.com For Rent and For Rent
-        tdc = trulia_dot_com(major_city, 'rent')
-        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    except:
-        print('trulia, for rent failed')
+    ### trulia.com For Rent and For Rent
+    tdc = trulia_dot_com(major_city, 'rent')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
     
-    try:
-        ### trulia.com For Rent and Sold
-        tdc = trulia_dot_com(major_city, 'sold')
-        tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    except:
-        print('trulia, sold failed')
+    ### trulia.com For Rent and Sold
+    tdc = trulia_dot_com(major_city, 'sold')
+    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
     
     ### merge all the datafiles into a master data file 
     dm = data_merger(data_path)
