@@ -1278,6 +1278,8 @@ class elliman_dot_com(dot_com):
                 print(f'batch {i+failed_point} done, sleep {sleep_secs} seconds\n')
                 time.sleep(15) # rest for a few seconds after each batch job done
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
     #####################
     # public attributes #
@@ -1804,6 +1806,8 @@ class rent_dot_com(dot_com):
                 print(f'batch {i+failed_point} finished running')
             self._browser.close()
             print('job finished!')
+        finally:
+            print('lets move on')
 
     @property
     def apt_urls(self):
@@ -3064,6 +3068,8 @@ class trulia_dot_com(dot_com):
 
             self._browser.close()
             print(f'scraping for category - {category} done!')
+        finally:
+            print('lets move on')
 
     #####################
     # public attributes #
@@ -3603,6 +3609,8 @@ class remax_dot_com(dot_com):
                 self.write_data(data, 'remax_forsale.csv', CONST.REMAX_COLNAMES, data_path)
                 print(f'batch {i+failed_point} finished running')
             print('job done!')
+        finally:
+            print('lets move on')
 
     @property
     def apt_urls(self):
@@ -3845,6 +3853,8 @@ class coldwell_dot_com(dot_com):
                 time.sleep(15) # rest for a few seconds after each batch job done
 
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Compass For Rent
 class compass_dot_com(dot_com):
@@ -4075,6 +4085,8 @@ class compass_dot_com(dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Compass For Sale
 class compass_fs_dot_com(compass_dot_com):
@@ -4215,6 +4227,8 @@ class compass_fs_dot_com(compass_dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Loopnet For Sale
 class loopnet_dot_com(dot_com):
@@ -4439,6 +4453,8 @@ class loopnet_dot_com(dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Hotpads For Rent
 class hotpads_dot_com(dot_com):
@@ -4705,6 +4721,8 @@ class hotpads_dot_com(dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Apartments For Rent
 class apartments_dot_com(dot_com):
@@ -5041,6 +5059,8 @@ class apartments_dot_com(dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### Berkshire Hathaway For Sale
 class berkshire_dot_com(dot_com):
@@ -5327,6 +5347,8 @@ class berkshire_dot_com(dot_com):
 
             self._browser.close()
             print('job done, congratulations!')
+        finally:
+            print('lets move on')
 
 ### merge all the files together 
 class data_merger:
@@ -5439,10 +5461,6 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = False
     
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-    
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
@@ -5471,6 +5489,10 @@ if __name__ == '__main__':
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com(major_city)
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
     
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com(major_city)
