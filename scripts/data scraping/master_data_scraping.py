@@ -3031,7 +3031,7 @@ class trulia_dot_com(dot_com):
             apt_urls = tdc.apt_urls[category]
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
-            failed_point = 0
+            failed_point = 0 # record the break-up point
 
             # batch jobs start
             print(f'a total number of {len(url_batches)} batches, category={category}')
@@ -4059,7 +4059,7 @@ class compass_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0
+            failed_point = 0 # record the break-up point
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -4201,7 +4201,7 @@ class compass_fs_dot_com(compass_dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0
+            failed_point = 0 # record the break-up point
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -5033,7 +5033,7 @@ class apartments_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0
+            failed_point = 0 # record the break-up point
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -5321,7 +5321,7 @@ class berkshire_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0
+            failed_point = 0 # record the break-up point
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
