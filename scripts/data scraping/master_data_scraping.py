@@ -3883,21 +3883,34 @@ class compass_dot_com(dot_com):
     def _get_apt_urls(self, test=False):
         apt_urls = []
         browser = self._browser
-        try:
-            while True:
-                # search all the tags in the gallary, usually 20 apartments per page
-                atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
-                hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
-                apt_urls += hrefs
-                button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']") # click through the right button
-                button.click() # click until the last possible right arrow 
+        # try:
+        #     while True:
+        #         # search all the tags in the gallary, usually 20 apartments per page
+        #         atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
+        #         hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
+        #         apt_urls += hrefs
+        #         button = browser.find_element_by_xpath("//button[@data-tn='arrowButtonRight']") # click through the right button
+        #         button.click() # click until the last possible right arrow 
 
-                if test == True:
-                    return apt_urls
-        except:
-            # if the last page is reached then we can return all the apartment urls that link to the 
-            # apartments 
-            return apt_urls
+        #         if test == True:
+        #             return apt_urls
+        # except:
+        #     # if the last page is reached then we can return all the apartment urls that link to the 
+        #     # apartments 
+        #     return apt_urls
+
+        max_pg = browser.find_elements_by_xpath("//button[@class='cx-enclosedBtn cx-enclosedBtn--xs']")[-1]
+        max_pg = int(self._extract_num(max_pg.text))
+
+        for i in range(max_pg+1):
+            url = f'{self._url}start={i*20}/'
+            browser.get(url)
+            atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
+            hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
+            apt_urls += hrefs
+
+        print(f'total number of apartments: {len(set(apt_urls))}')
+        return apt_urls
 
     ### aparantly, we are scraping the address 
     def _get_address(self, soup):
@@ -5164,6 +5177,7 @@ class berkshire_dot_com(dot_com):
             # repeatly hitting the next page button until reaching 
             # the end of the page 
             while True:
+                time.sleep(5)
                 apts = browser.find_elements_by_xpath("//section[@class='cmp-property-tile']")
                 urls = [apt.find_element_by_tag_name('a').get_attribute('href') for apt in apts]
                 apt_urls += urls
@@ -5184,6 +5198,7 @@ class berkshire_dot_com(dot_com):
         except:
             # now we know the last page of the apartments 
             # we are looking for is reached 
+            print(f'total number of apartments: {len(set(apt_urls))}')
             return apt_urls
 
     def _get_img_urls(self, browser):
@@ -5492,11 +5507,7 @@ if __name__ == '__main__':
     # to run the scraping for the entire webpage 
     # turn this to False
     is_testing = False
-    
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-    
+
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
@@ -5529,6 +5540,10 @@ if __name__ == '__main__':
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com(major_city)
     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com(major_city)
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
     
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
