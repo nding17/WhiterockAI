@@ -3057,6 +3057,7 @@ class remax_dot_com(dot_com):
     def __init__(self, city):
         dot_com.__init__(self, city)
         self._overhead = 'https://www.remax.com'
+
         if self._city == 'new york':
             nyc_url = 'https://www.remax.com/homes-for-sale/NY/New-York/city/3651000'
             self._browser, _ = self._get_browser(nyc_url)
@@ -3066,6 +3067,7 @@ class remax_dot_com(dot_com):
         if self._city == 'chicago':
             chi_url = 'https://www.remax.com/homes-for-sale/IL/Chicago/city/1714000'
             self._browser, _ = self._get_browser(chi_url)
+
         self._apt_urls = []
         self._apt_data = []
     
@@ -3105,11 +3107,12 @@ class remax_dot_com(dot_com):
             while True:
                 time.sleep(5)
                 blocks = browser.find_elements_by_xpath("//div[@class='listings-card']//script[@type='application/ld+json']")
+
                 for block in blocks:
                     jblock = json.loads(block.get_attribute('innerHTML'))
                     url = jblock[1]['url']
                     apt_urls.append(url)
-                btn_next = wait.until(
+                btn_next = WebDriverWait(browser, 10).until(
                     EC.element_to_be_clickable((By.XPATH, '//*[@id="__layout"]/div/div[2]/main/div/section[2]/div[2]/div/div[2]/div/button[last()]'))
                 )
                 btn_next.click()
@@ -5297,11 +5300,12 @@ if __name__ == '__main__':
     
     # to run the scraping for the entire webpage 
     # turn this to False
-    is_testing = True
+    is_testing = False
     
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    rmdc._get_ensemble_apt_urls(test=False)
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
     ### apartments.com New York For Rent
     adc = apartments_dot_com(major_city)
