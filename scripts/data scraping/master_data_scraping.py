@@ -4719,9 +4719,11 @@ class apartments_dot_com(dot_com):
     # choose the right language option
     def _choose_lang(self, browser):
         try:
-            lang_button = browser.find_element_by_xpath("//section[@class='languageConfirmation']") \
-                                 .find_element_by_xpath("//button[text()='English']")
-            lang_button.click()
+            lang_button = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//section[@class='languageConfirmation']"))        
+            )                     
+            
+            lang_button.find_element_by_xpath("//button[text()='English']").click()
         except:
             print('no language button')
 
@@ -4860,7 +4862,6 @@ class apartments_dot_com(dot_com):
     def _get_apt_data(self, apt_url, img_path):
         browser = self._browser
         browser.get(apt_url)
-        self._choose_lang(browser)
         street, city, state, zipcode = self._get_address(browser)
         year_built, num_units, num_stories, fireplace, wd = self._get_features(browser)
         
@@ -5438,10 +5439,6 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = False
     
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
-    
     ### apartments.com New York For Rent
     adc = apartments_dot_com(major_city)
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
@@ -5474,6 +5471,10 @@ if __name__ == '__main__':
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+    
+    ### remax.com Philadelphia For Sale
+    rmdc = remax_dot_com(major_city)
+    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
