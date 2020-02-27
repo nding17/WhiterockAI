@@ -13,13 +13,96 @@ from tabulate import tabulate
 
 class cleaning_instructions:
 
-    def __init__(self):
-        pass
+    NYC_SALES_CLEANING = {
+        'BOROUGH': {
+            'delete': 0,
+            'new name': 'BOROUGH',
+        },
+        'NEIGHBORHOOD': {
+            'delete': 0,
+            'new name': 'NEIGHBORHOOD',
+        },
+        'BUILDING CLASS CATEGORY': {
+            'delete': 1,
+        },
+        'TAX CLASS AT PRESENT': {
+            'delete': 0,
+            'new name': 'TAX CLASS',
+        },
+        'BLOCK': {
+            'delete': 0,
+            'new name': 'BLOCK',
+        },
+        'LOT': {
+            'delete': 0,
+            'new name': 'LOT',
+        },
+        'EASE-MENT': {
+            'delete': 1
+        },
+        'BUILDING CLASS AT PRESENT': {
+            'delete': 0,
+            'new name': 'BLDG CLASS ',
+        },
+        'ADDRESS': {
+            'delete': 0,
+            'new name': 'ADDRESS',
+        },
+        'APARTMENT NUMBER': {
+            'delete': 0,
+            'new name': 'APT #',
+        },
+        'ZIP CODE': {
+            'delete': 0,
+            'new name': 'ZIP',
+        },
+        'RESIDENTIAL UNITS': {
+            'delete': 0,
+            'new name': 'RESI UNITS',
+        },
+        'COMMERCIAL UNITS': {
+            'delete': 0,
+            'new name': 'COMM UNITS',
+        },
+        'TOTAL UNITS': {
+            'delete': 0,
+            'new name': '# UNITS',
+        },
+        'LAND SQUARE FEET': {
+            'delete': 0,
+            'new name': 'LAND SF',
+        },
+        'GROSS SQUARE FEET': {
+            'delete': 0,
+            'new name': 'GSF',
+        },
+        'YEAR BUILT': {
+            'delete': 0,
+            'new name': 'YEAR BUILT',
+        },
+        'TAX CLASS AT TIME OF SALE': {
+            'delete': 0,
+            'new name': 'TAX CLASS SALE',
+        },
+        'BUILDING CLASS AT TIME OF SALE': {
+            'delete': 0,
+            'new name': 'CLASS SALE',
+        },
+        'SALE PRICE': {
+            'delete': 0,
+            'new name': 'SALE PRICE',
+        },
+        'SALE DATE': {
+            'delete': 0,
+            'new name': 'SALE DATE',
+        },
+    }
+
+    instructions = {
+        'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
+    }
 
 class my_soup:
-
-    def __init__(self):
-        pass
 
     def _random_user_agent(self):
         """
@@ -141,8 +224,27 @@ class cleaning_pipeline:
             dfs.append(df)
 
         df_sm = pd.concat(dfs, axis=0, ignore_index=True)
-
         
+        cl = cleaning_instructions()
+        ins = cl.instructions['NYC_SALES_CLEANING']
+
+        orig_cols = list(ins.keys())
+        df_new = df_sm.copy()[orig_cols]
+        
+        for column in orig_cols:
+            if ins[column]['delete'] == 1:
+                df_new = df_new.drop([column], axis=1)
+            if ins[column]['delete'] == 0:
+                df_new = df_new.rename(columns={column: ins[column]['new name']})
+        
+        df_new = df_new.reindex(df_new.columns.tolist(), axis=1) \
+                       .astype(dtype={'SALE DATE': str})
+        
+        df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False) \
+                       .reset_index(drop=True)
+        
+        return df_new
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
