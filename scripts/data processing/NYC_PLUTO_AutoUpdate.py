@@ -98,6 +98,41 @@ class cleaning_instructions:
         },
     }
 
+    NYC_SALES_PROCESSING = {
+        'APARTMENT NUMBER': ['#'],
+        'GSF': ['<850'],
+        'LAND SF': ['0'],
+        'SALE PRICE': ['<25000'],
+        'BLDG CLASS ': [
+                'A8',
+                'C6',
+                'C8',
+                'C9',
+                'CM',
+                'D',
+                'E',
+                'F',
+                'G',
+                'H',
+                'I',
+                'J',
+                'K',
+                'L',
+                'M',
+                'N',
+                'O',
+                'P',
+                'Q',
+                'R',
+                'T',
+                'U',
+                'V',
+                'W',
+                'Y',
+                'Z',
+            ]
+    }
+
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
     }

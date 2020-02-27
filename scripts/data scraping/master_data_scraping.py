@@ -1159,8 +1159,8 @@ class elliman_dot_com(dot_com):
                 unit = self._get_apt_data(url)
                 apt_data.append(unit)
             except:
-                print(soup)
-                raise ValueError(f'FAILED apt url: {url}')
+                print(f'FAILED apt url: {url}')
+                continue
 
         # automatically updating the private attribute _apt_data
         self._apt_data = apt_data
@@ -1768,9 +1768,13 @@ class rent_dot_com(dot_com):
         # loop through all the apartment URLs and scrape all the apartments
         # information in each URL
         for i, apt_url in enumerate(apt_urls):
-            apt_all_data += self._get_apt_info(apt_url, img_path)
-            if verbose:
-                print(f'apartments in address {i} all scraped')
+            try:
+                apt_all_data += self._get_apt_info(apt_url, img_path)
+                if verbose:
+                    print(f'apartments in address {i} all scraped')
+            except:
+                print(f'failed at {apt_url}')
+                continue
 
         self._apt_data = apt_all_data
 
@@ -2523,6 +2527,7 @@ class trulia_dot_com(dot_com):
                 ])
             except:
                 print(f'failed URL: {url}')
+                continue
 
         return apt_info_data
 
@@ -2858,11 +2863,15 @@ class trulia_dot_com(dot_com):
             print(f'a total number of {len(apt_urls)} apartments to be scraped')
 
         for i, apt_url in enumerate(apt_urls):
-            sold_data = self._get_sold_info(apt_url)
-            apt_info_data.append(sold_data)
-
-            if test and i==5:
-                break
+            try:
+                sold_data = self._get_sold_info(apt_url)
+                apt_info_data.append(sold_data)
+    
+                if test and i==5:
+                    break
+            except:
+                print(f'failed at {apt_url}')
+                continue
 
         return apt_info_data
 
@@ -3031,7 +3040,7 @@ class trulia_dot_com(dot_com):
             apt_urls = tdc.apt_urls[category]
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//20)
 
-            failed_point = 0 # record the break-up point
+            failed_point = 0
 
             # batch jobs start
             print(f'a total number of {len(url_batches)} batches, category={category}')
@@ -3569,7 +3578,11 @@ class remax_dot_com(dot_com):
         # loop through all the apartment URLs and scrape all the apartments
         # information in each URL
         for i, apt_url in enumerate(apt_urls):
-            apt_all_data.append(self._get_apt_info(apt_url, img_path)) 
+            try:
+                apt_all_data.append(self._get_apt_info(apt_url, img_path))
+            except:
+                print(f'failed at {apt_url}')
+                continue
         
         self._apt_data = apt_all_data
 
@@ -4044,7 +4057,11 @@ class compass_dot_com(dot_com):
         apt_data = []
 
         for url in urls:
-            apt_data.append(self._get_apt_data(url, img_path))
+            try:
+                apt_data.append(self._get_apt_data(url, img_path))
+            except:
+                print(f'failed at {url}')
+                continue
 
         return apt_data
 
@@ -4059,7 +4076,7 @@ class compass_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0 # record the break-up point
+            failed_point = 0
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -4201,7 +4218,7 @@ class compass_fs_dot_com(compass_dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0 # record the break-up point
+            failed_point = 0
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -4412,7 +4429,10 @@ class loopnet_dot_com(dot_com):
         apt_data = []
 
         for url in apt_urls:
-            apt_data.append(self._get_apt_data(url, img_path))
+            try:
+                apt_data.append(self._get_apt_data(url, img_path))
+            except:
+                print(f'failed at {url}')
 
         return apt_data
 
@@ -4662,25 +4682,29 @@ class hotpads_dot_com(dot_com):
         apt_data = []
 
         for apt_url in apt_urls:
-            browser = self._browser
-            browser.get(apt_url)
-            time.sleep(3)
-    
             try:
-                robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
-                if 'Please verify you are a human' in robot_check.text:
-                    self._recaptcha(browser)
+                browser = self._browser
+                browser.get(apt_url)
+                time.sleep(3)
+        
+                try:
+                    robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
+                    if 'Please verify you are a human' in robot_check.text:
+                        self._recaptcha(browser)
+                except:
+                    pass
+                
+                try:
+                    multi_units = browser.find_elements_by_xpath("//div[@class='BuildingUnitCard']")
+                    unit_urls = [unit.find_element_by_tag_name('a') \
+                                     .get_attribute('href') for unit in multi_units]
+                    for unit_url in unit_urls:
+                        apt_data += self._get_apt_data(unit_url, img_path)
+                except:
+                    apt_data += self._get_apt_data(apt_url, img_path)
             except:
-                pass
-            
-            try:
-                multi_units = browser.find_elements_by_xpath("//div[@class='BuildingUnitCard']")
-                unit_urls = [unit.find_element_by_tag_name('a') \
-                                 .get_attribute('href') for unit in multi_units]
-                for unit_url in unit_urls:
-                    apt_data += self._get_apt_data(unit_url, img_path)
-            except:
-                apt_data += self._get_apt_data(apt_url, img_path)
+                print(f'failed at {apt_url}')
+                continue
 
         return apt_data
 
@@ -5018,7 +5042,11 @@ class apartments_dot_com(dot_com):
         apt_data = []
 
         for url in apt_urls:
-            apt_data += self._get_apt_data(url, img_path)
+            try:
+                apt_data += self._get_apt_data(url, img_path)
+            except:
+                print(f'failed at {url}')
+                continue
 
         return apt_data
 
@@ -5033,7 +5061,7 @@ class apartments_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0 # record the break-up point
+            failed_point = 0
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -5306,7 +5334,11 @@ class berkshire_dot_com(dot_com):
         apt_data = []
 
         for url in apt_urls:
-            apt_data.append(self._get_apt_data(url, img_path))
+            try:
+                apt_data.append(self._get_apt_data(url, img_path))
+            except:
+                print(f'failed at {url}')
+                continue
 
         return apt_data
 
@@ -5321,7 +5353,7 @@ class berkshire_dot_com(dot_com):
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
 
-            failed_point = 0 # record the break-up point
+            failed_point = 0
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
@@ -5461,6 +5493,10 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = False
     
+    ### apartments.com New York For Rent
+    adc = apartments_dot_com(major_city)
+    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
@@ -5489,10 +5525,6 @@ if __name__ == '__main__':
     ### coldwell Philadelphia For Sale
     cdc = coldwell_dot_com(major_city, 1, 'max')
     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
-
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
     
     ### remax.com Philadelphia For Sale
     rmdc = remax_dot_com(major_city)
