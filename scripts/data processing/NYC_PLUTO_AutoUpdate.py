@@ -707,7 +707,7 @@ class cleaning_pipeline(my_soup):
         return df_plups
 
     ### this step should be only done once 
-    def _load_old_pluto(self, pluto_path, fn_opluto=''):
+    def _load_old_pluto(self, pluto_path, fn_opluto):
         fn_old_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO.csv'
         fn_sales_master = 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv'
 
@@ -810,7 +810,7 @@ class cleaning_pipeline(my_soup):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
-    def pipeline(self, pluto_path, fpluto_path):
+    def pipeline(self, pluto_path, fpluto_path, fn_opluto=''):
         # new sales data processed
         print('>>>downloading, cleaning and processing new sales data')
         df_nsales = self.pipeline_sales_data()
@@ -821,7 +821,7 @@ class cleaning_pipeline(my_soup):
 
         # old pluto data loaded
         print('>>>processing and loading old PLUTO')
-        df_opluto = self._load_old_pluto(pluto_path)
+        df_opluto = self._load_old_pluto(pluto_path, fn_opluto=fn_opluto)
 
         # old pluto data updated with new pluto data
         print('>>>updating old PLUTO with new PLUTO')
