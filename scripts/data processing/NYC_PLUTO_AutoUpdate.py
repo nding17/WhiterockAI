@@ -617,7 +617,7 @@ class cleaning_pipeline(my_soup):
         
         df_smcl['SALE DATE'] = pd.to_datetime(df_smcl['SALE DATE'])
         df_smcl = df_smcl.sort_values(by=['SALE DATE'], ascending=False) \
-                       .reset_index(drop=True)
+                         .reset_index(drop=True)
 
         return df_smcl
 
@@ -710,15 +710,39 @@ class cleaning_pipeline(my_soup):
         fn_old_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO.csv'
         fn_sales_master = 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv'
 
-        fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO core.csv'
+        fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO Core.csv'
 
         if not os.path.exists(f'{pluto_path}/{fn_core_pluto}'):
             df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0)
             df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0)
-            print(f'original rows: {df_sales.shape[0]}')
-            print(f'drop duplicates: {df_sales.drop_duplicates().shape[0]}')
-            df_sales = df_sales.drop_duplicates(df_sales.columns.difference(['SALE PRICE']))
-            print(f"unique rows: {df_sales.shape[0]}")
+
+            df_sales['SALE DATE'] = pd.to_datetime(df_sales['SALE DATE'])
+
+            # for multiple properties with identical address, block, lot and  units
+            # we know they are the same property and thus only the most recent 
+            # property details are kept            
+            df_sales = df_sales.sort_values(by='SALE DATE') \
+                               .drop_duplicates(subset=['ADDRESS', 
+                                                        'BLOCK', 
+                                                        'LOT', 
+                                                        '# UNITS'], 
+                                                keep='last')
+
+            df_pluto_core = pd.merge(df_pluto, 
+                                     df_sales, 
+                                     on=['ADDRESS', 
+                                         'BLOCK', 
+                                         'LOT', 
+                                         '# UNITS'],
+                                     how='outer')
+
+            all_cols = df_pluto_core.columns
+            dup_cols = [col for col in all_cols if '_y' in col]
+            df_pluto_core = df_pluto_core[all_cols.difference(dup_cols)] \
+                                         .rename(columns={col: col.strip('_x') for col in all_cols if '_x' in col}) \
+                                         .reset_index(drop=True)
+
+            df_pluto_core.to_csv(f'{pluto_path}/{fn_core_pluto}')
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
