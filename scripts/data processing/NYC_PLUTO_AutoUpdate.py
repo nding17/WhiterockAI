@@ -699,12 +699,28 @@ class cleaning_pipeline(my_soup):
 
         return df_plups
 
-    def pipeline_pluto(self): 
+    def pipeline_new_pluto(self): 
         df_plu = self._extract_new_pluto()
         df_plucl = self._clean_new_pluto(df_plu)
         df_plups = self._process_new_pluto(df_plucl)
         return df_plups
 
+    ### this step should be only done once 
+    def _process_old_pluto(self, pluto_path):
+        fn_old_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO.csv'
+        fn_sales_master = 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv'
+
+        fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO core.csv'
+
+        if not os.path.exists(f'{pluto_path}/{fn_core_pluto}'):
+            df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0)
+            df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0)
+            print(f'original rows: {df_sales.shape[0]}')
+            print(f'drop duplicates: {df_sales.drop_duplicates().shape[0]}')
+            df_sales = df_sales.drop_duplicates(df_sales.columns.difference(['SALE PRICE']))
+            print(f"unique rows: {df_sales.shape[0]}")
+
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    cp.pipeline_pluto()
+    # cp.pipeline_pluto()
+    cp._process_old_pluto('../../data/NYC Data')

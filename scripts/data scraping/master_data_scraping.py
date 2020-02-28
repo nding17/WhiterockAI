@@ -3894,6 +3894,9 @@ class compass_dot_com(dot_com):
             hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
             apt_urls += hrefs
 
+            if test:
+                break
+
         print(f'total number of apartments: {len(set(apt_urls))}')
         return apt_urls
 
