@@ -269,7 +269,7 @@ class cleaning_instructions:
         },
         'numfloors': {
             'delete': 0,
-            'new name': '# FOORS',
+            'new name': '# FLOORS',
         },
         'unitsres': {
             'delete': 1,
@@ -661,7 +661,7 @@ class cleaning_pipeline(my_soup):
         
         fn_pluto = [fn for fn in zipfile.namelist() \
                         if ('pluto' in fn) and ('.csv' in fn)][0]
-        df_plu = pd.read_csv(zipfile.open(fn_pluto))
+        df_plu = pd.read_csv(zipfile.open(fn_pluto), low_memory=False)
         return df_plu
 
     def _clean_new_pluto(self, df_plu):
@@ -688,7 +688,7 @@ class cleaning_pipeline(my_soup):
                         'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
                         'W', 'Y', 'Z'])].index.tolist() + \
                      df_plucl[df_plucl['GSF']<800].index.tolist() + \
-                     df_plucl[df_plucl['# FOORS']==0].index.tolist() + \
+                     df_plucl[df_plucl['# FLOORS']==0].index.tolist() + \
                      df_plucl[df_plucl['# UNITS']==0].index.tolist()
 
         df_plups = df_plucl.drop(drop_index).reset_index(drop=True)
@@ -713,8 +713,8 @@ class cleaning_pipeline(my_soup):
         fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO Core.csv'
 
         if not os.path.exists(f'{pluto_path}/{fn_core_pluto}'):
-            df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0)
-            df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0)
+            df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0, low_memory=False)
+            df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0, low_memory=False)
 
             df_sales['SALE DATE'] = pd.to_datetime(df_sales['SALE DATE'])
 
@@ -752,13 +752,49 @@ class cleaning_pipeline(my_soup):
             return df_pluto
 
         else:
-            df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0)
+            df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0, low_memory=False)
             return df_pluto_core
 
     def _update_pluto(self, pluto_old, pluto_new):
-        pass
+        # all the columns of the old PLUTO
+        cols_op = pluto_old.columns.tolist()
+        # all the columns of the new PLUTO
+        cols_np = pluto_new.columns.tolist()
+
+        # PLUTO update dataframe
+        added_cols = list(set(cols_np)-set(cols_op))
+        pluto_up = pd.concat([pluto_old.copy(), pd.DataFrame(columns=added_cols)], sort=False)
+
+        # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
+        # properties in PLUTO
+        id_cols = ['ADDRESS', 'BLOCK', 'LOT', '# UNITS']
+        id_up = pluto_up[id_cols] # identifiers for the old PLUTO
+        id_new = pluto_new[id_cols] # identifiers for the new PLUTO
+
+        # find the same identifiers: identifiers that exist in both new and old PLUTO data
+        # as well as the different identifiers that are unique in each PLUTO data
+        same_id = pd.merge(id_up, id_new, how='inner', indicator=False)
+        diff_id = id_new[~id_new.isin(same_id)] # diff identifiers
+
+        # the index of a list of the same identifiers in the new PLUTO
+        idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id)].index
+        # the index of a list of the same identifiers in the old PLUTO
+        idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index
+
+        # update the old PLUTO with the data in the new PLUTO
+        pluto_up.at[idx_sid_up, cols_np] = pluto_new.iloc[idx_sid_new]
+
+        # concat the updated PLUTO with new property data that's not 
+        # already in the old PLUTO file
+        pluto_up = pd.concat([pluto_up, pluto_new[pluto_new[id_cols].isin(diff_id)]], sort=False)
+
+        return pluto_up
+
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
     # cp.pipeline_pluto()
-    cp._process_old_pluto('../../data/NYC Data')
+    pluto_old = cp._process_old_pluto('../../data/NYC Data')
+    pluto_new = cp.pipeline_new_pluto()
+
+    print(cp._update_pluto(pluto_old, pluto_new))
