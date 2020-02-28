@@ -747,7 +747,7 @@ class cleaning_pipeline(my_soup):
             df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0, low_memory=False)
             return df_pluto_core
 
-    def _update_pluto_with_new_pluto(self, pluto_old, pluto_new):
+    def _update_pluto_with_df(self, pluto_old, pluto_new):
         # all the columns of the old PLUTO
         cols_op = pluto_old.columns.tolist()
         # all the columns of the new PLUTO
@@ -802,11 +802,7 @@ class cleaning_pipeline(my_soup):
                                on=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'],
                                how='outer')
 
-        all_cols = final_pluto.columns
-        dup_cols = [col for col in all_cols if '_y' in col]
-        final_pluto = final_pluto[all_cols.difference(dup_cols)] \
-                             .rename(columns={col: col.strip('_x') for col in all_cols if '_x' in col}) \
-                             .reset_index(drop=True)
+        final_pluto = self._update_pluto_with_df(final_pluto, sales_sub)
 
         return final_pluto
 
@@ -829,7 +825,7 @@ class cleaning_pipeline(my_soup):
 
         # old pluto data updated with new pluto data
         print('>>>updating old PLUTO with new PLUTO')
-        df_upluto = self._update_pluto_with_new_pluto(df_opluto, df_npluto)
+        df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
 
         # final pluto updated by the latest sales data
         print('>>>updating PLUTO with recent sales data')
