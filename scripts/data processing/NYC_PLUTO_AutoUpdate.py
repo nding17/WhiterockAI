@@ -707,7 +707,7 @@ class cleaning_pipeline(my_soup):
         return df_plups
 
     ### this step should be only done once 
-    def _load_old_pluto(self, pluto_path):
+    def _load_old_pluto(self, pluto_path, fn_opluto=''):
         fn_old_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO.csv'
         fn_sales_master = 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv'
 
@@ -744,8 +744,8 @@ class cleaning_pipeline(my_soup):
             return df_pluto
 
         else:
-            df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0, low_memory=False)
-            return df_pluto_core
+            df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
+            return df_pluto_old
 
     def _update_pluto_with_df(self, pluto_old, pluto_new):
         # all the columns of the old PLUTO
