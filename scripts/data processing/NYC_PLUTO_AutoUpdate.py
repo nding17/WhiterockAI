@@ -12,6 +12,7 @@ from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from urllib.request import urlopen
 from io import BytesIO
+from lycleaner import Address_cleaner
 
 class cleaning_instructions:
 
@@ -100,7 +101,7 @@ class cleaning_instructions:
         },
     }
 
-    PLUTO_CLEANING = {
+    NYC_PLUTO_CLEANING = {
         'borough': {
             'delete': 0,
             'new name': 'BOROUGH',
@@ -465,7 +466,7 @@ class cleaning_instructions:
 
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
-        'PLUTO_CLEANING': PLUTO_CLEANING,
+        'NYC_PLUTO_CLEANING': NYC_PLUTO_CLEANING,
     }
 
 class my_soup:
@@ -632,6 +633,11 @@ class cleaning_pipeline(my_soup):
                         'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'Y', 'Z'])].index.tolist()
 
         df_smps = df_smcl.drop(drop_index).reset_index(drop=True)
+        df_smps['ADDRESS'] = df_smps['ADDRESS'].astype(str)
+
+        cleaner = Address_cleaner()
+        df_smps['ADDRESS'] = cleaner.easy_clean(df_smps['ADDRESS'].str.upper())
+
         return df_smps
 
     def pipeline_sales_data(self):
@@ -658,11 +664,47 @@ class cleaning_pipeline(my_soup):
         df_plu = pd.read_csv(zipfile.open(fn_pluto))
         return df_plu
 
-    def _clean_pluto(self, df_plu):
+    def _clean_new_pluto(self, df_plu):
+        cl = cleaning_instructions() # cleaning instructions for sales data
+        ins = cl.instructions['NYC_PLUTO_CLEANING']
+
+        orig_cols = list(ins.keys()) # original column names to be updated 
+        df_plucl = df_plu.copy()[orig_cols] # sales data cleaned 
         
+        for column in orig_cols:
+            if ins[column]['delete'] == 1:
+                df_plucl = df_plucl.drop([column], axis=1)
+            if ins[column]['delete'] == 0:
+                df_plucl = df_plucl.rename(columns={column: ins[column]['new name']})
+        
+        df_plucl['REIS SUBMARKET'] = ''
+
+        return df_plucl
+
+    def _process_new_pluto(self, df_plucl):
+        drop_index = df_plucl[df_plucl['BLDG CLASS NOW'].isin([
+                        'A8', 'C6', 'C8', 'C9', 'CM', 'D', 'E',
+                        'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                        'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
+                        'W', 'Y', 'Z'])].index.tolist() + \
+                     df_plucl[df_plucl['GSF']<800].index.tolist() + \
+                     df_plucl[df_plucl['# FOORS']==0].index.tolist() + \
+                     df_plucl[df_plucl['# UNITS']==0].index.tolist()
+
+        df_plups = df_plucl.drop(drop_index).reset_index(drop=True)
+        df_plups['ADDRESS'] = df_plups['ADDRESS'].astype(str)
+
+        cleaner = Address_cleaner()
+        df_plups['ADDRESS'] = cleaner.easy_clean(df_plups['ADDRESS'].str.upper())
+
+        return df_plups
+
+    def pipeline_pluto(self): 
+        df_plu = self._extract_new_pluto()
+        df_plucl = self._clean_new_pluto(df_plu)
+        df_plups = self._process_new_pluto(df_plucl)
+        return df_plups
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    # cp._extract_new_pluto()
-    ins = cleaning_instructions().instructions
-    print(len(ins['PLUTO_CLEANING']))
+    cp.pipeline_pluto()
