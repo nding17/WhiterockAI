@@ -718,6 +718,11 @@ class cleaning_pipeline(my_soup):
 
             df_sales['SALE DATE'] = pd.to_datetime(df_sales['SALE DATE'])
 
+            df_pluto = df_pluto.drop_duplicates(subset=['ADDRESS', 
+                                                        'BLOCK',
+                                                        'LOT',
+                                                        '# UNITS'])
+
             # for multiple properties with identical address, block, lot and  units
             # we know they are the same property and thus only the most recent 
             # property details are kept            
@@ -739,10 +744,19 @@ class cleaning_pipeline(my_soup):
             all_cols = df_pluto_core.columns
             dup_cols = [col for col in all_cols if '_y' in col]
             df_pluto_core = df_pluto_core[all_cols.difference(dup_cols)] \
-                                         .rename(columns={col: col.strip('_x') for col in all_cols if '_x' in col}) \
-                                         .reset_index(drop=True)
+                                 .rename(columns={col: col.strip('_x') for col in all_cols if '_x' in col}) \
+                                 .reset_index(drop=True)
 
             df_pluto_core.to_csv(f'{pluto_path}/{fn_core_pluto}')
+
+            return df_pluto
+
+        else:
+            df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0)
+            return df_pluto_core
+
+    def _update_pluto(self, pluto_old, pluto_new):
+        pass
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
