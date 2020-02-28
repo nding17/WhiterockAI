@@ -461,11 +461,11 @@ class cleaning_instructions:
         'notes': {
             'delete': 1,
         },
-        
     }
 
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
+        'PLUTO_CLEANING': PLUTO_CLEANING,
     }
 
 class my_soup:
@@ -655,9 +655,14 @@ class cleaning_pipeline(my_soup):
         
         fn_pluto = [fn for fn in zipfile.namelist() \
                         if ('pluto' in fn) and ('.csv' in fn)][0]
-        df = pd.read_csv(zipfile.open(fn_pluto))
-        print(df.columns)
+        df_plu = pd.read_csv(zipfile.open(fn_pluto))
+        return df_plu
+
+    def _clean_pluto(self, df_plu):
+        
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    cp._extract_new_pluto()
+    # cp._extract_new_pluto()
+    ins = cleaning_instructions().instructions
+    print(len(ins['PLUTO_CLEANING']))
