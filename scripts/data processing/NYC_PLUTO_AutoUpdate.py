@@ -9,7 +9,9 @@ import requests
 
 from datetime import datetime
 from bs4 import BeautifulSoup
-from tabulate import tabulate
+from zipfile import ZipFile
+from urllib.request import urlopen
+from io import BytesIO
 
 class cleaning_instructions:
 
@@ -98,11 +100,242 @@ class cleaning_instructions:
         },
     }
 
+    PLUTO_CLEANING = {
+        'borough': {
+            'delete': 0,
+            'new name': 'BOROUGH',
+        },
+        'block': {
+            'delete': 0,
+            'new name': 'BLOCK',
+        },
+        'lot': {
+            'delete': 0,
+            'new name': 'LOT',
+        },
+        'cd': {
+            'delete': 1,
+        },
+        'ct2010': {
+            'delete': 1,
+        },
+        'cb2010': {
+            'delete': 1,
+        },
+        'schooldist': {
+            'delete': 0,
+            'new name': 'SCHOOL DIS',
+        },
+        'council': {
+            'delete': 0,
+            'new name': 'COUNCIL',
+        },
+        'zipcode': {
+            'delete': 0,
+            'new name': 'ZIP',
+        },
+        'firecomp': {
+            'delete': 0,
+            'new name': 'FIRE COMP',
+        },
+        'policeprct': {
+            'delete': 0,
+            'new name': 'POLICE PRCT',
+        },
+        'healtharea': {
+            'delete': 0,
+            'new name': 'HEALTH AREA',
+        },
+        'sanitboro': {
+            'delete': 0,
+            'new name': 'SANIT BORO',
+        },
+        'sanitsub': {
+            'delete': 1,
+        },
+        'address': {
+            'delete': 0,
+            'new name': 'ADDRESS',
+        },
+        'zonedist1': {
+            'delete': 0,
+            'new name': 'zonedist1',
+        },
+        'zonedist2': {
+            'delete': 0,
+            'new name': 'zonedist2',
+        },
+        'zonedist3': {
+            'delete': 0,
+            'new name': 'zonedist3',
+        },
+        'zonedist4': {
+            'delete': 0,
+            'new name': 'zonedist4',
+        },
+        'overlay1': {
+            'delete': 0,
+            'new name': 'overlay1',
+        },
+        'overlay2': {
+            'delete': 0,
+            'new name': 'overlay2',
+        },
+        'spdist1': {
+            'delete': 0,
+            'new name': 'spdist1',
+        },
+        'spdist2': {
+            'delete': 0,
+            'new name': 'spdist2',
+        },
+        'spdist3': {
+            'delete': 0,
+            'new name': 'spdist3',
+        },
+        'ltdheight': {
+            'delete': 1,
+        },
+        'splitzone': {
+            'delete': 1,
+        },
+        'bldgclass': {
+            'delete': 0,
+            'new name': 'BLDG CLASS NOW',
+        },
+        'landuse': {
+            'delete': 0,
+            'new name': 'LAND USE',
+        },
+        'easements': {
+            'delete': 0,
+            'new name': 'easements',
+        },
+        'ownertype': {
+            'delete': 0,
+            'new name': 'OWNER TYPE',
+        },
+        'ownername': {
+            'delete': 0,
+            'new name': 'OWNER',
+        },
+        'lotarea': {
+            'delete': 0,
+            'new name': 'LAND SF',
+        },
+        'bldgarea': {
+            'delete': 0,
+            'new name': 'GSF',
+        },
+        'comarea': {
+            'delete': 0,
+            'new name': 'COMM SF',
+        },
+        'resarea': {
+            'delete': 0,
+            'new name': 'RESI SF',
+        },
+        'officearea': {
+            'delete': 0,
+            'new name': 'OFFICE SF',
+        },
+        'retailarea': {
+            'delete': 0,
+            'new name': 'RETAIL SF',
+        },
+        'garagearea': {
+            'delete': 0,
+            'new name': 'GARAGE SF',
+        },
+        'strgearea': {
+            'delete': 0,
+            'new name': 'STORAGE SF',
+        },
+        'factryarea': {
+            'delete': 0,
+            'new name': 'FACTORY SF',
+        },
+        'otherarea': {
+            'delete': 0,
+            'new name': 'OTHER SF',
+        },
+        'areasource': {
+            'delete': 1,
+        },
+        'numbldgs': {
+            'delete': 0,
+            'new name': '# BLDG',
+        },
+        'numfloors': {
+            'delete': 0,
+            'new name': '# FOORS',
+        },
+        'unitsres': {
+            'delete': 1,
+        },
+        'unitstotal': {
+            'delete': 0,
+            'new name': '# UNITS',
+        },
+        'lotfront': {
+            'delete': 0,
+            'new name': 'LOT FRONT',
+        },
+        'lotdepth': {
+            'delete': 0,
+            'new name': 'LOT DEPTH',
+        },
+        'bldgfront': {
+            'delete': 0,
+            'new name': 'BLDG FRONT',
+        },
+        'bldgdepth': {
+            'delete': 0,
+            'new name': 'BLDG DEPTH',
+        },
+        'ext': {
+            'delete': 1,
+        },
+        'proxcode': {
+            'delete': 1,
+        },
+        'irrlotcode': {
+            'delete': 1, 
+        },
+        'lottype': {
+            'delete': 0,
+            'new name': 'LOT TYPE',
+        },
+        'bsmtcode': {
+            'delete': 0,
+            'new name': 'bsmtcode',
+        },
+        'assessland': {
+            'delete': 0,
+            'new name': 'assessland',
+        },
+        'assesstot': {
+            'delete': 0,
+            'new name': 'assesstot',
+        },
+        'exempttot': {
+            'delete': 0,
+            'new name': 'exempttot',
+        },
+        'yearbuilt': {
+            'delete': 0,
+            'new name': 'YEAR BUILT',
+        }
+    }
+
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
     }
 
 class my_soup:
+
+    def __init__(self):
+        pass
 
     def _random_user_agent(self):
         """
@@ -200,14 +433,15 @@ class my_soup:
             # time to give up, try to find what's going on 
             raise ValueError(f'FAILED to get soup for apt url {url}')
 
-class cleaning_pipeline:
+class cleaning_pipeline(my_soup):
 
     def __init__(self):
+        super()
         self._nyc_sales_page = 'https://www1.nyc.gov/site/finance/taxes/property-rolling-sales-data.page'
+        self._nyc_pluto_page = 'https://www1.nyc.gov/site/planning/data-maps/open-data/dwn-pluto-mappluto.page'
 
     def _extract_sales_data(self):
-        ms = my_soup()
-        soup = ms.soup_attempts(self._nyc_sales_page)
+        soup = self.soup_attempts(self._nyc_sales_page)
         
         # not looking at Statan Island
         statan = 'statenisland'
@@ -265,11 +499,29 @@ class cleaning_pipeline:
         return df_smps
 
     def pipeline_sales_data(self):
-        df_sm = self._extract_sales_data()
-        df_smcl = self._clean_sales_data(df_sm)
-        df_smps = self._process_sales_data(df_smcl)
+        df_sm = self._extract_sales_data() # extract sales data
+        df_smcl = self._clean_sales_data(df_sm) # clean sales data
+        df_smps = self._process_sales_data(df_smcl) # process sales data 
         return df_smps
+
+    def _extract_new_pluto(self):
+        soup = self.soup_attempts(self._nyc_pluto_page)
+        textbox = soup.find_all('div', class_='text-box')
+        links = [l['href'] for tb in textbox for l in tb.find_all('a')]
+
+        pluto_link = [f'http://www1.nyc.gov{l}' \
+                        for l in links \
+                            if ('nyc_pluto' in l) \
+                            and ('csv.zip' in l)][0]
+
+        resp = urlopen(pluto_link)
+        zipfile = ZipFile(BytesIO(resp.read()))
+        
+        fn_pluto = [fn for fn in zipfile.namelist() \
+                        if ('pluto' in fn) and ('.csv' in fn)][0]
+        df = pd.read_csv(zipfile.open(fn_pluto))
+        print(df.columns)
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    print(cp.pipeline_sales_data())
+    cp._extract_new_pluto()
