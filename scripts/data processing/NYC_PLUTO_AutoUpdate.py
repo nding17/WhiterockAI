@@ -325,7 +325,143 @@ class cleaning_instructions:
         'yearbuilt': {
             'delete': 0,
             'new name': 'YEAR BUILT',
-        }
+        },
+        'yearalter1': {
+            'delete': 0,
+            'new name': 'yearalter1',
+        },
+        'yearalter2': {
+            'delete': 0,
+            'new name': 'yearalter2',
+        },
+        'histdist': {
+            'delete': 1,
+        },
+        'landmark': {
+            'delete': 1,
+        },
+        'builtfar': {
+            'delete': 0,
+            'new name': 'builtfar',
+        },
+        'residfar': {
+            'delete': 0,
+            'new name': 'residfar',
+        },
+        'commfar': {
+            'delete': 0,
+            'new name': 'commfar',
+        },
+        'facilfar': {
+            'delete': 0,
+            'new name': 'facilfar',
+        },
+        'borocode': {
+            'delete': 1,
+        },
+        'bbl': {
+            'delete': 1,
+        },
+        'condono': {
+            'delete': 1,
+        },
+        'tract2010': {
+            'delete': 1,
+        },
+        'xcoord': {
+            'delete': 1,
+        },
+        'ycoord': {
+            'delete': 1,
+        },
+        'latitude': {
+            'delete': 0,
+            'new name': 'LATITUDE',
+        },
+        'longitude': {
+            'delete': 0,
+            'new name': 'LONGITUDE',
+        },
+        'zonemap': {
+            'delete': 1,
+        },
+        'zmcode': {
+            'delete': 1,
+        },
+        'sanborn': {
+            'delete': 1
+        },
+        'taxmap': {
+            'delete': 1
+        },
+        'edesignum': {
+            'delete': 0,
+            'new name': 'edesignum',
+        },
+        'appbbl': {
+            'delete': 0,
+            'new name': 'appbbl',
+        },
+        'appdate': {
+            'delete': 1,
+        },
+        'plutomapid': {
+            'delete': 1,
+        },
+        'version': {
+            'delete': 1,
+        },
+        'sanitdistrict': {
+            'delete': 0,
+            'new name': 'sanitdistrict',
+        },
+        'healthcenterdistrict': {
+            'delete': 0,
+            'new name': 'healthcenterdistrict',
+        },
+        'firm07_flag': {
+            'delete': 0,
+            'new name': 'firm07_flag',
+        },
+        'pfirm15_flag': {
+            'delete': 0,
+            'new name': 'pfirm15_flag',
+        },
+        'rpaddate': {
+            'delete': 1,
+        },
+        'dcasdate': {
+            'delete': 1,
+        },
+        'zoningdate': {
+            'delete': 1,
+        },
+        'landmkdate': {
+            'delete': 1,
+        },
+        'basempdate': {
+            'delete': 1,
+        },
+        'masdate': {
+            'delete': 1,
+        },
+        'polidate': {
+            'delete': 1,
+        },
+        'edesigdate': {
+            'delete': 0,
+            'new name': 'edesigdate',
+        },
+        'geom': {
+            'delete': 1,
+        },
+        'dcpedited': {
+            'delete': 1,
+        },
+        'notes': {
+            'delete': 1,
+        },
+        
     }
 
     instructions = {
@@ -492,7 +628,7 @@ class cleaning_pipeline(my_soup):
                      df_smcl[df_smcl['SALE PRICE']<25000].index.tolist() + \
                      df_smcl[df_smcl['BLDG CLASS'].isin([
                         'A8', 'C6', 'C8', 'C9', 'CM', 'D', 'E', 'F',
-                        'G', 'H', 'I', 'J', 'K',  'L', 'M', 'N', 'O', 
+                        'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 
                         'P', 'Q', 'R', 'T', 'U', 'V', 'W', 'Y', 'Z'])].index.tolist()
 
         df_smps = df_smcl.drop(drop_index).reset_index(drop=True)
