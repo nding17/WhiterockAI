@@ -8,6 +8,7 @@ import time
 import requests
 
 from datetime import datetime
+from datetime import date
 from bs4 import BeautifulSoup
 from zipfile import ZipFile
 from urllib.request import urlopen
@@ -706,7 +707,7 @@ class cleaning_pipeline(my_soup):
         return df_plups
 
     ### this step should be only done once 
-    def _process_old_pluto(self, pluto_path):
+    def _load_old_pluto(self, pluto_path):
         fn_old_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO.csv'
         fn_sales_master = 'NMA-002 Resi_Sales_Master [bylocation;addresses].csv'
 
@@ -718,27 +719,18 @@ class cleaning_pipeline(my_soup):
 
             df_sales['SALE DATE'] = pd.to_datetime(df_sales['SALE DATE'])
 
-            df_pluto = df_pluto.drop_duplicates(subset=['ADDRESS', 
-                                                        'BLOCK',
-                                                        'LOT',
-                                                        '# UNITS'])
+            df_pluto = df_pluto.drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'])
 
             # for multiple properties with identical address, block, lot and  units
             # we know they are the same property and thus only the most recent 
             # property details are kept            
             df_sales = df_sales.sort_values(by='SALE DATE') \
-                               .drop_duplicates(subset=['ADDRESS', 
-                                                        'BLOCK', 
-                                                        'LOT', 
-                                                        '# UNITS'], 
+                               .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                                 keep='last')
 
             df_pluto_core = pd.merge(df_pluto, 
                                      df_sales, 
-                                     on=['ADDRESS', 
-                                         'BLOCK', 
-                                         'LOT', 
-                                         '# UNITS'],
+                                     on=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'],
                                      how='outer')
 
             all_cols = df_pluto_core.columns
@@ -755,7 +747,7 @@ class cleaning_pipeline(my_soup):
             df_pluto_core = pd.read_csv(f'{pluto_path}/{fn_core_pluto}', index_col=0, low_memory=False)
             return df_pluto_core
 
-    def _update_pluto(self, pluto_old, pluto_new):
+    def _update_pluto_with_new_pluto(self, pluto_old, pluto_new):
         # all the columns of the old PLUTO
         cols_op = pluto_old.columns.tolist()
         # all the columns of the new PLUTO
@@ -776,6 +768,8 @@ class cleaning_pipeline(my_soup):
         same_id = pd.merge(id_up, id_new, how='inner', indicator=False)
         diff_id = id_new[~id_new.isin(same_id)] # diff identifiers
 
+        print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
+
         # the index of a list of the same identifiers in the new PLUTO
         idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id)].index
         # the index of a list of the same identifiers in the old PLUTO
@@ -790,11 +784,61 @@ class cleaning_pipeline(my_soup):
 
         return pluto_up
 
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+        delta = pd.Timedelta(deltadays)
+        sales = sales.sort_values(by=['SALE DATE'], ascending=False)
+        latest_date = sales['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
+                           (sales['SALE DATE']<=latest_date)].index
+        sales_sub = sales.iloc[keep_index].reset_index(drop=True)
+
+        sales_sub = sales_sub.sort_values(by='SALE DATE') \
+                             .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
+                                              keep='last')
+
+        final_pluto = pd.merge(pluto, 
+                               sales_sub, 
+                               on=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'],
+                               how='outer')
+
+        all_cols = final_pluto.columns
+        dup_cols = [col for col in all_cols if '_y' in col]
+        final_pluto = final_pluto[all_cols.difference(dup_cols)] \
+                             .rename(columns={col: col.strip('_x') for col in all_cols if '_x' in col}) \
+                             .reset_index(drop=True)
+
+        return final_pluto
+
+    def _export_final_pluto(fpluto, fpluto_path):
+        fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
+        fpluto.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
+
+    def pipeline(self, pluto_path, fpluto_path):
+        # new sales data processed
+        print('>>>downloading, cleaning and processing new sales data')
+        df_nsales = self.pipeline_sales_data()
+
+        # new pluto data processed 
+        print('>>>downloading, cleaning and processing new PLUTO')
+        df_npluto = self.pipeline_new_pluto()
+
+        # old pluto data loaded
+        print('>>>processing and loading old PLUTO')
+        df_opluto = self._load_old_pluto(pluto_path)
+
+        # old pluto data updated with new pluto data
+        print('>>>updating old PLUTO with new PLUTO')
+        df_upluto = self._update_pluto_with_new_pluto(df_opluto, df_npluto)
+
+        # final pluto updated by the latest sales data
+        print('>>>updating PLUTO with recent sales data')
+        final_pluto = self._update_pluto_with_sales_data(df_upluto, df_nsales, 40)
+
+        print('>>>exporting final PLUTO')
+        self._export_final_pluto(final_pluto, fpluto_path)
+        print('>>>job done! Congratulations!')
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    # cp.pipeline_pluto()
-    pluto_old = cp._process_old_pluto('../../data/NYC Data')
-    pluto_new = cp.pipeline_new_pluto()
-
-    print(cp._update_pluto(pluto_old, pluto_new))
+    cp.pipeline('../../data/NYC Data', '../../data')
