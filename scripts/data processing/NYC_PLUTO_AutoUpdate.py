@@ -713,7 +713,7 @@ class cleaning_pipeline(my_soup):
 
         fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO Core.csv'
 
-        if not os.path.exists(f'{pluto_path}/{fn_core_pluto}'):
+        if (not os.path.exists(f'{pluto_path}/{fn_core_pluto}')) or (''==fn_opluto):
             df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0, low_memory=False)
             df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0, low_memory=False)
 
