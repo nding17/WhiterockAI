@@ -806,7 +806,7 @@ class cleaning_pipeline(my_soup):
 
         return final_pluto
 
-    def _export_final_pluto(fpluto, fpluto_path):
+    def _export_final_pluto(self, fpluto, fpluto_path):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
