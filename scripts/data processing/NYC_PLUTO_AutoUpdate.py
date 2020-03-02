@@ -816,11 +816,9 @@ class cleaning_pipeline(my_soup):
     ### fill in missed location data into the merged PLUTO
     def _fill_loc(self, pluto_update):
         d_subm = dict(zip(pluto_update['ADDRESS'], pluto_update['REIS SUBMARKET']))
-        d_state = dict(zip(pluto_update['ADDRESS'], pluto_update['STATE']))
         d_zip = dict(zip(pluto_update['ADDRESS'], pluto_update['ZIP']))
         
         p_subm = pd.DataFrame(d_subm.items(), columns=['ADDRESS', 'REIS SUBMARKET'])
-        p_state = pd.DataFrame(d_state.items(), columns=['ADDRESS', 'STATE'])
         p_zip = pd.DataFrame(d_zip.items(), columns=['ADDRESS', 'ZIP'])
         
         p_all = p_subm
@@ -829,7 +827,7 @@ class cleaning_pipeline(my_soup):
         for p_one in ps:
             p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
         
-        valid_cols = pluto_update.columns.difference(['REIS SUBMARKET', 'STATE', 'ZIP'])
+        valid_cols = pluto_update.columns.difference(['REIS SUBMARKET', 'ZIP'])
         pluto_loc_updated = pluto_update[valid_cols]
         
         pluto_loc_updated = pd.merge(pluto_loc_updated, p_all, on='ADDRESS', how='left')
