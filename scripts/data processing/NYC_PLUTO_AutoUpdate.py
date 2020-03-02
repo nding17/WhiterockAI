@@ -821,10 +821,7 @@ class cleaning_pipeline(my_soup):
         p_subm = pd.DataFrame(d_subm.items(), columns=['ADDRESS', 'REIS SUBMARKET'])
         p_zip = pd.DataFrame(d_zip.items(), columns=['ADDRESS', 'ZIP'])
         
-        p_all = [p_subm, p_zip]
-
-        for p_one in ps:
-            p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
+        p_all = pd.merge(p_subm, p_zip, on='ADDRESS', how='left')
         
         valid_cols = pluto_update.columns.difference(['REIS SUBMARKET', 'ZIP'])
         pluto_loc_updated = pluto_update[valid_cols]
