@@ -644,7 +644,7 @@ class cleaning_pipeline(my_soup):
                 address = address.split(', ')[0].strip()
             return address
 
-        # df_smps['ADDRESS'] = df_smps['ADDRESS'].apply(remove_units)
+        df_smps['ADDRESS'] = df_smps['ADDRESS'].apply(remove_units)
         return df_smps
 
     def pipeline_sales_data(self):
@@ -777,9 +777,9 @@ class cleaning_pipeline(my_soup):
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
         # the index of a list of the same identifiers in the new PLUTO
-        idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id)].index
+        idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id)].index.tolist()
         # the index of a list of the same identifiers in the old PLUTO
-        idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index
+        idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index.tolist()
 
         # update the old PLUTO with the data in the new PLUTO
         cols_update = list(set(cols_np)-set(cols_op))
