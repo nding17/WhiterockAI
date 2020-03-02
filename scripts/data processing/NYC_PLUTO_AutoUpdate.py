@@ -766,8 +766,8 @@ class cleaning_pipeline(my_soup):
         # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
         # properties in PLUTO
         id_cols = ['ADDRESS', 'BLOCK', 'LOT', '# UNITS']
-        id_up = pluto_up[id_cols] # identifiers for the old PLUTO
-        id_new = pluto_new[id_cols] # identifiers for the new PLUTO
+        id_up = pluto_up[id_cols].drop_duplicates(subset=id_cols) # identifiers for the old PLUTO
+        id_new = pluto_new[id_cols].drop_duplicates(subset=id_cols) # identifiers for the new PLUTO
 
         # find the same identifiers: identifiers that exist in both new and old PLUTO data
         # as well as the different identifiers that are unique in each PLUTO data
