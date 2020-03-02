@@ -771,16 +771,16 @@ class cleaning_pipeline(my_soup):
 
         # find the same identifiers: identifiers that exist in both new and old PLUTO data
         # as well as the different identifiers that are unique in each PLUTO data
-        same_id = pd.merge(id_up, id_new, how='inner', indicator=False)
-        diff_id = id_new[~id_new.isin(same_id)] # diff identifiers
+        same_id = pd.merge(id_up, id_new, on=id_cols, how='inner')
+        diff_id = id_new[id_cols][~id_new[id_cols].isin(same_id[id_cols])] # diff identifiers
 
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
         # the index of a list of the same identifiers in the new PLUTO
-        idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id)].index.tolist()
+        idx_sid_new = pluto_new[pluto_new[id_cols].isin(same_id[id_cols])].index.tolist()
         # the index of a list of the same identifiers in the old PLUTO
-        idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index.tolist()
+        idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id[id_cols])].index.tolist()
 
         # update the old PLUTO with the data in the new PLUTO
         cols_update = list(set(cols_np)-set(id_cols))
@@ -804,8 +804,6 @@ class cleaning_pipeline(my_soup):
         sales_sub = sales_sub.sort_values(by='SALE DATE') \
                              .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                               keep='last')
-
-        print(f'total number of rows in the subset sales data: {sales_sub.shape[0]}')
 
         final_pluto = pd.merge(pluto, 
                                sales_sub, 
