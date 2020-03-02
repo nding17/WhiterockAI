@@ -772,7 +772,7 @@ class cleaning_pipeline(my_soup):
         # find the same identifiers: identifiers that exist in both new and old PLUTO data
         # as well as the different identifiers that are unique in each PLUTO data
         same_id = pd.merge(id_up, id_new, on=id_cols, how='inner')
-        diff_id = id_new[id_cols][~id_new[id_cols].isin(same_id[id_cols])] # diff identifiers
+        diff_id = id_new[id_cols][~id_new[id_cols].index.isin(same_id[id_cols].index)] # diff identifiers
 
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
