@@ -783,7 +783,7 @@ class cleaning_pipeline(my_soup):
         idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index.tolist()
 
         # update the old PLUTO with the data in the new PLUTO
-        cols_update = list(set(cols_np)-set(cols_op))
+        cols_update = list(set(cols_np)-set(id_cols))
         pluto_up.at[idx_sid_up, cols_update] = pluto_new[cols_update].iloc[idx_sid_new]
 
         # concat the updated PLUTO with new property data that's not 
