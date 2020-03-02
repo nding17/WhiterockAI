@@ -774,6 +774,7 @@ class cleaning_pipeline(my_soup):
         same_id = pd.merge(id_up, id_new, how='inner', indicator=False)
         diff_id = id_new[~id_new.isin(same_id)] # diff identifiers
 
+        print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
         # the index of a list of the same identifiers in the new PLUTO
@@ -797,7 +798,7 @@ class cleaning_pipeline(my_soup):
         latest_date = sales['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
-                           (sales['SALE DATE']<=latest_date)].index
+                           (sales['SALE DATE']<=latest_date)].index.tolist()
         sales_sub = sales.iloc[keep_index].reset_index(drop=True)
 
         sales_sub = sales_sub.sort_values(by='SALE DATE') \
