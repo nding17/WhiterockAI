@@ -813,9 +813,35 @@ class cleaning_pipeline(my_soup):
 
         return final_pluto
 
+    ### fill in missed location data into the merged PLUTO
+    def _fill_loc(self, pluto_update):
+        d_subm = dict(zip(pluto_update['ADDRESS'], pluto_update['REIS SUBMARKET']))
+        d_city = dict(zip(pluto_update['ADDRESS'], pluto_update['CITY']))
+        d_state = dict(zip(pluto_update['ADDRESS'], pluto_update['STATE']))
+        d_zip = dict(zip(pluto_update['ADDRESS'], pluto_update['ZIP']))
+        
+        p_subm = pd.DataFrame(d_subm.items(), columns=['ADDRESS', 'REIS SUBMARKET'])
+        p_city = pd.DataFrame(d_city.items(), columns=['ADDRESS', 'CITY'])
+        p_state = pd.DataFrame(d_state.items(), columns=['ADDRESS', 'STATE'])
+        p_zip = pd.DataFrame(d_zip.items(), columns=['ADDRESS', 'ZIP'])
+        
+        p_all = p_subm
+        ps = [p_city, p_state, p_zip]
+
+        for p_one in ps:
+            p_all = pd.merge(p_all, p_one, on='ADDRESS', how='left')
+        
+        valid_cols = pluto_update.columns.difference(['REIS SUBMARKET', 'CITY', 'STATE', 'ZIP'])
+        pluto_loc_updated = pluto_update[valid_cols]
+        
+        pluto_loc_updated = pd.merge(pluto_loc_updated, p_all, on='ADDRESS', how='left')
+        
+        return pluto_loc_updated
+
     def _export_final_pluto(self, fpluto, fpluto_path):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
-        fpluto.reset_index(drop=True).to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
+        fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
+        fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
     def pipeline(self, pluto_path, fpluto_path, fn_opluto=''):
         # new sales data processed
