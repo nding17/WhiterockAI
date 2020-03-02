@@ -3893,7 +3893,7 @@ class compass_dot_com(dot_com):
             atags = browser.find_elements_by_xpath("//a[@class='uc-listingPhotoCard uc-listingCard uc-listingCard-has-photo']")
             hrefs = [atag.get_attribute('href') for atag in atags] # fetch the url to the details of a apartment
             apt_urls += hrefs
-
+            
             if test:
                 break
 
@@ -5495,18 +5495,10 @@ if __name__ == '__main__':
     # to run the scraping for the entire webpage 
     # turn this to False
     is_testing = False
-
-    ### compass New York For Rent 
-    codc = compass_dot_com(major_city)
-    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
     ### compass New York For Sale 
     codcv2 = compass_fs_dot_com(major_city)
     codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
-    
-    # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com(major_city)
-    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
     
     ### elliman.com For Sale 
     if major_city == 'NYC':
@@ -5532,6 +5524,14 @@ if __name__ == '__main__':
     ### apartments.com New York For Rent
     adc = apartments_dot_com(major_city)
     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+    
+    # berkshire hathaway New York For Sale
+    bdc = berkshire_dot_com(major_city)
+    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+    
+    ### compass New York For Rent 
+    codc = compass_dot_com(major_city)
+    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
     
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
