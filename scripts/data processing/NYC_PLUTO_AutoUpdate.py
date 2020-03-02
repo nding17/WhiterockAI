@@ -753,11 +753,11 @@ class cleaning_pipeline(my_soup):
             df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
             return df_pluto_old
 
-    def _update_pluto_with_df(self, pluto_old, pluto_new):
+    def _update_pluto_with_df(self, pluto_old, df_new):
         # all the columns of the old PLUTO
         cols_op = pluto_old.columns.tolist()
         # all the columns of the new PLUTO
-        cols_np = pluto_new.columns.tolist()
+        cols_np = df_new.columns.tolist()
 
         cols_id = ['ADDRESS', 'BLOCK', 'LOT', '# UNITS']
 
@@ -765,34 +765,34 @@ class cleaning_pipeline(my_soup):
         added_cols = list(set(cols_np)-set(cols_op))
         pluto_up = pd.concat([pluto_old.copy(), pd.DataFrame(columns=added_cols)], sort=False)
 
-        pluto_up = pluto_up.drop_duplicates(subset=cols_id)
-        pluto_new = pluto_new.drop_duplicates(subset=cols_id)
+        pluto_up = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index 
+        df_new = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
 
         # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
         # properties in PLUTO
-        id_up = pluto_up[cols_id].drop_duplicates(subset=cols_id) # identifiers for the old PLUTO
-        id_new = pluto_new[cols_id].drop_duplicates(subset=cols_id) # identifiers for the new PLUTO
+        id_up = pluto_up[cols_id] # identifiers for the old PLUTO
+        id_new = df_new[cols_id] # identifiers for the new PLUTO
 
         # find the same identifiers: identifiers that exist in both new and old PLUTO data
         # as well as the different identifiers that are unique in each PLUTO data
         same_id = pd.merge(id_up, id_new, on=cols_id, how='inner')
-        diff_id = id_new[cols_id][~id_new[cols_id].index.isin(same_id[cols_id].index)] # diff identifiers
+        diff_id = id_new.loc[~id_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)] # diff identifiers
 
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
         # the index of a list of the same identifiers in the new PLUTO
-        idx_sid_new = pluto_new[pluto_new[cols_id].isin(same_id[cols_id])].index.tolist()
+        idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
         # the index of a list of the same identifiers in the old PLUTO
-        idx_sid_up = pluto_up[pluto_up[cols_id].isin(same_id[cols_id])].index.tolist()
+        idx_sid_up = pluto_up.loc[pluto_up.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
 
         # update the old PLUTO with the data in the new PLUTO
         cols_update = list(set(cols_np)-set(cols_id))
-        pluto_up.at[idx_sid_up, cols_update] = pluto_new[cols_update].iloc[idx_sid_new]
+        pluto_up.at[idx_sid_up, cols_update] = df_new[cols_update].iloc[idx_sid_new]
 
         # concat the updated PLUTO with new property data that's not 
         # already in the old PLUTO file
-        pluto_up = pd.concat([pluto_up, pluto_new[pluto_new[cols_id].isin(diff_id)]], sort=False)
+        pluto_up = pd.concat([pluto_up, df_new.loc[df_new.set_index(cols_id).index.isin(diff_id.set_index(cols_id).index)]], sort=False)
 
         return pluto_up
 
@@ -809,12 +809,7 @@ class cleaning_pipeline(my_soup):
                              .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                               keep='last')
 
-        final_pluto = pd.merge(pluto, 
-                               sales_sub, 
-                               on=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'],
-                               how='outer')
-
-        final_pluto = self._update_pluto_with_df(final_pluto, sales_sub)
+        final_pluto = self._update_pluto_with_df(pluto, sales_sub)
 
         return final_pluto
 
