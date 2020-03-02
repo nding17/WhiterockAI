@@ -639,6 +639,12 @@ class cleaning_pipeline(my_soup):
         cleaner = Address_cleaner()
         df_smps['ADDRESS'] = cleaner.easy_clean(df_smps['ADDRESS'].str.upper())
 
+        def remove_units(address):
+            if ', ' in address:
+                address = address.split(', ')[0].strip()
+            return address
+
+        # df_smps['ADDRESS'] = df_smps['ADDRESS'].apply(remove_units)
         return df_smps
 
     def pipeline_sales_data(self):
@@ -776,7 +782,8 @@ class cleaning_pipeline(my_soup):
         idx_sid_up = pluto_up[pluto_up[id_cols].isin(same_id)].index
 
         # update the old PLUTO with the data in the new PLUTO
-        pluto_up.at[idx_sid_up, cols_np] = pluto_new.iloc[idx_sid_new]
+        cols_update = list(set(cols_np)-set(cols_op))
+        pluto_up.at[idx_sid_up, cols_update] = pluto_new[cols_update].iloc[idx_sid_new]
 
         # concat the updated PLUTO with new property data that's not 
         # already in the old PLUTO file
@@ -796,6 +803,8 @@ class cleaning_pipeline(my_soup):
         sales_sub = sales_sub.sort_values(by='SALE DATE') \
                              .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                               keep='last')
+
+        print(f'total number of rows in the subset sales data: {sales_sub.shape[0]}')
 
         final_pluto = pd.merge(pluto, 
                                sales_sub, 
