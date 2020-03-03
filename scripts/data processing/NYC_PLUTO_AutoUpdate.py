@@ -785,13 +785,11 @@ class cleaning_pipeline(my_soup):
     def _load_reis(self, reis_path):
         reis = pd.read_excel(f'{reis_path}/REIS All Properties 152k Report.xlsx')
 
-    def _update_pluto_with_df(self, pluto_old, df_new):
+    def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['ADDRESS', 'BLOCK', 'LOT', '# UNITS']):
         # all the columns of the old PLUTO
         cols_op = pluto_old.columns.tolist()
         # all the columns of the new PLUTO
         cols_np = df_new.columns.tolist()
-
-        cols_id = ['ADDRESS', 'BLOCK', 'LOT', '# UNITS']
 
         # PLUTO update dataframe
         # added emtpy columns to be added later on
@@ -883,7 +881,6 @@ class cleaning_pipeline(my_soup):
         # old pluto data loaded
         print('>>> processing and loading old PLUTO')
         df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
-        df_opluto.to_csv('../../data/pluto_exp.csv')
 
         # old pluto data updated with new pluto data
         print('>>> updating old PLUTO with new PLUTO')
