@@ -807,6 +807,9 @@ class cleaning_pipeline(my_soup):
         same_id = pd.merge(id_up, id_new, on=cols_id, how='inner')
         diff_id = id_new.loc[~id_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)] # diff identifiers
 
+        print(f'{id_new.shape[0]} rows to be integrated in total')
+        print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
+
         df_new = df_new.reset_index(drop=True)
         pluto_up = pluto_up.reset_index(drop=True)
 
@@ -814,9 +817,6 @@ class cleaning_pipeline(my_soup):
         idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
         # the index of a list of the same identifiers in the old PLUTO
         idx_sid_up = pluto_up.loc[pluto_up.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
-
-        print(f'{df_new_check.shape[0]} rows to be integrated in total')
-        print(f'{idx_sid_new.shape[0]} rows to be updated')
 
         # update the old PLUTO with the data in the new PLUTO
         cols_update = list(set(cols_np)-set(cols_id))
@@ -902,29 +902,36 @@ class cleaning_pipeline(my_soup):
         # old pluto data loaded
         print('>>> processing and loading old PLUTO')
         df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
+        print(f'Original PLUTO shape: {df_opluto.shape}')
 
         # new pluto data processed 
         print('>>> downloading, cleaning and processing new PLUTO')
         df_npluto = self.pipeline_new_pluto()
+        print(f'New PLUTO shape: {df_npluto.shape}')
 
         # old pluto data updated with new pluto data
         print('>>> updating old PLUTO with new PLUTO')
         df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
         df_upluto['ZIP'] = df_upluto['ZIP'].astype(int, errors='ignore')
+        print(f'PLUTO shape: {df_upluto.shape}')
 
         print('>>> loading and processing REIS')
         df_reis = self.pipeline_reis_data(reis_path)
+        print(f'REIS shape: {df_reis.shape}')
 
         print('>>> updating PLUTO with REIS')
         df_rpluto = self._update_pluto_with_df(df_upluto, df_reis, cols_id=['ADDRESS', 'ZIP'])
+        print(f'-> PLUTO shape: {df_rpluto.shape}')
 
         # new sales data processed
         print('>>> downloading, cleaning and processing new sales data')
         df_nsales = self.pipeline_sales_data()
+        print(f'-> Sales Data shape: {df_nsales.shape}')
 
         # final pluto updated by the latest sales data
         print('>>> updating PLUTO with recent sales data')
         final_pluto = self._update_pluto_with_sales_data(df_rpluto, df_nsales, 40)
+        print(f'-> PLUTO shape: {final_pluto.shape}')
 
         print('>>> exporting final PLUTO')
         self._export_final_pluto(final_pluto, fpluto_path)
