@@ -902,22 +902,22 @@ class cleaning_pipeline(my_soup):
         # old pluto data loaded
         print('>>> Processing and loading old PLUTO')
         df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
-        print(f'Original PLUTO shape: {df_opluto.shape}')
+        print(f'-> Original PLUTO shape: {df_opluto.shape}')
 
         # new pluto data processed 
         print('>>> Downloading, cleaning and processing new PLUTO')
         df_npluto = self.pipeline_new_pluto()
-        print(f'New PLUTO shape: {df_npluto.shape}')
+        print(f'-> New PLUTO shape: {df_npluto.shape}')
 
         # old pluto data updated with new pluto data
         print('>>> Updating old PLUTO with new PLUTO')
         df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
         df_upluto['ZIP'] = df_upluto['ZIP'].astype(int, errors='ignore')
-        print(f'PLUTO shape: {df_upluto.shape}')
+        print(f'-> PLUTO shape: {df_upluto.shape}')
 
         print('>>> Loading and processing REIS')
         df_reis = self.pipeline_reis_data(reis_path)
-        print(f'REIS shape: {df_reis.shape}')
+        print(f'-> REIS shape: {df_reis.shape}')
 
         print('>>> Updating PLUTO with REIS')
         df_rpluto = self._update_pluto_with_df(df_upluto, df_reis, cols_id=['ADDRESS', 'ZIP'])
