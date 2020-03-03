@@ -483,6 +483,7 @@ class cleaning_instructions:
         'Sale Date': 'SALE DATE',
         'Transaction Type': 'TRANSACTION TYPE',
         'Buyer': 'BUYER',
+        'Year Built': 'YEAR BUILT',
         'Seller': 'SELLER',
         'Construction Status': 'CONSTRUCTION STATUS',
         'Expected Completion': 'EXPECTED COMPLETION',
@@ -782,9 +783,6 @@ class cleaning_pipeline(my_soup):
             df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
             return df_pluto_old
 
-    def _load_reis(self, reis_path):
-        reis = pd.read_excel(f'{reis_path}/REIS All Properties 152k Report.xlsx')
-
     def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['ADDRESS', 'BLOCK', 'LOT', '# UNITS']):
         # all the columns of the old PLUTO
         cols_op = pluto_old.columns.tolist()
@@ -826,6 +824,34 @@ class cleaning_pipeline(my_soup):
         pluto_up = pd.concat([pluto_up, df_new.loc[df_new.set_index(cols_id).index.isin(diff_id.set_index(cols_id).index)]], sort=False)
 
         return pluto_up
+
+    def _load_reis(self, reis_path):
+        reis = pd.read_excel(f'{reis_path}/REIS All Properties 152k Report.xlsx')
+        return reis
+
+    def _clean_res(self, reis):
+        cl = cleaning_instructions() # cleaning instructions for sales data
+        ins = cl.instructions['REIS_RENAME']
+        reis_cl = reis.rename(columns=ins, errors='raise')
+        reis_cl = reis_cl[[*ins.values()]]
+
+        cleaner = Address_cleaner()
+        reis_cl['ADDRESS'] = reis_cl['ADDRESS'].astype(str)
+        reis_cl['ADDRESS'] = cleaner.easy_clean(reis_cl['ADDRESS'].str.upper())
+
+        reis_cl = reis_cl.reindex(reis_cl.columns.tolist(), axis=1) \
+                         .astype(dtype={'SALE DATE': str})
+        
+        reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
+        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
+                         .reset_index(drop=True)
+
+        return reis_cl
+
+    def pipeline_reis_data(self, reis_path):
+        reis = self._load_reis(reis_path)
+        reis_cl = self._clean_res(reis)
+        return reis_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
     def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
@@ -869,7 +895,7 @@ class cleaning_pipeline(my_soup):
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
-    def pipeline(self, pluto_path, fpluto_path, fn_opluto=''):
+    def pipeline(self, pluto_path, fpluto_path, reis_path, fn_opluto=''):
         # new sales data processed
         print('>>> downloading, cleaning and processing new sales data')
         df_nsales = self.pipeline_sales_data()
@@ -886,9 +912,15 @@ class cleaning_pipeline(my_soup):
         print('>>> updating old PLUTO with new PLUTO')
         df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
 
+        print('>>> loading and processing REIS')
+        df_reis = self.pipeline_reis_data(reis_path)
+
+        print('>>> updating PLUTO with REIS')
+        df_rpluto = self._update_pluto_with_df(df_upluto, df_reis, cols_id=['ADDRESS', 'ZIP'])
+
         # final pluto updated by the latest sales data
         print('>>> updating PLUTO with recent sales data')
-        final_pluto = self._update_pluto_with_sales_data(df_upluto, df_nsales, 40)
+        final_pluto = self._update_pluto_with_sales_data(df_rpluto, df_nsales, 40)
 
         print('>>> exporting final PLUTO')
         self._export_final_pluto(final_pluto, fpluto_path)
@@ -896,4 +928,4 @@ class cleaning_pipeline(my_soup):
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
-    cp.pipeline('../../data/NYC Data', '../../data')
+    cp.pipeline('../../data/NYC Data', '../../data/NYC Data', '../../data')
