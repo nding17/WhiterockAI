@@ -843,6 +843,7 @@ class cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
+        reis_cl['ZIP'] = reis_cl['ZIP'].astype(float, errors='ignore')
         reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
                          .reset_index(drop=True)
 
@@ -927,5 +928,16 @@ class cleaning_pipeline(my_soup):
         print('>>> job done! Congratulations!')
 
 if __name__ == '__main__':
+    # under this directory, you should have the PLUTO data 
+    # you will need to update. If you want to directly update
+    # a designated PLUTO file, you should pass in fn_opluto as
+    # a keyword argument
+    pluto_path = '../../data/NYC Data'
+    # under this directory, you should have the REIS data
+    # to be updated into PLUTO
+    reis_path = '../../data/NYC Data'
+    # where you want export the final PLUTO 
+    output_path = '../../data'
+
     cp = cleaning_pipeline()
-    cp.pipeline('../../data/NYC Data', '../../data/NYC Data', '../../data')
+    cp.pipeline(pluto_path, reis_path, output_path)
