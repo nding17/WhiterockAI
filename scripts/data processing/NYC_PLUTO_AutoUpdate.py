@@ -794,13 +794,13 @@ class cleaning_pipeline(my_soup):
         added_cols = list(set(cols_np)-set(cols_op))
         pluto_up = pluto_old.copy().reindex(columns=cols_op+added_cols)   
 
-        pluto_up = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index 
-        df_new = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
+        pluto_up_check = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index
+        df_new_check = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
 
         # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
         # properties in PLUTO
-        id_up = pluto_up[cols_id] # identifiers for the old PLUTO
-        id_new = df_new[cols_id] # identifiers for the new PLUTO
+        id_up = pluto_up_check[cols_id] # identifiers for the old PLUTO
+        id_new = df_new_check[cols_id] # identifiers for the new PLUTO
 
         # find the same identifiers: identifiers that exist in both new and old PLUTO data
         # as well as the different identifiers that are unique in each PLUTO data
@@ -809,6 +809,9 @@ class cleaning_pipeline(my_soup):
 
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
+
+        df_new = df_new.reset_index(drop=True)
+        pluto_up = pluto_up.reset_index(drop=True)
 
         # the index of a list of the same identifiers in the new PLUTO
         idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
@@ -843,7 +846,6 @@ class cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
-        reis_cl['ZIP'] = reis_cl['ZIP'].astype(float, errors='ignore')
         reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
                          .reset_index(drop=True)
 
@@ -908,6 +910,7 @@ class cleaning_pipeline(my_soup):
         # old pluto data updated with new pluto data
         print('>>> updating old PLUTO with new PLUTO')
         df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
+        df_upluto['ZIP'] = df_upluto['ZIP'].astype(int, errors='ignore')
 
         print('>>> loading and processing REIS')
         df_reis = self.pipeline_reis_data(reis_path)
