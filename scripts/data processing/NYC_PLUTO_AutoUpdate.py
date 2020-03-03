@@ -807,9 +807,6 @@ class cleaning_pipeline(my_soup):
         same_id = pd.merge(id_up, id_new, on=cols_id, how='inner')
         diff_id = id_new.loc[~id_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)] # diff identifiers
 
-        print(f'{id_new.shape[0]} rows to be integrated in total')
-        print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
-
         df_new = df_new.reset_index(drop=True)
         pluto_up = pluto_up.reset_index(drop=True)
 
@@ -817,6 +814,9 @@ class cleaning_pipeline(my_soup):
         idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
         # the index of a list of the same identifiers in the old PLUTO
         idx_sid_up = pluto_up.loc[pluto_up.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
+
+        print(f'{df_new_check.shape[0]} rows to be integrated in total')
+        print(f'{idx_sid_new.shape[0]} rows to be updated')
 
         # update the old PLUTO with the data in the new PLUTO
         cols_update = list(set(cols_np)-set(cols_id))
