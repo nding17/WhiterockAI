@@ -15,6 +15,7 @@ from urllib.request import urlopen
 from io import BytesIO
 from lycleaner import Address_cleaner
 
+### New York PLUTO Auto-Update
 class cleaning_instructions:
 
     NYC_SALES_CLEANING = {
@@ -465,9 +466,37 @@ class cleaning_instructions:
         },
     }
 
+    REIS_RENAME = {
+        'Property Type': 'PROPERTY TYPE',
+        'Street Address': 'ADDRESS',
+        'City': 'CITY',
+        'State': 'STATE',
+        'Zip': 'ZIP',
+        'County': 'COUNTY',
+        'Year Renovated': 'YEAR RENOVATED',
+        'Asking Rent (Units)': 'ASKING RENT (UNITS)',
+        'Asking Rent (SF)': 'ASKING RENT (SF)',
+        'Vacancy': 'VACANCY',
+        'Building Class': 'BLDG CLASS',
+        'Cap Rate': 'CAP RATE',
+        'Sale Price': 'SALE PRICE',
+        'Sale Date': 'SALE DATE',
+        'Transaction Type': 'TRANSACTION TYPE',
+        'Buyer': 'BUYER',
+        'Seller': 'SELLER',
+        'Construction Status': 'CONSTRUCTION STATUS',
+        'Expected Completion': 'EXPECTED COMPLETION',
+        'Expected Groundbreak': 'EXPECTED GROUNDBREAK',
+        'Developer': 'DEVELOPER',
+        'Developer Phone': 'DEVELOPER PHONE',
+        'Sector Name': 'SECTOR NAME',
+        'Submarket': 'REIS SUBMARKET',
+    }
+
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
         'NYC_PLUTO_CLEANING': NYC_PLUTO_CLEANING,
+        'REIS_RENAME': REIS_RENAME,
     }
 
 class my_soup:
@@ -719,7 +748,7 @@ class cleaning_pipeline(my_soup):
 
         fn_core_pluto = 'NPL-001 All_Properties [bylocation;address] PLUTO Core.csv'
 
-        if (not os.path.exists(f'{pluto_path}/{fn_core_pluto}')) or (''==fn_opluto):
+        if (not os.path.exists(f'{pluto_path}/{fn_core_pluto}')) or (fn_opluto==''):
             df_pluto = pd.read_csv(f'{pluto_path}/{fn_old_pluto}', index_col=0, low_memory=False)
             df_sales = pd.read_csv(f'{pluto_path}/{fn_sales_master}', index_col=0, low_memory=False)
 
@@ -747,11 +776,14 @@ class cleaning_pipeline(my_soup):
 
             df_pluto_core.to_csv(f'{pluto_path}/{fn_core_pluto}')
 
-            return df_pluto
+            return df_pluto_core
 
         else:
             df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
             return df_pluto_old
+
+    def _load_reis(self, reis_path):
+        reis = pd.read_excel(f'{reis_path}/REIS All Properties 152k Report.xlsx')
 
     def _update_pluto_with_df(self, pluto_old, df_new):
         # all the columns of the old PLUTO
@@ -762,8 +794,9 @@ class cleaning_pipeline(my_soup):
         cols_id = ['ADDRESS', 'BLOCK', 'LOT', '# UNITS']
 
         # PLUTO update dataframe
+        # added emtpy columns to be added later on
         added_cols = list(set(cols_np)-set(cols_op))
-        pluto_up = pd.concat([pluto_old.copy(), pd.DataFrame(columns=added_cols)], sort=False)
+        pluto_up = pluto_old.copy().reindex(columns=cols_op+added_cols)   
 
         pluto_up = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index 
         df_new = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
@@ -796,6 +829,7 @@ class cleaning_pipeline(my_soup):
 
         return pluto_up
 
+    ### update the PLUTO with the most recent sales data cleaned and processed earlier 
     def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
         delta = pd.Timedelta(deltadays)
         sales = sales.sort_values(by=['SALE DATE'], ascending=False)
@@ -830,35 +864,38 @@ class cleaning_pipeline(my_soup):
         
         return pluto_loc_updated
 
+    ### export the final merged and most updated PLUTO 
     def _export_final_pluto(self, fpluto, fpluto_path):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
+    ### the entire pipeline to process PLUTO 
     def pipeline(self, pluto_path, fpluto_path, fn_opluto=''):
         # new sales data processed
-        print('>>>downloading, cleaning and processing new sales data')
+        print('>>> downloading, cleaning and processing new sales data')
         df_nsales = self.pipeline_sales_data()
 
         # new pluto data processed 
-        print('>>>downloading, cleaning and processing new PLUTO')
+        print('>>> downloading, cleaning and processing new PLUTO')
         df_npluto = self.pipeline_new_pluto()
 
         # old pluto data loaded
-        print('>>>processing and loading old PLUTO')
-        df_opluto = self._load_old_pluto(pluto_path, fn_opluto=fn_opluto)
+        print('>>> processing and loading old PLUTO')
+        df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
+        df_opluto.to_csv('../../data/pluto_exp.csv')
 
         # old pluto data updated with new pluto data
-        print('>>>updating old PLUTO with new PLUTO')
+        print('>>> updating old PLUTO with new PLUTO')
         df_upluto = self._update_pluto_with_df(df_opluto, df_npluto)
 
         # final pluto updated by the latest sales data
-        print('>>>updating PLUTO with recent sales data')
+        print('>>> updating PLUTO with recent sales data')
         final_pluto = self._update_pluto_with_sales_data(df_upluto, df_nsales, 40)
 
-        print('>>>exporting final PLUTO')
+        print('>>> exporting final PLUTO')
         self._export_final_pluto(final_pluto, fpluto_path)
-        print('>>>job done! Congratulations!')
+        print('>>> job done! Congratulations!')
 
 if __name__ == '__main__':
     cp = cleaning_pipeline()
