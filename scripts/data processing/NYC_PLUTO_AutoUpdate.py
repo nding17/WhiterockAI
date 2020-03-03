@@ -896,17 +896,13 @@ class cleaning_pipeline(my_soup):
 
     ### the entire pipeline to process PLUTO 
     def pipeline(self, pluto_path, fpluto_path, reis_path, fn_opluto=''):
-        # new sales data processed
-        print('>>> downloading, cleaning and processing new sales data')
-        df_nsales = self.pipeline_sales_data()
+        # old pluto data loaded
+        print('>>> processing and loading old PLUTO')
+        df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
 
         # new pluto data processed 
         print('>>> downloading, cleaning and processing new PLUTO')
         df_npluto = self.pipeline_new_pluto()
-
-        # old pluto data loaded
-        print('>>> processing and loading old PLUTO')
-        df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
 
         # old pluto data updated with new pluto data
         print('>>> updating old PLUTO with new PLUTO')
@@ -917,6 +913,10 @@ class cleaning_pipeline(my_soup):
 
         print('>>> updating PLUTO with REIS')
         df_rpluto = self._update_pluto_with_df(df_upluto, df_reis, cols_id=['ADDRESS', 'ZIP'])
+
+        # new sales data processed
+        print('>>> downloading, cleaning and processing new sales data')
+        df_nsales = self.pipeline_sales_data()
 
         # final pluto updated by the latest sales data
         print('>>> updating PLUTO with recent sales data')
