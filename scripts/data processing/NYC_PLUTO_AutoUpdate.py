@@ -829,7 +829,7 @@ class cleaning_pipeline(my_soup):
         reis = pd.read_excel(f'{reis_path}/REIS All Properties 152k Report.xlsx')
         return reis
 
-    def _clean_res(self, reis):
+    def _clean_reis(self, reis):
         cl = cleaning_instructions() # cleaning instructions for sales data
         ins = cl.instructions['REIS_RENAME']
         reis_cl = reis.rename(columns=ins, errors='raise')
@@ -850,7 +850,7 @@ class cleaning_pipeline(my_soup):
 
     def pipeline_reis_data(self, reis_path):
         reis = self._load_reis(reis_path)
-        reis_cl = self._clean_res(reis)
+        reis_cl = self._clean_reis(reis)
         return reis_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
@@ -895,7 +895,7 @@ class cleaning_pipeline(my_soup):
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
-    def pipeline(self, pluto_path, fpluto_path, reis_path, fn_opluto=''):
+    def pipeline(self, pluto_path, reis_path, fpluto_path, fn_opluto=''):
         # old pluto data loaded
         print('>>> processing and loading old PLUTO')
         df_opluto = self._load_old_pluto(pluto_path, fn_opluto)
