@@ -362,10 +362,88 @@ class cleaning_instructions:
 
     # combine two different dictionaries 
     CHI_SALES_CLEANING = {**CHI_PLUTO_CLEANING, **CHI_SALES_CLEANING_ADD}
+
+    REIS_RENAME = {
+        'Property Type': 'PROPERTY TYPE',
+        'Street Address': 'ADDRESS',
+        'City': 'CITY',
+        'State': 'STATE',
+        'Zip': 'ZIP',
+        'County': 'COUNTY',
+        'Year Renovated': 'YEAR RENOVATED',
+        'Asking Rent (Units)': 'ASKING RENT (UNITS)',
+        'Asking Rent (SF)': 'ASKING RENT (SF)',
+        'Vacancy': 'VACANCY',
+        'Building Class': 'BLDG CLASS',
+        'Cap Rate': 'CAP RATE',
+        'Sale Price': 'SALE PRICE',
+        'Sale Date': 'SALE DATE',
+        'Transaction Type': 'TRANSACTION TYPE',
+        'Buyer': 'BUYER',
+        'Year Built': 'YEAR BUILT',
+        'Seller': 'SELLER',
+        'Construction Status': 'CONSTRUCTION STATUS',
+        'Expected Completion': 'EXPECTED COMPLETION',
+        'Expected Groundbreak': 'EXPECTED GROUNDBREAK',
+        'Developer': 'DEVELOPER',
+        'Developer Phone': 'DEVELOPER PHONE',
+        'Sector Name': 'SECTOR NAME',
+        'Submarket': 'REIS SUBMARKET',
+    }
+
+    CHI_COL_MAPPING = {
+        'GARAGE ATTACHED': {
+            '2': '0',
+        },
+        'GARAGE 1 AREA': {
+            '2': '0',
+        },  
+        'GARAGE 1': {
+            '1': '1',
+            '2': '1.5',
+            '3': '2',
+            '4': '2.5',
+            '5': '3',
+            '6': '3.5',
+            '7': '0',
+            '8': '4',
+            '9': '4.5',
+            '10': '5',
+            '11': '5.5',
+            '12': '6',
+        },
+        'BLDG CODE': {
+            '202': 'SMALL 1 STORY',
+            '203': 'MEDIUM 1 STORY',
+            '204': 'LARGE 1 STORY',
+            '210': 'TOWNHOUSE',
+            '211': 'MULTI: 2 TO 6 UNITS',
+            '212': 'MIXED USE',
+            '234': 'SPLIT LEVEL',
+            '295': 'TOWNHOUSE',
+            '205': '2 OR MORE STORIES',
+            '206': '2 OR MORE STORIES',
+            '207': '2 OR MORE STORIES',
+            '208': '2 OR MORE STORIES',
+            '209': '2 OR MORE STORIES',
+            '278': '2 OR MORE STORIES',
+        },
+        'BLDG CAT': {
+            '1': '1',
+            '2': '2',
+            '3': '3',
+            '5': '1.5',
+            '6': '1.5',
+            '7': '1.5',
+            '8': '1.5',
+            '9': '1.5',
+        }
+    }
     
     instructions = {
         'CHI_PLUTO_CLEANING': CHI_PLUTO_CLEANING,
         'CHI_SALES_CLEANING': CHI_SALES_CLEANING,
+        'REIS_RENAME': REIS_RENAME,
     }
 
 class cleaning_pipeline:
@@ -403,7 +481,15 @@ class cleaning_pipeline:
                         'LAND SF': str}, 
                     errors='ignore').reset_index(drop=True)
 
-        return newdata_cl
+        newdata_cl['SALE DATE'] = pd.to_datetime(newdata_cl['SALE DATE'])
+
+        cleaner = Address_cleaner()
+        newdata_cl['ADDRESS'] = cleaner.easy_clean(newdata_cl['ADDRESS'].str.upper())
+
+        newdata_cl = newdata_cl.loc[:,~newdata_cl.columns.duplicated()]
+        newdata_final = newdata_cl.copy().reindex(columns=newdata_cl.columns.tolist()+['BLDG CODE DEF', '# FLOORS'])  
+
+        return newdata_final
 
     def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF']):
         # make sure there are no duplicated columns 
@@ -477,6 +563,11 @@ class cleaning_pipeline:
         pluto['BLDG CODE'] = pluto['BLDG CODE'].astype(str, errors='ignore') \
                                                .apply(lambda x: x.split('.')[0])
 
+        cleaner = Address_cleaner()
+        pluto['ADDRESS'] = cleaner.easy_clean(pluto['ADDRESS'].str.upper())
+
+        pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
+
         pluto_cl = pluto.copy().sort_values(by='SALE DATE') \
                                .drop_duplicates(subset=['PIN', 
                                                         'ADDRESS', 
@@ -487,16 +578,104 @@ class cleaning_pipeline:
 
         return pluto_cl
 
+    ### update the PLUTO with the most recent sales data cleaned and processed earlier 
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+        delta = pd.Timedelta(deltadays)
+        sales = sales.sort_values(by=['SALE DATE'], ascending=False)
+        latest_date = sales['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
+                           (sales['SALE DATE']<=latest_date)].index.tolist()
+        sales_sub = sales.iloc[keep_index].reset_index(drop=True)
+
+        sales_sub = sales_sub.sort_values(by='SALE DATE') \
+                             .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
+                                              keep='last')
+
+        final_pluto = self._update_pluto_with_df(pluto, sales_sub)
+
+        return final_pluto
+
+    def _load_reis(self, reis_path):
+        reis = pd.read_excel(f'{reis_path}/REIS Full Property Report 150k.xlsx')
+        return reis
+
+    def _clean_reis(self, reis):
+        cl = cleaning_instructions() # cleaning instructions for sales data
+        ins = cl.instructions['REIS_RENAME']
+        reis_cl = reis.rename(columns=ins, errors='raise')
+        reis_cl = reis_cl[[*ins.values()]]
+
+        cleaner = Address_cleaner()
+        reis_cl['ADDRESS'] = reis_cl['ADDRESS'].astype(str)
+        reis_cl['ADDRESS'] = cleaner.easy_clean(reis_cl['ADDRESS'].str.upper())
+
+        reis_cl = reis_cl.reindex(reis_cl.columns.tolist(), axis=1) \
+                         .astype(dtype={'SALE DATE': str})
+        
+        reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
+        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
+                         .reset_index(drop=True)
+
+        return reis_cl
+
+    def pipeline_reis_data(self, reis_path):
+        reis = self._load_reis(reis_path)
+        reis_cl = self._clean_reis(reis)
+        return reis_cl
+
+    def _process_pluto(self, pluto):
+        drop_index = pluto[pluto['Modeling Group']=='NCHARS'].index.tolist() + \
+                     pluto[pluto['Total Building Square Feet']>0].index.tolist() + \
+                     pluto[pluto['BLDG CODE']=='299'].index.tolist()
+
+        pluto1 = pluto.copy().drop(drop_index).reset_index(drop=True)
+        pluto1 = pluto1.astype({
+                'GARAGE ATTACHED': str,
+                'GARAGE 1 AREA': str,
+                'GARAGE 1': str,
+                'BLDG CODE': str,
+                'BLDG CAT': str,
+            }, errors='ignore')
+
+        pcols = ['GARAGE ATTACHED', 
+                 'GARAGE 1 AREA', 
+                 'GARAGE 1', 
+                 'BLDG CODE', 
+                 'BLDG CAT']
+
+        pluto1[pcols] = pluto1[pcols].apply(lambda x: x.split('.')[0])
+
+
+    def pipeline(self, pluto_path, reis_path, ouput_path):
+        ci = cleaning_instructions()
+        ins = ci.instructions
+
+        print('>>> Downloanding and cleaning sales data, takes a while')
+        sales_data = self.pipeline_data(self._chi_sales_api_id, ins['CHI_SALES_CLEANING'])
+
+        print('>>> Downloading and cleaning new PLUTO, takes a while, please be patient')
+        pluto_new = self.pipeline_data(self._chi_pluto_api_id, ins['CHI_PLUTO_CLEANING'])
+
+        print('>>> Loading and cleaning old PLUTO')
+        pluto_old = self._load_old_pluto(pluto_path)
+
+        print('>>> Updating old PLUTO with new PLUTO')
+        pluto_stage1 = self._update_pluto_with_df(pluto_old, pluto_new)
+
+        print('>>> Updating stage 1 PLUTO with sales data')
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40)
+
+        print('>>> Loading and cleaning REIS')
+        reis = self.pipeline_reis_data(reis_path)
+
+        print('>>> Updating stage 2 PLUTO with REIS')
+        pluto_stage3 = self._update_pluto_with_df(pluto_stage2, reis, cols_id=['ADDRESS'])
+
 if __name__ == '__main__':
+    pluto_path = '../../data/CHI Data'
+    reis_path = '../../data/CHI Data'
+    output_path = '../../data'
+
     cp = cleaning_pipeline()
-    ci = cleaning_instructions()
-    ins = ci.instructions['CHI_PLUTO_CLEANING']
-    api_id = cp._chi_pluto_api_id
-    newdata = cp.pipeline_data(api_id, ins)
-
-    ins_s = ci.instructions['CHI_SALES_CLEANING']
-    api_id_s = cp._chi_sales_api_id
-    newdata_s = cp.pipeline_data(api_id_s, ins_s)
-
-    pluto_old = cp._load_old_pluto('../../data/CHI Data')
-    cp._update_pluto_with_df(newdata, newdata_s)
+    cp.pipeline(pluto_path, reis_path, output_path)
