@@ -444,6 +444,7 @@ class cleaning_instructions:
         'CHI_PLUTO_CLEANING': CHI_PLUTO_CLEANING,
         'CHI_SALES_CLEANING': CHI_SALES_CLEANING,
         'REIS_RENAME': REIS_RENAME,
+        'CHI_COL_MAPPING': CHI_COL_MAPPING,
     }
 
 class cleaning_pipeline:
@@ -646,6 +647,14 @@ class cleaning_pipeline:
 
         pluto1[pcols] = pluto1[pcols].apply(lambda x: x.split('.')[0])
 
+        ci = cleaning_instructions()
+        ins = ci.instructions['CHI_COL_MAPPING']
+
+        pluto1['GARAGE ATTACHED'] = pluto1['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED'])
+        pluto1['GARAGE 1 AREA'] = pluto1['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA'])
+        pluto1['GARAGE 1'] = pluto1['GARAGE 1'].map(ins['GARAGE 1'])
+        pluto1['BLDG CODE DEF'] = pluto1['BLDG CODE'].map(ins['BLDG CODE'])
+        pluto1['# FLOORS'] = pluto1['BLDG CAT'].map(ins['BLDG CAT'])
 
     def pipeline(self, pluto_path, reis_path, ouput_path):
         ci = cleaning_instructions()
