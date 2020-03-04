@@ -30,11 +30,11 @@ class clean_instructions:
     rename_dict = {
         'number_of_rooms': {
             'delete': 0,
-            'new_name': '# ROOMS',
+            'new name': '# ROOMS',
         },
         'assessment_date': {
             'delete': 0,
-            'new_name': 'assessment_date',
+            'new name': 'assessment_date',
         },
         'beginning_point': {
             'delete': 1,
@@ -47,63 +47,63 @@ class clean_instructions:
         },
         'building_code_description': {
             'delete': 0,
-            'new_name': 'BLDG CODE',
+            'new name': 'BLDG CODE',
         },
         'category_code': {
             'delete': 1,
         },
         'category_code_description': {
             'delete': 0,
-            'new_name': 'BLDG CAT',
+            'new name': 'BLDG CAT',
         },
         'census_tract': {
             'delete': 1,
         },
         'central_air': {
             'delete': 0,
-            'new_name': 'CENTRAL AIR',
+            'new name': 'CENTRAL AIR',
         },
         'cross_reference': {
             'delete': 1,
         },
         'date_exterior_condition': {
             'delete': 0,
-            'new_name': 'EXT CONDITION DATE',
+            'new name': 'EXT CONDITION DATE',
         },
         'depth': {
             'delete': 0,
-            'new_name': 'LOT DEPTH',
+            'new name': 'LOT DEPTH',
         },
         'exempt_building': {
             'delete': 0,
-            'new_name': 'BLDG EXEMPT',
+            'new name': 'BLDG EXEMPT',
         },
         'exempt_land': {
             'delete': 0,
-            'new_name': 'LAND EXEMPT',
+            'new name': 'LAND EXEMPT',
         },
         'exterior_condition': {
             'delete': 0,
-            'new_name': 'EXT CONDITION',
+            'new name': 'EXT CONDITION',
         },
         'fireplaces': {
             'delete': 0,
-            'new_name': '# FIREPLACE',
+            'new name': '# FIREPLACE',
         },
         'frontage': {
             'delete': 0,
-            'new_name': 'LOT FRONTAGE',
+            'new name': 'LOT FRONTAGE',
         },
         'fuel': {
             'delete': 1,
         },
         'garage_spaces': {
             'delete': 0,
-            'new_name': 'GARAGE',
+            'new name': 'GARAGE',
         },
         'garage_type': {
             'delete': 0,
-            'new_name': 'GARAGE TYPE',
+            'new name': 'GARAGE TYPE',
         },
         'general_construction': {
             'delete': 1,
@@ -113,7 +113,7 @@ class clean_instructions:
         },
         'homestead_exemption': {
             'delete': 0,
-            'new_name': 'homestead_exemption',
+            'new name': 'homestead_exemption',
         },
         'house_extension': {
             'delete': 1,
@@ -123,11 +123,11 @@ class clean_instructions:
         },
         'interior_condition': {
             'delete': 0,
-            'new_name': 'INT CONDITION',
+            'new name': 'INT CONDITION',
         },
         'location': {
             'delete': 0,
-            'new_name': 'ADDRESS',
+            'new name': 'ADDRESS',
         },
         'mailing_address_1': {
             'delete': 1,
@@ -140,79 +140,79 @@ class clean_instructions:
         },
         'mailing_city_state': {
             'delete': 0,
-            'new_name': 'OWNER CITY',
+            'new name': 'OWNER CITY',
         },
         'mailing_street': {
             'delete': 0,
-            'new_name': 'OWNER ADDRESS',
+            'new name': 'OWNER ADDRESS',
         },
         'mailing_zip': {
             'delete': 0,
-            'new_name': 'OWNER ZIP',
+            'new name': 'OWNER ZIP',
         },
         'market_value': {
             'delete': 0,
-            'new_name': 'MARKET VALUE',
+            'new name': 'MARKET VALUE',
         },
         'market_value_date': {
             'delete': 1,
         },
         'number_of_bathrooms': {
             'delete': 0,
-            'new_name': '# BATH',
+            'new name': '# BATH',
         },
         'number_of_bedrooms': {
             'delete': 0,
-            'new_name': '# BED',
+            'new name': '# BED',
         },
         'basements': {
             'delete': 0,
-            'new_name': 'BASEMENT',
+            'new name': 'BASEMENT',
         },
         'number_stories': {
             'delete': 0,
-            'new_name': '# FLOORS',
+            'new name': '# FLOORS',
         },
         'off_street_open': {
             'delete': 0,
-            'new_name': 'off_street_open'
+            'new name': 'off_street_open'
         },
         'other_building': {
             'delete': 0,
-            'new_name': 'BUILDING',
+            'new name': 'BUILDING',
         },
         'owner_1': {
             'delete': 0,
-            'new_name': 'OWNER',
+            'new name': 'OWNER',
         },
         'owner_2': {
             'delete': 1,
         },
         'parcel_number': {
             'delete': 0,
-            'new_name': 'PARCEL ID',
+            'new name': 'PARCEL ID',
         },
         'parcel_shape': {
             'delete': 0,
-            'new_name': 'PARCEL SHAPE',
+            'new name': 'PARCEL SHAPE',
         },
         'quality_grade': {
             'delete': 1
         },
         'recording_date': {
             'delete': 0,
-            'new_name': 'RECORDING DATE',
+            'new name': 'RECORDING DATE',
         },
         'registry_number': {
             'delete': 1
         },
         'sale_date': {
             'delete': 0,
-            'new_name': 'SALE DATE',
+            'new name': 'SALE DATE',
         },
         'sale_price': {
             'delete': 0,
-            'new_name': 'SALE PRICE',
+            'new name': 'SALE PRICE',
         },
         'separate_utilities': {
             'delete': 1,
@@ -243,23 +243,23 @@ class clean_instructions:
         },
         'taxable_building': {
             'delete': 0,
-            'new_name': 'BLDG ASSD $',
+            'new name': 'BLDG ASSD $',
         },
         'taxable_land': {
             'delete': 0,
-            'new_name': 'LAND ASSD $',
+            'new name': 'LAND ASSD $',
         },
         'topography': {
             'delete': 0,
-            'new_name': 'TOPOGRAPHY',
+            'new name': 'TOPOGRAPHY',
         },
         'total_area': {
             'delete': 0,
-            'new_name': 'LAND SF',
+            'new name': 'LAND SF',
         },
         'total_livable_area': {
             'delete': 0,
-            'new_name': 'GSF',
+            'new name': 'GSF',
         },
         'type_heater': {
             'delete': 1,
@@ -269,40 +269,40 @@ class clean_instructions:
         },
         'unit': {
             'delete': 0,
-            'new_name': 'UNIT #',
+            'new name': 'UNIT #',
         },
         'utility': {
             'delete': 1,
         },
         'view_type': {
             'delete': 0,
-            'new_name': 'VIEW',
+            'new name': 'VIEW',
         },
         'year_built': {
             'delete': 0,
-            'new_name': 'YEAR BUILT',
+            'new name': 'YEAR BUILT',
         },
         'year_built_estimate': {
             'delete': 1,
         },
         'zip_code': {
             'delete': 0,
-            'new_name': 'ZIP',
+            'new name': 'ZIP',
         },
         'zoning': {
             'delete': 0,
-            'new_name': 'ZONING',
+            'new name': 'ZONING',
         },
         'objectid': {
             'delete': 1,
         },
         'lat': {
             'delete': 0,
-            'new_name': 'LATITUDE',
+            'new name': 'LATITUDE',
         },
         'lng': {
             'delete': 0,
-            'new_name': 'LONGITUDE',
+            'new name': 'LONGITUDE',
         },
     }
 
@@ -407,7 +407,7 @@ class cleaning_pipline:
             if rename_dict[column]['delete'] == 1:
                 df_new = df_new.drop([column], axis=1)
             if rename_dict[column]['delete'] == 0:
-                df_new = df_new.rename(columns={column: rename_dict[column]['new_name']})
+                df_new = df_new.rename(columns={column: rename_dict[column]['new name']})
         
         df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1) \
                        .astype(dtype={'SALE DATE': str})
