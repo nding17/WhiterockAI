@@ -306,7 +306,8 @@ class cleaning_instructions:
             'delete': 1
         },
         'town_and_neighborhood': {
-            'delete': 1,
+            'delete': 0,
+            'new name': 'Town and Neighborhood'
         }
     }
 
@@ -334,23 +335,24 @@ class cleaning_instructions:
             'delete': 1,
         },
         'town_and_neighborhood_sf_group_only': {
-            'delete': 1,
+            'delete': 0,
+            'new name': 'Town and Neighborhood, SF Group Only'
         },
         'most_recent_sale': {
             'delete': 0,
-            'new name': 'most_recent_sale'
+            'new name': 'Most Rencent Sale'
         },
         'road_proximity': {
             'delete': 0,
-            'new name': 'road_proximity'
+            'new name': 'Road Proximity'
         },
         'est_bldg': {
             'delete': 0,
-            'new name': 'est_bldg',
+            'new name': 'Estimate (Building)',
         },
         'est_land': {
             'delete': 0,
-            'new name': 'est_land',
+            'new name': 'Estimate (Land)',
         },
         'sale_price': {
             'delete': 0,
@@ -375,7 +377,7 @@ class cleaning_pipeline:
     ### extract data from API 
     def _extract_data(self, api_id):
         # MAX_LIMIT = 1000000000
-        MAX_LIMIT = 100000
+        MAX_LIMIT = 10000
         client = Socrata("datacatalog.cookcountyil.gov", None)
         results = client.get(api_id, limit=MAX_LIMIT)
         data = pd.DataFrame.from_records(results)
@@ -393,10 +395,69 @@ class cleaning_pipeline:
             if ins[column]['delete'] == 0:
                 newdata = newdata.rename(columns={column: ins[column]['new name']})
 
-        newdata_cl = newdata.drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'])
-        print(newdata.shape, newdata_cl.shape)
-        return newdata
+        newdata_cl = newdata.copy().drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'])
+        newdata_cl = newdata_cl.astype({
+                        'PIN': str, 
+                        'ADDRESS': str,
+                        'BLDG CODE': str,
+                        'LAND SF': str}, 
+                    errors='ignore').reset_index(drop=True)
 
+        return newdata_cl
+
+    def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF']):
+        # make sure there are no duplicated columns 
+        # to prevent conflicts 
+        pluto_old = pluto_old.loc[:,~pluto_old.columns.duplicated()]
+        df_new = df_new.loc[:,~df_new.columns.duplicated()]
+
+        # all the columns of the old PLUTO
+        cols_op = pluto_old.columns.tolist()
+        # all the columns of the new PLUTO
+        cols_np = df_new.columns.tolist()
+
+        # PLUTO update dataframe
+        # added emtpy columns to be added later on
+        added_cols = list(set(cols_np)-set(cols_op))
+        pluto_up = pluto_old.copy().reindex(columns=cols_op+added_cols)
+
+
+        pluto_up_check = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index
+        df_new_check = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
+
+        # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
+        # properties in PLUTO
+        id_up = pluto_up_check[cols_id] # identifiers for the old PLUTO
+        id_new = df_new_check[cols_id] # identifiers for the new PLUTO
+
+        # find the same identifiers: identifiers that exist in both new and old PLUTO data
+        # as well as the different identifiers that are unique in each PLUTO data
+        same_id = pd.merge(id_up, id_new, on=cols_id, how='inner')
+        diff_id = id_new.loc[~id_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)] # diff identifiers
+
+        print(f'{id_new.shape[0]} rows to be integrated in total')
+        print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
+
+        if same_id.shape[0]>0:
+            df_new = df_new.reset_index(drop=True)
+            pluto_up = pluto_up.reset_index(drop=True)
+
+            # the index of a list of the same identifiers in the new PLUTO
+            idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
+            # the index of a list of the same identifiers in the old PLUTO
+            idx_sid_up = pluto_up.loc[pluto_up.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
+
+            # update the old PLUTO with the data in the new PLUTO
+            cols_update = list(set(cols_np)-set(cols_id))
+            pluto_up.at[idx_sid_up, cols_update] = df_new[cols_update].iloc[idx_sid_new]
+
+        # concat the updated PLUTO with new property data that's not 
+        # already in the old PLUTO file
+        pluto_up = pd.concat([pluto_up, df_new.loc[df_new.set_index(cols_id).index.isin(diff_id.set_index(cols_id).index)]], sort=False)
+
+        return pluto_up
+
+    ### data pipeline for extracting and cleaning new data 
     def pipeline_data(self, api_id, ins):
         data = self._extract_data(api_id)
         newdata = self._clean_data(data, ins)
@@ -407,12 +468,22 @@ class cleaning_pipeline:
         pluto = pd.read_csv(f'{pluto_path}/CHIPL-001 All_Properties PLUTO.csv', low_memory=False)
         pluto = pluto.dropna(subset=['PIN', 'ADDRESS'])
         pluto = pluto.drop_duplicates()
+
         pluto['PIN'] = pluto['PIN'].astype(str, errors='ignore') \
                                    .apply(lambda x: x.split('.')[0])
 
-        pluto_cl = pluto.sort_values(by='SALE DATE') \
-                        .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
-                                         keep='last')
+        pluto['LAND SF'] = pluto['LAND SF'].apply(lambda x: x.replace(',', ''))
+
+        pluto['BLDG CODE'] = pluto['BLDG CODE'].astype(str, errors='ignore') \
+                                               .apply(lambda x: x.split('.')[0])
+
+        pluto_cl = pluto.copy().sort_values(by='SALE DATE') \
+                               .drop_duplicates(subset=['PIN', 
+                                                        'ADDRESS', 
+                                                        'BLDG CODE', 
+                                                        'LAND SF'], 
+                                                keep='last') \
+                               .reset_index(drop=True)
 
         return pluto_cl
 
@@ -423,4 +494,9 @@ if __name__ == '__main__':
     api_id = cp._chi_pluto_api_id
     newdata = cp.pipeline_data(api_id, ins)
 
-    # cp._load_old_pluto('../../data/CHI Data')
+    ins_s = ci.instructions['CHI_SALES_CLEANING']
+    api_id_s = cp._chi_sales_api_id
+    newdata_s = cp.pipeline_data(api_id_s, ins_s)
+
+    pluto_old = cp._load_old_pluto('../../data/CHI Data')
+    cp._update_pluto_with_df(newdata, newdata_s)
