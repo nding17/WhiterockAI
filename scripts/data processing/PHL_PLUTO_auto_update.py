@@ -692,8 +692,8 @@ if __name__ == '__main__':
     ### these are the only two lines of code the users need to specify based on their
     ### own machine's configuration
 
-    pluto_path = '../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
-    export_path = '../data/project'
+    pluto_path = '../../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
+    export_path = '../../data/project'
 
     ci = clean_instructions()
     instructions = ci.instructions
