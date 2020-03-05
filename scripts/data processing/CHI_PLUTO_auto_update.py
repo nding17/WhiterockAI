@@ -455,8 +455,8 @@ class cleaning_pipeline:
 
     ### extract data from API 
     def _extract_data(self, api_id):
-        # MAX_LIMIT = 1000000000
-        MAX_LIMIT = 10000
+        MAX_LIMIT = 1000000000
+        # MAX_LIMIT = 10000
         client = Socrata("datacatalog.cookcountyil.gov", None)
         results = client.get(api_id, limit=MAX_LIMIT)
         data = pd.DataFrame.from_records(results)
@@ -657,11 +657,11 @@ class cleaning_pipeline:
 
         # map the values to the corresponding values in WHITEROCK 
         # use .fillna for Non-Exhaustive Mapping
-        pluto_final['GARAGE ATTACHED'] = pluto_final['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED']).fillna(pluto_final.loc['GARAGE ATTACHED'])
-        pluto_final['GARAGE 1 AREA'] = pluto_final['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA']).fillna(pluto_final.loc['GARAGE 1 AREA'])
-        pluto_final['GARAGE 1'] = pluto_final['GARAGE 1'].map(ins['GARAGE 1']).fillna(pluto_final.loc['GARAGE 1'])
-        pluto_final['BLDG CODE DEF'] = pluto_final['BLDG CODE'].map(ins['BLDG CODE']).fillna(pluto_final.loc['BLDG CODE DEF'])
-        pluto_final['# FLOORS'] = pluto_final['BLDG CAT'].map(ins['BLDG CAT']).fillna(pluto_final.loc['# FLOORS'])
+        pluto_final['GARAGE ATTACHED'] = pluto_final['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED']).fillna(pluto_final['GARAGE ATTACHED'])
+        pluto_final['GARAGE 1 AREA'] = pluto_final['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA']).fillna(pluto_final['GARAGE 1 AREA'])
+        pluto_final['GARAGE 1'] = pluto_final['GARAGE 1'].map(ins['GARAGE 1']).fillna(pluto_final['GARAGE 1'])
+        pluto_final['BLDG CODE DEF'] = pluto_final['BLDG CODE'].map(ins['BLDG CODE']).fillna(pluto_final['BLDG CODE DEF'])
+        pluto_final['# FLOORS'] = pluto_final['BLDG CAT'].map(ins['BLDG CAT']).fillna(pluto_final['# FLOORS'])
 
         pluto_final = pluto_final.reset_index(drop=True)
 
