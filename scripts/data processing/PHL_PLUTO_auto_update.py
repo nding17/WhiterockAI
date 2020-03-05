@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from datetime import datetime
+from datetime import date
 import warnings
 import urllib
 import os
@@ -585,7 +586,8 @@ class cleaning_pipline:
         return df
 
     def load_old_PLUTO(self, pluto_path):
-        pluto = pd.read_csv(pluto_path)
+        fn_pluto = 'PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
+        pluto = pd.read_csv(f'{pluto_path}/{fn_pluto}')
         return pluto
 
     def export_data(self, data, exp_path, file_name):
@@ -610,7 +612,7 @@ class cleaning_pipline:
         df_sub = self.subset_df_date(df_new, '40 days')
 
         self.logger(self.export_data, instructions)
-        self.export_data(df_sub, export_path, 'PLUTO_monthly_1.18.2020.csv')
+        self.export_data(df_sub, export_path, f'PHL PLUTO monthly {date.today()}.csv')
         
         self.logger(self.load_old_PLUTO, instructions)
         pluto = self.load_old_PLUTO(pluto_path)
@@ -624,7 +626,7 @@ class cleaning_pipline:
         print(f'\t->post-processed PLUTO df shape: {pnew.shape}')
         
         self.logger(self.export_data, instructions)
-        self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO PLUTO_monthly_1.18.2020.csv')
+        self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO.csv')
 
 ### Google API image downloading class
 class PicDownloader:
@@ -692,8 +694,8 @@ if __name__ == '__main__':
     ### these are the only two lines of code the users need to specify based on their
     ### own machine's configuration
 
-    pluto_path = '../../data/project/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
-    export_path = '../../data/project'
+    pluto_path = '../../data/PHL Data'
+    export_path = '../../data'
 
     ci = clean_instructions()
     instructions = ci.instructions

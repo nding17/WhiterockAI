@@ -895,7 +895,7 @@ class cleaning_pipeline(my_soup):
     def _export_final_pluto(self, fpluto, fpluto_path):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
-        fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto} {date.today()}.csv')
+        fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto}.csv')
 
     ### the entire pipeline to process PLUTO 
     def pipeline(self, pluto_path, reis_path, fpluto_path, fn_opluto=''):

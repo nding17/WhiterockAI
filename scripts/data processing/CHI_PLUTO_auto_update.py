@@ -570,10 +570,7 @@ class cleaning_pipeline:
         pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
 
         pluto_cl = pluto.copy().sort_values(by='SALE DATE') \
-                               .drop_duplicates(subset=['PIN', 
-                                                        'ADDRESS', 
-                                                        'BLDG CODE', 
-                                                        'LAND SF'], 
+                               .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
                                                 keep='last') \
                                .reset_index(drop=True)
 
@@ -683,7 +680,7 @@ class cleaning_pipeline:
 
     def _export_pluto(self, pluto_final, output_path):
         date_today = str(date.today())
-        pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO {date_today}.csv')
+        pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
 
     def pipeline(self, pluto_path, reis_path, ouput_path):
         ci = cleaning_instructions()
