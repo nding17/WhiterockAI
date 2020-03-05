@@ -236,7 +236,7 @@ class phl_cleaning_pipeline:
         df_sub = self.subset_df_date(df_new, '40 days')
 
         self.logger(self.export_data, instructions)
-        self.export_data(df_sub, export_path, f'PHL PLUTO monthly {date.today()}.csv')
+        self.export_data(df_sub, export_path, f'PHL PLUTO Monthly {date.today()}.csv')
         
         self.logger(self.load_old_PLUTO, instructions)
         pluto = self.load_old_PLUTO(pluto_path)
@@ -641,10 +641,22 @@ class nyc_cleaning_pipeline(my_soup):
         return pluto_loc_updated
 
     ### export the final merged and most updated PLUTO 
-    def _export_final_pluto(self, fpluto, fpluto_path):
+    def _export_final_pluto(self, fpluto, fpluto_path, deltadays=40):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
+        fpluto_final['SALE DATE'] = pd.to_datetime(fpluto_final['SALE DATE'])
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto}.csv')
+
+        delta = pd.Timedelta(deltadays)
+        fpluto_final = fpluto_final.sort_values(by=['SALE DATE'], ascending=False)
+        latest_date = fpluto_final['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+
+        keep_index = fpluto_final[(fpluto_final['SALE DATE']>=earliest_date) & 
+                                  (fpluto_final['SALE DATE']<=latest_date)].index.tolist()
+
+        pluto_monthly = fpluto_final.iloc[keep_index].reset_index(drop=True)
+        pluto_monthly.to_csv(f'{output_path}/NPL PLUTO Monthly {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
     def pipeline(self, instructions, pluto_path, reis_path, fpluto_path, fn_opluto=''):
@@ -912,9 +924,20 @@ class chi_cleaning_pipeline:
         
         return pluto_final
 
-    def _export_pluto(self, pluto_final, output_path):
-        date_today = str(date.today())
+    def _export_pluto(self, pluto_final, output_path, deltadays=40):
+        pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
         pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
+
+        delta = pd.Timedelta(deltadays)
+        pluto_final = pluto_final.sort_values(by=['SALE DATE'], ascending=False)
+        latest_date = pluto_final['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+
+        keep_index = pluto_final[(pluto_final['SALE DATE']>=earliest_date) & 
+                                 (pluto_final['SALE DATE']<=latest_date)].index.tolist()
+
+        pluto_monthly = pluto_final.iloc[keep_index].reset_index(drop=True)
+        pluto_monthly.to_csv(f'{output_path}/CHIPL PLUTO Monthly {date.today()}.csv')
 
     def pipeline(self, ins, pluto_path, reis_path, ouput_path):
         print('>>> Downloanding and cleaning sales data, takes a while')
