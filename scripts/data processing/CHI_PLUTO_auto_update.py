@@ -626,12 +626,16 @@ class cleaning_pipeline:
         return reis_cl
 
     def _process_pluto(self, pluto):
+
+        pluto['Total Building Square Feet'] = pluto['Total Building Square Feet'].astype(float, errors='ignore')
+
         drop_index = pluto[pluto['Modeling Group']=='NCHARS'].index.tolist() + \
                      pluto[pluto['Total Building Square Feet']>0].index.tolist() + \
                      pluto[pluto['BLDG CODE']=='299'].index.tolist()
 
-        pluto1 = pluto.copy().drop(drop_index).reset_index(drop=True)
-        pluto1 = pluto1.astype({
+        pluto_final = pluto.copy().drop(drop_index).reset_index(drop=True)
+
+        pluto_final = pluto_final.astype({
                 'GARAGE ATTACHED': str,
                 'GARAGE 1 AREA': str,
                 'GARAGE 1': str,
@@ -645,16 +649,39 @@ class cleaning_pipeline:
                  'BLDG CODE', 
                  'BLDG CAT']
 
-        pluto1[pcols] = pluto1[pcols].apply(lambda x: x.split('.')[0])
+        for col in pcols:
+            pluto_final[col] = pluto_final[col].apply(lambda x: str(x).split('.')[0] if float(x).is_integer() else str(x))
 
         ci = cleaning_instructions()
         ins = ci.instructions['CHI_COL_MAPPING']
 
-        pluto1['GARAGE ATTACHED'] = pluto1['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED'])
-        pluto1['GARAGE 1 AREA'] = pluto1['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA'])
-        pluto1['GARAGE 1'] = pluto1['GARAGE 1'].map(ins['GARAGE 1'])
-        pluto1['BLDG CODE DEF'] = pluto1['BLDG CODE'].map(ins['BLDG CODE'])
-        pluto1['# FLOORS'] = pluto1['BLDG CAT'].map(ins['BLDG CAT'])
+        # map the values to the corresponding values in WHITEROCK 
+        pluto_final['GARAGE ATTACHED'] = pluto_final['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED'])
+        pluto_final['GARAGE 1 AREA'] = pluto_final['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA'])
+        pluto_final['GARAGE 1'] = pluto_final['GARAGE 1'].map(ins['GARAGE 1'])
+        pluto_final['BLDG CODE DEF'] = pluto_final['BLDG CODE'].map(ins['BLDG CODE'])
+        pluto_final['# FLOORS'] = pluto_final['BLDG CAT'].map(ins['BLDG CAT'])
+
+        pluto_final = pluto_final.reset_index(drop=True)
+
+        # Process the YEAR BUILT: substract the current year from the year in the original df 
+        pluto_final['YEAR BUILT'] = pluto_final['YEAR BUILT'].astype(float)
+
+        # select the year that is not NaN and process it 
+        ix_nan = pluto_final[pluto_final['YEAR BUILT'].isnull()]
+        pluto_final['YEAR BUILT'].iloc[~ix_nan] = pluto_final['YEAR BUILT'].iloc[~ix_nan].astype(int)
+
+        # subtract the current year from the year in the original data
+        current_year = int(date.today().year)
+        pluto_final['YEAR BUILT'].iloc[~ix_nan] = current_year-pluto_final['YEAR BUILT'].iloc[~ix_nan]['YEAR BUILT']
+
+        pluto_final = pluto_final.reset_index(drop=True)
+        
+        return pluto_final
+
+    def _export_pluto(self, pluto_final, output_path):
+        date_today = str(date.today())
+        pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO {date_today}.csv')
 
     def pipeline(self, pluto_path, reis_path, ouput_path):
         ci = cleaning_instructions()
@@ -672,14 +699,23 @@ class cleaning_pipeline:
         print('>>> Updating old PLUTO with new PLUTO')
         pluto_stage1 = self._update_pluto_with_df(pluto_old, pluto_new)
 
-        print('>>> Updating stage 1 PLUTO with sales data')
+        print('>>> Updating [stage 1] PLUTO with sales data')
         pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40)
 
         print('>>> Loading and cleaning REIS')
         reis = self.pipeline_reis_data(reis_path)
 
-        print('>>> Updating stage 2 PLUTO with REIS')
+        print('>>> Updating [stage 2] PLUTO with REIS')
         pluto_stage3 = self._update_pluto_with_df(pluto_stage2, reis, cols_id=['ADDRESS'])
+
+        print('>>> Processing [final stage] PLUTO')
+        pluto_final = self._process_pluto(pluto_stage3)
+
+        print('>>> Exporting final PLUTO')
+        self._export_pluto(pluto_final, output_path)
+
+        print('>>> Job Done! Congratulations!')
+
 
 if __name__ == '__main__':
     pluto_path = '../../data/CHI Data'
