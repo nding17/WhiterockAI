@@ -668,12 +668,12 @@ class cleaning_pipeline:
         pluto_final['YEAR BUILT'] = pluto_final['YEAR BUILT'].astype(float)
 
         # select the year that is not NaN and process it 
-        ix_nan = pluto_final[pluto_final['YEAR BUILT'].isnull()]
-        pluto_final['YEAR BUILT'].iloc[~ix_nan] = pluto_final['YEAR BUILT'].iloc[~ix_nan].astype(int)
+        idx = pluto_final[~pluto_final['YEAR BUILT'].isnull()].index
+        pluto_final['YEAR BUILT'].iloc[idx] = pluto_final['YEAR BUILT'].iloc[idx].astype(int)
 
         # subtract the current year from the year in the original data
         current_year = int(date.today().year)
-        pluto_final['YEAR BUILT'].iloc[~ix_nan] = current_year-pluto_final['YEAR BUILT'].iloc[~ix_nan]['YEAR BUILT']
+        pluto_final['YEAR BUILT'].iloc[idx] = current_year-pluto_final['YEAR BUILT'].iloc[idx]['YEAR BUILT']
 
         pluto_final = pluto_final.reset_index(drop=True)
         
