@@ -691,27 +691,35 @@ class cleaning_pipeline:
 
         print('>>> Downloanding and cleaning sales data, takes a while')
         sales_data = self.pipeline_data(self._chi_sales_api_id, ins['CHI_SALES_CLEANING'])
+        print(f'-> Sales data shape: {sales_data.shape}')
 
         print('>>> Downloading and cleaning new PLUTO, takes a while, please be patient')
         pluto_new = self.pipeline_data(self._chi_pluto_api_id, ins['CHI_PLUTO_CLEANING'])
+        print(f'-> New PLUTO shape: {pluto_new.shape}')
 
         print('>>> Loading and cleaning old PLUTO')
         pluto_old = self._load_old_pluto(pluto_path)
+        print(f'-> Old PLUTO shape: {pluto_old.shape}')
 
         print('>>> Updating old PLUTO with new PLUTO')
         pluto_stage1 = self._update_pluto_with_df(pluto_old, pluto_new)
+        print(f'-> [Stage 1] PLUTO shape: {pluto_stage1.shape}')
 
         print('>>> Updating [stage 1] PLUTO with sales data')
         pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40)
+        print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
         reis = self.pipeline_reis_data(reis_path)
+        print(f'-> REIS shape: {reis.shape}')
 
         print('>>> Updating [stage 2] PLUTO with REIS')
         pluto_stage3 = self._update_pluto_with_df(pluto_stage2, reis, cols_id=['ADDRESS'])
+        print(f'-> [Stage 3] PLUTO shape: {pluto_stage3.shape}')
 
         print('>>> Processing [final stage] PLUTO')
         pluto_final = self._process_pluto(pluto_stage3)
+        print(f'-> Final PLUTO shape: {pluto_final.shape}')
 
         print('>>> Exporting final PLUTO')
         self._export_pluto(pluto_final, output_path)
