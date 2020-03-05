@@ -11,6 +11,9 @@ from datetime import date
 from urllib.request import urlopen
 from lycleaner import Address_cleaner
 from sodapy import Socrata
+from bs4 import BeautifulSoup
+from zipfile import ZipFile
+from io import BytesIO
 
 class clean_instructions:
 
@@ -2314,18 +2317,23 @@ class PicDownloader:
 
 if __name__ == '__main__':
     ### NYC PLUTO Update
+    print(f'NYC PLUTO UPDATE START!')
     nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(nyc_data_path, nyc_reis_data, nyc_export_path)
 
     ### CHI PLUTO Update 
+    print(f'CHI PLUTO UPDATE START!')
     chi_data_path, chi_reis_data, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data'
     ccp = chi_cleaning_pipeline()
     ccp.pipeline(chi_data_path, chi_reis_data, chi_export_path)
 
     ### PHL PLUTO Update 
+    print(f'PHL PLUTO UPDATE START!')
     phl_data_path, phl_export_path = '../../data/PHL Data', '../../data'
     ci = clean_instructions()
     instructions = ci.instructions
     pcp = phl_cleaning_pipeline()
     pcp.pipeline(phl_data_path, phl_export_path, instructions)
+
+
