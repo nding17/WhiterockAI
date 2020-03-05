@@ -2251,6 +2251,67 @@ class chi_cleaning_pipeline:
 
         print('>>> Job Done! Congratulations!')
 
+### Google API image downloading class
+class PicDownloader:
+
+    def __init__(self):
+        self.key  = "AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE"
+
+    def searching_from_pluto(self, pluto, address, target):
+        return pluto[pluto['ADDRESS'] == address][target].values[0]
+        
+    def download(self, url, name):
+        urllib.request.urlretrieve(url.replace(" ", "%20"),"%s.png" % name)
+
+    def gen_url(self, geom, fov=100, heading=0, pitch=30, size=(500, 500)):
+        x, y = size
+        lat, lng = geom
+        return "https://maps.googleapis.com/maps/api/streetview?size=%s" \
+                "x%s&location=%s,%s&fov=%s&heading=%s&pitch=%s" \
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, lat, lng, fov, heading, pitch)
+
+    def gen_url_by_string(self, address, fov=60, pitch=30, size=(400, 400)):
+        x, y = size
+        return "https://maps.googleapis.com/maps/api/streetview?size=%sx" \
+                "%s&location=%s&fov=%s&pitch=%s" \
+                "&key=AIzaSyBMsupEpnbssPowczxp3ow0QPPW01TE-fE" \
+                % (x, y, address, fov, pitch)
+
+    def address_checker(self, address, pic_path, folders):
+
+        addr_exist = False
+
+        for folder in folders:
+            if os.path.exists(f'{pic_path}/{folder}/{address}.png'):
+                addr_exist = True
+
+        return addr_exist
+
+    def export_addr_img(self, city, data, pic_path, saving_dir, folders):
+
+        address_list = list(set(list(data.dropna(subset=['ADDRESS'])['ADDRESS'].values)))
+
+        for address in address_list:
+            try:
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                
+                addr_exist = self.address_checker(new_addr, pic_path, folders)    
+
+                if (not addr_exist) and new_addr[0].isnumeric():
+                    url = self.gen_url_by_string(new_addr)
+                    saving_path = f'{saving_dir}/{new_addr}'
+                    self.download(url, saving_path)
+                    time.sleep(5)
+                
+            except Exception as e:
+                print(e)
+                print(str(address_list.index(address)))
+                new_addr = '_'.join(address.split('/')) + ', ' + city
+                new_addr_pic = '_'.join(address.split('/'))
+                pass
+
 if __name__ == '__main__':
     ### NYC PLUTO Update
     nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
