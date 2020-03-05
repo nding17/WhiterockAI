@@ -837,9 +837,7 @@ class chi_cleaning_pipeline:
         reis = pd.read_excel(f'{reis_path}/REIS Full Property Report 150k.xlsx')
         return reis
 
-    def _clean_reis(self, reis):
-        cl = cleaning_instructions() # cleaning instructions for sales data
-        ins = cl.instructions['CHI_REIS_RENAME']
+    def _clean_reis(self, reis, ins):
         reis_cl = reis.rename(columns=ins, errors='raise')
         reis_cl = reis_cl[[*ins.values()]]
 
@@ -856,12 +854,12 @@ class chi_cleaning_pipeline:
 
         return reis_cl
 
-    def pipeline_reis_data(self, reis_path):
+    def pipeline_reis_data(self, reis_path, ins):
         reis = self._load_reis(reis_path)
-        reis_cl = self._clean_reis(reis)
+        reis_cl = self._clean_reis(reis, ins)
         return reis_cl
 
-    def _process_pluto(self, pluto):
+    def _process_pluto(self, pluto, ins):
         pluto['Total Building Square Feet'] = pluto['Total Building Square Feet'].astype(float, errors='ignore')
 
         drop_index = pluto[pluto['Modeling Group']=='NCHARS'].index.tolist() + \
@@ -887,9 +885,6 @@ class chi_cleaning_pipeline:
         # if the number is an integer, we should remove all the '.0', if it's a float, leave it as is 
         for col in pcols:
             pluto_final[col] = pluto_final[col].apply(lambda x: str(x).split('.')[0] if float(x).is_integer() else str(x))
-
-        ci = cleaning_instructions()
-        ins = ci.instructions['CHI_COL_MAPPING']
 
         # map the values to the corresponding values in WHITEROCK 
         # use .fillna for Non-Exhaustive Mapping
@@ -943,7 +938,7 @@ class chi_cleaning_pipeline:
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
-        reis = self.pipeline_reis_data(reis_path)
+        reis = self.pipeline_reis_data(reis_path, instructions['CHI_REIS_RENAME'])
         print(f'-> REIS shape: {reis.shape}')
 
         print('>>> Updating [stage 2] PLUTO with REIS')
@@ -951,7 +946,7 @@ class chi_cleaning_pipeline:
         print(f'-> [Stage 3] PLUTO shape: {pluto_stage3.shape}')
 
         print('>>> Processing [final stage] PLUTO')
-        pluto_final = self._process_pluto(pluto_stage3)
+        pluto_final = self._process_pluto(pluto_stage3, instructions['CHI_COL_MAPPING'])
         print(f'-> Final PLUTO shape: {pluto_final.shape}')
 
         print('>>> Exporting final PLUTO')
@@ -1021,6 +1016,7 @@ class PicDownloader:
                 pass
 
 if __name__ == '__main__':
+
     instructions = ci.instructions
 
     ### NYC PLUTO Update
