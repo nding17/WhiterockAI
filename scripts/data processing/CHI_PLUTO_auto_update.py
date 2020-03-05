@@ -626,7 +626,6 @@ class cleaning_pipeline:
         return reis_cl
 
     def _process_pluto(self, pluto):
-
         pluto['Total Building Square Feet'] = pluto['Total Building Square Feet'].astype(float, errors='ignore')
 
         drop_index = pluto[pluto['Modeling Group']=='NCHARS'].index.tolist() + \
@@ -657,11 +656,12 @@ class cleaning_pipeline:
         ins = ci.instructions['CHI_COL_MAPPING']
 
         # map the values to the corresponding values in WHITEROCK 
-        pluto_final['GARAGE ATTACHED'] = pluto_final['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED'])
-        pluto_final['GARAGE 1 AREA'] = pluto_final['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA'])
-        pluto_final['GARAGE 1'] = pluto_final['GARAGE 1'].map(ins['GARAGE 1'])
-        pluto_final['BLDG CODE DEF'] = pluto_final['BLDG CODE'].map(ins['BLDG CODE'])
-        pluto_final['# FLOORS'] = pluto_final['BLDG CAT'].map(ins['BLDG CAT'])
+        # use .fillna for Non-Exhaustive Mapping
+        pluto_final['GARAGE ATTACHED'] = pluto_final['GARAGE ATTACHED'].map(ins['GARAGE ATTACHED']).fillna(pluto_final.loc['GARAGE ATTACHED'])
+        pluto_final['GARAGE 1 AREA'] = pluto_final['GARAGE 1 AREA'].map(ins['GARAGE 1 AREA']).fillna(pluto_final.loc['GARAGE 1 AREA'])
+        pluto_final['GARAGE 1'] = pluto_final['GARAGE 1'].map(ins['GARAGE 1']).fillna(pluto_final.loc['GARAGE 1'])
+        pluto_final['BLDG CODE DEF'] = pluto_final['BLDG CODE'].map(ins['BLDG CODE']).fillna(pluto_final.loc['BLDG CODE DEF'])
+        pluto_final['# FLOORS'] = pluto_final['BLDG CAT'].map(ins['BLDG CAT']).fillna(pluto_final.loc['# FLOORS'])
 
         pluto_final = pluto_final.reset_index(drop=True)
 
@@ -675,6 +675,7 @@ class cleaning_pipeline:
         # subtract the current year from the year in the original data
         current_year = int(date.today().year)
         pluto_final['YEAR BUILT'].iloc[idx] = current_year-pluto_final['YEAR BUILT'].iloc[idx]
+        pluto_final['YEAR BUILT'].iloc[idx] = pluto_final['YEAR BUILT'].iloc[idx].astype(int)
 
         pluto_final = pluto_final.reset_index(drop=True)
         
