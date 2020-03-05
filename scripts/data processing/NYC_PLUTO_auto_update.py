@@ -466,7 +466,7 @@ class cleaning_instructions:
         },
     }
 
-    REIS_RENAME = {
+    NYC_REIS_RENAME = {
         'Property Type': 'PROPERTY TYPE',
         'Street Address': 'ADDRESS',
         'City': 'CITY',
@@ -497,7 +497,7 @@ class cleaning_instructions:
     instructions = {
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
         'NYC_PLUTO_CLEANING': NYC_PLUTO_CLEANING,
-        'REIS_RENAME': REIS_RENAME,
+        'NYC_REIS_RENAME': NYC_REIS_RENAME,
     }
 
 class my_soup:
@@ -601,7 +601,7 @@ class my_soup:
             # time to give up, try to find what's going on 
             raise ValueError(f'FAILED to get soup for apt url {url}')
 
-class cleaning_pipeline(my_soup):
+class nyc_cleaning_pipeline(my_soup):
 
     def __init__(self):
         super()
@@ -834,7 +834,7 @@ class cleaning_pipeline(my_soup):
 
     def _clean_reis(self, reis):
         cl = cleaning_instructions() # cleaning instructions for sales data
-        ins = cl.instructions['REIS_RENAME']
+        ins = cl.instructions['NYC_REIS_RENAME']
         reis_cl = reis.rename(columns=ins, errors='raise')
         reis_cl = reis_cl[[*ins.values()]]
 
@@ -952,5 +952,5 @@ if __name__ == '__main__':
     # uncomment this if you already have a base PLUTO, otherwise leave it empty 
     # fn_opluto = 'NPL-001 All_Properties [bylocation;address] PLUTO 2020-03-03.csv'
 
-    cp = cleaning_pipeline()
-    cp.pipeline(pluto_path, reis_path, output_path)
+    ncp = nyc_cleaning_pipeline()
+    ncp.pipeline(pluto_path, reis_path, output_path)

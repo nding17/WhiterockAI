@@ -363,7 +363,7 @@ class cleaning_instructions:
     # combine two different dictionaries 
     CHI_SALES_CLEANING = {**CHI_PLUTO_CLEANING, **CHI_SALES_CLEANING_ADD}
 
-    REIS_RENAME = {
+    CHI_REIS_RENAME = {
         'Property Type': 'PROPERTY TYPE',
         'Street Address': 'ADDRESS',
         'City': 'CITY',
@@ -443,11 +443,11 @@ class cleaning_instructions:
     instructions = {
         'CHI_PLUTO_CLEANING': CHI_PLUTO_CLEANING,
         'CHI_SALES_CLEANING': CHI_SALES_CLEANING,
-        'REIS_RENAME': REIS_RENAME,
+        'CHI_REIS_RENAME': CHI_REIS_RENAME,
         'CHI_COL_MAPPING': CHI_COL_MAPPING,
     }
 
-class cleaning_pipeline:
+class chi_cleaning_pipeline:
 
     def __init__(self):
         self._chi_pluto_api_id = 'bcnq-qi2z'
@@ -600,7 +600,7 @@ class cleaning_pipeline:
 
     def _clean_reis(self, reis):
         cl = cleaning_instructions() # cleaning instructions for sales data
-        ins = cl.instructions['REIS_RENAME']
+        ins = cl.instructions['CHI_REIS_RENAME']
         reis_cl = reis.rename(columns=ins, errors='raise')
         reis_cl = reis_cl[[*ins.values()]]
 
@@ -729,5 +729,5 @@ if __name__ == '__main__':
     reis_path = '../../data/CHI Data'
     output_path = '../../data'
 
-    cp = cleaning_pipeline()
+    cp = chi_cleaning_pipeline()
     cp.pipeline(pluto_path, reis_path, output_path)

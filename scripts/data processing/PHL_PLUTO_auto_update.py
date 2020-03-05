@@ -13,7 +13,7 @@ class clean_instructions:
         pass
 
     ### new columns
-    added_columns = [
+    PHL_COLS_ADD = [
         '# UNITS',
         'REIS Submarket',
         'CITY',
@@ -28,7 +28,7 @@ class clean_instructions:
 
     ### OVERWRITE instructions for the original data file
     ### these instructions could be manually altered  
-    rename_dict = {
+    PHL_PLUTO_RENAME = {
         'number_of_rooms': {
             'delete': 0,
             'new name': '# ROOMS',
@@ -308,7 +308,7 @@ class clean_instructions:
     }
 
     ### special instructions for data processing
-    process_dict = {
+    PHL_PLUTO_PROCESS = {
         'APT 2-4 UNITS': {
             '# UNITS': 3,
             'CONDO': 0,
@@ -372,7 +372,7 @@ class clean_instructions:
     }
 
     ### some log instructions - status update messages 
-    log_dict = {
+    PHL_LOGGING = {
         'download_df': '==>Downloading new data... (takes a while, please be patient)',
         'pre_clean_df': '==>Pre-processing the downloaded data (delete redundant columns, rename some columns)',
         'subset_df_date': '==>Subsetting recent data from the downloaded data',
@@ -385,13 +385,13 @@ class clean_instructions:
 
     ### package all the instructions
     instructions = {
-        'added_columns': added_columns,
-        'rename_dict': rename_dict,
-        'process_dict': process_dict,
-        'log_dict': log_dict,
+        'PHL_COLS_ADD': PHL_COLS_ADD,
+        'PHL_PLUTO_RENAME': PHL_PLUTO_RENAME,
+        'PHL_PLUTO_PROCESS': PHL_PLUTO_PROCESS,
+        'PHL_LOGGING': PHL_LOGGING,
     }
 
-class cleaning_pipline:
+class phl_cleaning_pipeline:
 
     def __init__(self):
         pass
@@ -399,18 +399,18 @@ class cleaning_pipline:
     ### delete redundant columns and rename some columns 
     ### to match the names of the PLUTO data
     def pre_clean_df(self, df, instructions):
-        added_columns = instructions['added_columns']
-        rename_dict = instructions['rename_dict']
-        orig_columns = list(instructions['rename_dict'].keys())
+        PHL_COLS_ADD = instructions['PHL_COLS_ADD']
+        PHL_PLUTO_RENAME = instructions['PHL_PLUTO_RENAME']
+        orig_columns = list(instructions['PHL_PLUTO_RENAME'].keys())
         df_new = df.copy()[orig_columns]
         
         for column in orig_columns:
-            if rename_dict[column]['delete'] == 1:
+            if PHL_PLUTO_RENAME[column]['delete'] == 1:
                 df_new = df_new.drop([column], axis=1)
-            if rename_dict[column]['delete'] == 0:
-                df_new = df_new.rename(columns={column: rename_dict[column]['new name']})
+            if PHL_PLUTO_RENAME[column]['delete'] == 0:
+                df_new = df_new.rename(columns={column: PHL_PLUTO_RENAME[column]['new name']})
         
-        df_new = df_new.reindex(df_new.columns.tolist()+added_columns, axis=1) \
+        df_new = df_new.reindex(df_new.columns.tolist()+PHL_COLS_ADD, axis=1) \
                        .astype(dtype={'SALE DATE': str})
         
         df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
@@ -563,15 +563,15 @@ class cleaning_pipline:
                      pluto_loc[pluto_loc['GSF']<800].index.tolist() + \
                      pluto_loc[pluto_loc['SALE PRICE']<25000].index.tolist()
         
-        process_dict = instructions['process_dict']
+        PHL_PLUTO_PROCESS = instructions['PHL_PLUTO_PROCESS']
         
         pluto_process = pluto_loc.drop(drop_index) \
                                  .reset_index(drop=True)
         
-        mod_keys = list(process_dict.keys())
+        mod_keys = list(PHL_PLUTO_PROCESS.keys())
         
         for key in mod_keys:
-            mod = process_dict[key]
+            mod = PHL_PLUTO_PROCESS[key]
             pluto_process.at[pluto_process[pluto_process['BLDG CODE']==key].index, 
                              ['# UNITS', 'CONDO', 'BUILDING', 'UNIT']] \
                         = [mod['# UNITS'], mod['CONDO'], mod['BUILDING'], mod['UNIT']]
@@ -579,10 +579,9 @@ class cleaning_pipline:
         return pluto_process.reset_index(drop=True)
 
     def download_df(self):
-        url = 'https://phl.carto.com/api/v2/sql?q=SELECT+*,+ST_Y(the_geom)+AS+lat,' \
-              '+ST_X(the_geom)+AS+lng+FROM+opa_properties_public&filename=opa_properties_public' \
-              '&format=csv&skipfields=cartodb_id,the_geom,the_geom_webmercator'
-        df = pd.read_csv(url)
+        # API based data fetching
+        API = 'https://phl.carto.com/api/v2/sql?q=SELECT * FROM opa_properties_public'.replace(' ', '%20')
+        df = pd.read_json(API)
         return df
 
     def load_old_PLUTO(self, pluto_path):
@@ -595,8 +594,8 @@ class cleaning_pipline:
         
     def logger(self, func, instructions):
         func_name = func.__name__
-        log_dict = instructions['log_dict']
-        print(log_dict[func_name])
+        PHL_LOGGING = instructions['PHL_LOGGING']
+        print(PHL_LOGGING[func_name])
     
     ### all-in-one pipeline function to handle all the processing tasks
     def pipeline(self, pluto_path, export_path, instructions):
@@ -700,18 +699,18 @@ if __name__ == '__main__':
     ci = clean_instructions()
     instructions = ci.instructions
 
-    cp = cleaning_pipline()
+    cp = phl_cleaning_pipeline()
     cp.pipeline(pluto_path, export_path, instructions)
 
-    ### Download images from Google API
+    # ### Download images from Google API
 
-    PD = PicDownloader()
-    data_path = '../data/project'
-    data = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
-    pic_path = '../pictures'
-    saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
-    folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
-    city = 'PHL'
+    # PD = PicDownloader()
+    # data_path = '../data/project'
+    # data = pd.read_csv(f'{data_path}/PLUTO_monthly_1.18.2020.csv', index_col=0)
+    # pic_path = '../pictures'
+    # saving_dir = '../Whiterock Database/Pennsylvania/Philadelphia - PHL/Pictures'
+    # folders = ['Brick', 'Glass', 'Limestone', 'Wood Panels', 'Other']
+    # city = 'PHL'
 
-    cp.logger(PD.export_addr_img, instructions)
-    PD.export_addr_img(city, data, pic_path, saving_dir, folders)
+    # cp.logger(PD.export_addr_img, instructions)
+    # PD.export_addr_img(city, data, pic_path, saving_dir, folders)
