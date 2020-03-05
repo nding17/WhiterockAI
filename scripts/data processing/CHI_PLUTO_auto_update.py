@@ -649,6 +649,7 @@ class cleaning_pipeline:
                  'BLDG CODE', 
                  'BLDG CAT']
 
+        # if the number is an integer, we should remove all the '.0', if it's a float, leave it as is 
         for col in pcols:
             pluto_final[col] = pluto_final[col].apply(lambda x: str(x).split('.')[0] if float(x).is_integer() else str(x))
 
@@ -673,7 +674,7 @@ class cleaning_pipeline:
 
         # subtract the current year from the year in the original data
         current_year = int(date.today().year)
-        pluto_final['YEAR BUILT'].iloc[idx] = current_year-pluto_final['YEAR BUILT'].iloc[idx]['YEAR BUILT']
+        pluto_final['YEAR BUILT'].iloc[idx] = current_year-pluto_final['YEAR BUILT'].iloc[idx]
 
         pluto_final = pluto_final.reset_index(drop=True)
         
