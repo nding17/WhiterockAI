@@ -1898,7 +1898,7 @@ class nyc_cleaning_pipeline(my_soup):
         return reis_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays, fpluto_path):
         delta = pd.Timedelta(days=deltadays)
         sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
         sales = sales.sort_values(by='SALE DATE', ascending=False, na_position='last')
@@ -1915,6 +1915,24 @@ class nyc_cleaning_pipeline(my_soup):
                                               keep='last')
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
+        
+        final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])
+        
+        pluto_mon = final_pluto[~final_pluto['SALE DATE'].isnull()]
+        pluto_mon = pluto_mon.sort_values(by='SALE DATE', 
+                                          ascending=False, 
+                                          na_position='last') \
+                             .reset_index(drop=True)
+        
+        delta = pd.Timedelta(days=deltadays)
+        latest_date = pluto_mon['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        
+        keep_index = pluto_mon[(pluto_mon['SALE DATE']>=earliest_date) & 
+                               (pluto_mon['SALE DATE']<=latest_date)].index.tolist()
+        pluto_mon = pluto_mon.iloc[keep_index].reset_index(drop=True)
+        
+        pluto_mon.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
@@ -1936,25 +1954,10 @@ class nyc_cleaning_pipeline(my_soup):
         return pluto_loc_updated
 
     ### export the final merged and most updated PLUTO 
-    def _export_final_pluto(self, fpluto, fpluto_path, deltadays):
+    def _export_final_pluto(self, fpluto, fpluto_path):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto}.csv')
-        
-        fpluto_final['SALE DATE'] = pd.to_datetime(fpluto_final['SALE DATE'])
-        
-        pluto_mon = fpluto_final[~fpluto_final['SALE DATE'].isnull()]
-        pluto_mon = pluto_mon.sort_values(by='SALE DATE', ascending=False, na_position='last').reset_index(drop=True)
-        
-        delta = pd.Timedelta(days=deltadays)
-        latest_date = pluto_mon['SALE DATE'].iloc[0]
-        earliest_date = latest_date-delta
-        
-        keep_index = pluto_mon[(pluto_mon['SALE DATE']>=earliest_date) & 
-                               (pluto_mon['SALE DATE']<=latest_date)].index.tolist()
-        pluto_mon = pluto_mon.iloc[keep_index].reset_index(drop=True)
-        
-        pluto_mon.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
     def pipeline(self, instructions, pluto_path, reis_path, fpluto_path, fn_opluto=''):
@@ -1974,14 +1977,6 @@ class nyc_cleaning_pipeline(my_soup):
         df_upluto['ZIP'] = df_upluto['ZIP'].astype(int, errors='ignore')
         print(f'-> PLUTO shape: {df_upluto.shape}')
 
-        print('>>> Loading and processing REIS')
-        df_reis = self.pipeline_reis_data(reis_path, instructions)
-        print(f'-> REIS shape: {df_reis.shape}')
-
-        print('>>> Updating PLUTO with REIS')
-        df_rpluto = self._update_pluto_with_df(df_upluto, df_reis, cols_id=['ADDRESS', 'ZIP'])
-        print(f'-> PLUTO shape: {df_rpluto.shape}')
-
         # new sales data processed
         print('>>> Downloading, cleaning and processing new sales data')
         df_nsales = self.pipeline_sales_data(instructions)
@@ -1989,11 +1984,19 @@ class nyc_cleaning_pipeline(my_soup):
 
         # final pluto updated by the latest sales data
         print('>>> Updating PLUTO with recent sales data')
-        final_pluto = self._update_pluto_with_sales_data(df_rpluto, df_nsales, 40)
+        pluto_sales = self._update_pluto_with_sales_data(df_upluto, df_nsales, 40, fpluto_path)
+        print(f'-> PLUTO shape: {pluto_sales.shape}')
+        
+        print('>>> Loading and processing REIS')
+        df_reis = self.pipeline_reis_data(reis_path, instructions)
+        print(f'-> REIS shape: {df_reis.shape}')
+
+        print('>>> Updating PLUTO with REIS')
+        final_pluto = self._update_pluto_with_df(pluto_sales, df_reis, cols_id=['ADDRESS', 'ZIP'])
         print(f'-> PLUTO shape: {final_pluto.shape}')
 
         print('>>> Exporting final PLUTO')
-        self._export_final_pluto(final_pluto, fpluto_path, 40)
+        self._export_final_pluto(final_pluto, fpluto_path)
         print('>>> job done! Congratulations!')
 
 class chi_cleaning_pipeline:
@@ -2125,7 +2128,7 @@ class chi_cleaning_pipeline:
         return pluto_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays, output_path, ins):
         delta = pd.Timedelta(days=deltadays)
         sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
         sales = sales.sort_values(by='SALE DATE', ascending=False, na_position='last')
@@ -2140,6 +2143,27 @@ class chi_cleaning_pipeline:
                                               keep='last')
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
+        
+        final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])   
+        pluto_temp = self._process_pluto(final_pluto, ins)
+
+        # subset the df if the SALE DATE is not null
+        # also re-index afterwards to later subsetting 
+        pluto_monthly = pluto_temp[~pluto_temp['SALE DATE'].isnull()]
+        pluto_monthly = pluto_monthly.sort_values(by='SALE DATE', 
+                                                  ascending=False, 
+                                                  na_position='last') \
+                                     .reset_index(drop=True)
+        
+        delta = pd.Timedelta(days=deltadays)
+        latest_date = pluto_monthly['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        
+        keep_index = pluto_monthly[(pluto_monthly['SALE DATE']>=earliest_date) & 
+                                   (pluto_monthly['SALE DATE']<=latest_date)].index.tolist()
+        pluto_monthly = pluto_monthly.iloc[keep_index].reset_index(drop=True)
+        
+        pluto_monthly.to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
@@ -2222,25 +2246,8 @@ class chi_cleaning_pipeline:
         
         return pluto_final
 
-    def _export_pluto(self, pluto_final, output_path, deltadays=40):
+    def _export_pluto(self, pluto_final, output_path):
         pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
-        
-        pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
-
-        # subset the df if the SALE DATE is not null
-        # also re-index afterwards to later subsetting 
-        pluto_mon = pluto_final[~pluto_final['SALE DATE'].isnull()]
-        pluto_mon = pluto_mon.sort_values(by='SALE DATE', ascending=False, na_position='last').reset_index(drop=True)
-        
-        delta = pd.Timedelta(days=deltadays)
-        latest_date = pluto_mon['SALE DATE'].iloc[0]
-        earliest_date = latest_date-delta
-        
-        keep_index = pluto_mon[(pluto_mon['SALE DATE']>=earliest_date) & 
-                               (pluto_mon['SALE DATE']<=latest_date)].index.tolist()
-        pluto_mon = pluto_mon.iloc[keep_index].reset_index(drop=True)
-        
-        pluto_mon.to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
     def pipeline(self, ins, pluto_path, reis_path, output_path):
         print('>>> Downloanding and cleaning sales data, takes a while')
@@ -2260,7 +2267,11 @@ class chi_cleaning_pipeline:
         print(f'-> [Stage 1] PLUTO shape: {pluto_stage1.shape}')
 
         print('>>> Updating [stage 1] PLUTO with sales data')
-        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40)
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, 
+                                                          sales_data, 
+                                                          40, 
+                                                          output_path, 
+                                                          instructions['CHI_COL_MAPPING'])
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
