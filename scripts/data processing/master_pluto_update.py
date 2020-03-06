@@ -2313,18 +2313,61 @@ if __name__ == '__main__':
     
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
-    chi_data_path, chi_reis_data, chi_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    chi_data_path, chi_reis_data, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data'
     ccp = chi_cleaning_pipeline()
     ccp.pipeline(instructions, chi_data_path, chi_reis_data, chi_export_path)
 
     ### PHL PLUTO Update 
     print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
+    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data/PHL Data', '../../data'
     pcp = phl_cleaning_pipeline()
     pcp.pipeline(instructions, phl_data_path, phl_export_path)
 
     ### NYC PLUTO Update
     print(f'NYC PLUTO UPDATE START!')
-    nyc_data_path, nyc_reis_data, nyc_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
+
+    ### Download images from Google API
+    PD = PicDownloader()
+    data_paths = [
+        '../../data',
+        '../../data',
+        '../../data',
+    ]
+
+    data_fns = [
+        f'CHIPL PLUTO Monthly {date.today()}.csv',
+        f'NPL PLUTO Monthly {date.today()}.csv',
+        f'PHL PLUTO Monthly {date.today()}.csv',
+    ]
+
+    saving_dirs = [
+        '../Whiterock Database/Illinois/CHI/Pictures',
+        '../Whiterock Database/New York/NYC/Pictures',
+        '../Whiterock Database/Pennsylvania/PHL/Pictures',
+    ]
+
+    folders = ['Brick', 
+               'Glass', 
+               'Limestone', 
+               'Wood Panels', 
+               'Other']
+
+    cities = [
+        'CHI',
+        'NYC',
+        'PHL',
+    ]
+
+    pic_path = '../pictures'
+
+    for i in range(len(cities)):
+        city = cities[i]
+        data_path = data_paths[i]
+        saving_dir = saving_dirs[i]
+        data_fn = data_fns[i]
+        data = pd.read_csv(f'{data_path}/{data_fn}', index_col=0)
+        cp.logger(PD.export_addr_img(instructions))
+        PD.export_addr_img(city, data, pic_path, saving_dir, folders)
