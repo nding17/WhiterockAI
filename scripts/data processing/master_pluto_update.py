@@ -1327,7 +1327,7 @@ class phl_cleaning_pipeline:
                        .astype(dtype={'SALE DATE': str})
         
         df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False) \
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
                        .reset_index(drop=True)
         
         return df_new
@@ -1335,8 +1335,8 @@ class phl_cleaning_pipeline:
     ### subset the most recent data from the downloaded data based on 
     ### the order of date
     def subset_df_date(self, df_new, deltadays):
-        delta = pd.Timedelta(deltadays)
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False)
+        delta = pd.Timedelta(days=deltadays)
+        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
         latest_date = df_new['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
@@ -1361,7 +1361,7 @@ class phl_cleaning_pipeline:
     ### fill in new downloaded data
     def update_PLUTO(self, pluto, df_sub):
         pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
-        pluto = pluto.sort_values(by=['SALE DATE'], ascending=False)
+        pluto = pluto.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
 
         pluto_addresses = pluto['ADDRESS'].tolist()
         sub_addresses = df_sub['ADDRESS'].tolist()
@@ -1433,7 +1433,7 @@ class phl_cleaning_pipeline:
         
         pluto_conc['SALE DATE'] = pluto_conc['SALE DATE'].apply(lambda x: int_to_datetime(x))
         
-        pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False) \
+        pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                                .reset_index(drop=True)
 
         return pluto_conc
@@ -1521,7 +1521,7 @@ class phl_cleaning_pipeline:
         df_new = self.pre_clean_df(df, instructions)
         
         self.logger(self.subset_df_date, instructions)
-        df_sub = self.subset_df_date(df_new, '40 days')
+        df_sub = self.subset_df_date(df_new, 40)
 
         self.logger(self.export_data, instructions)
         self.export_data(df_sub, export_path, f'PHL PLUTO Monthly {date.today()}.csv')
@@ -1686,7 +1686,7 @@ class nyc_cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         df_smcl['SALE DATE'] = pd.to_datetime(df_smcl['SALE DATE'])
-        df_smcl = df_smcl.sort_values(by=['SALE DATE'], ascending=False) \
+        df_smcl = df_smcl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return df_smcl
@@ -1798,7 +1798,7 @@ class nyc_cleaning_pipeline(my_soup):
             # for multiple properties with identical address, block, lot and  units
             # we know they are the same property and thus only the most recent 
             # property details are kept            
-            df_sales = df_sales.sort_values(by='SALE DATE') \
+            df_sales = df_sales.sort_values(by='SALE DATE', na_position='last') \
                                .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                                 keep='last')
 
@@ -1818,8 +1818,12 @@ class nyc_cleaning_pipeline(my_soup):
             return df_pluto_core
 
         else:
-            df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
-            return df_pluto_old
+            try:
+                df_pluto_old = pd.read_csv(f'{pluto_path}/{fn_opluto}', index_col=0, low_memory=False)
+                return df_pluto_old
+            except:
+                print('cannot load old PLUTO, maybe the filename is invalid')
+                raise
 
     def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['ADDRESS', 'BLOCK', 'LOT', '# UNITS']):
         # all the columns of the old PLUTO
@@ -1883,7 +1887,7 @@ class nyc_cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
-        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
+        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return reis_cl
@@ -1894,20 +1898,21 @@ class nyc_cleaning_pipeline(my_soup):
         return reis_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, deltadays, export_path):
-        delta = pd.Timedelta(deltadays)
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+        delta = pd.Timedelta(days=deltadays)
         sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
-        sales = sales.sort_values(by=['SALE DATE'], ascending=False)
+        sales = sales.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
         latest_date = sales['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
+        
         keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
                            (sales['SALE DATE']<=latest_date)].index.tolist()
+        
         sales_sub = sales.iloc[keep_index].reset_index(drop=True)
 
-        sales_sub = sales_sub.sort_values(by='SALE DATE') \
+        sales_sub = sales_sub.sort_values(by='SALE DATE', na_position='last') \
                              .drop_duplicates(subset=['ADDRESS', 'BLOCK', 'LOT', '# UNITS'], 
                                               keep='last')
-        sales_sub.to_csv(f'{export_path}/NPL PLUTO Monthly {date.today()}.csv')
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
 
@@ -1931,10 +1936,23 @@ class nyc_cleaning_pipeline(my_soup):
         return pluto_loc_updated
 
     ### export the final merged and most updated PLUTO 
-    def _export_final_pluto(self, fpluto, fpluto_path):
+    def _export_final_pluto(self, fpluto, fpluto_path, deltadays):
         fn_fpluto = 'NPL-001 All_Properties [bylocation;address] PLUTO'
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto}.csv')
+        
+        delta = pd.Timedelta(days=deltadays)
+        fpluto_final['SALE DATE'] = pd.to_datetime(fpluto_final['SALE DATE'])
+        fpluto_final = fpluto_final[~fpluto_final['SALE DATE'].isnull()]
+
+        fpluto_final = fpluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        latest_date = fpluto_final['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        
+        keep_index = fpluto_final[(fpluto_final['SALE DATE']>=earliest_date) & 
+                                  (fpluto_final['SALE DATE']<=latest_date)].index.tolist()
+        pluto_mon = fpluto_final.iloc[keep_index].reset_index(drop=True)
+        pluto_mon.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
     def pipeline(self, instructions, pluto_path, reis_path, fpluto_path, fn_opluto=''):
@@ -1969,11 +1987,11 @@ class nyc_cleaning_pipeline(my_soup):
 
         # final pluto updated by the latest sales data
         print('>>> Updating PLUTO with recent sales data')
-        final_pluto = self._update_pluto_with_sales_data(df_rpluto, df_nsales, 40, fpluto_path)
+        final_pluto = self._update_pluto_with_sales_data(df_rpluto, df_nsales, 40)
         print(f'-> PLUTO shape: {final_pluto.shape}')
 
         print('>>> Exporting final PLUTO')
-        self._export_final_pluto(final_pluto, fpluto_path)
+        self._export_final_pluto(final_pluto, fpluto_path, 40)
         print('>>> job done! Congratulations!')
 
 class chi_cleaning_pipeline:
@@ -2037,7 +2055,6 @@ class chi_cleaning_pipeline:
         added_cols = list(set(cols_np)-set(cols_op))
         pluto_up = pluto_old.copy().reindex(columns=cols_op+added_cols)
 
-
         pluto_up_check = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index
         df_new_check = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
 
@@ -2098,7 +2115,7 @@ class chi_cleaning_pipeline:
 
         pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
 
-        pluto_cl = pluto.copy().sort_values(by='SALE DATE') \
+        pluto_cl = pluto.copy().sort_values(by='SALE DATE', na_position='last') \
                                .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
                                                 keep='last') \
                                .reset_index(drop=True)
@@ -2106,21 +2123,19 @@ class chi_cleaning_pipeline:
         return pluto_cl
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, deltadays, ins, output_path):
-        delta = pd.Timedelta(deltadays)
-        sales = sales.sort_values(by=['SALE DATE'], ascending=False)
+    def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
+        delta = pd.Timedelta(days=deltadays)
+        sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
+        sales = sales.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
         latest_date = sales['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
                            (sales['SALE DATE']<=latest_date)].index.tolist()
         sales_sub = sales.iloc[keep_index].reset_index(drop=True)
 
-        sales_sub = sales_sub.sort_values(by='SALE DATE') \
+        sales_sub = sales_sub.sort_values(by='SALE DATE', na_position='last') \
                              .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
                                               keep='last')
-                             
-        sales_exp = self._process_pluto(sales_sub, ins)
-        sales_exp.to_csv(f'{output_path}/CHIPL PLUTO Monthly {date.today()}.csv')
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
 
@@ -2142,7 +2157,7 @@ class chi_cleaning_pipeline:
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
-        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False) \
+        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return reis_cl
@@ -2207,6 +2222,19 @@ class chi_cleaning_pipeline:
 
     def _export_pluto(self, pluto_final, output_path, deltadays=40):
         pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
+        
+        delta = pd.Timedelta(days=deltadays)
+        pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
+
+        pluto_final = pluto_final[~pluto_final['SALE DATE'].isnull()]
+        pluto_final = pluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        latest_date = pluto_final['SALE DATE'].iloc[0]
+        earliest_date = latest_date-delta
+        
+        keep_index = pluto_final[(pluto_final['SALE DATE']>=earliest_date) & 
+                                  (pluto_final['SALE DATE']<=latest_date)].index.tolist()
+        pluto_mon = pluto_final.iloc[keep_index].reset_index(drop=True)
+        pluto_mon.to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
     def pipeline(self, ins, pluto_path, reis_path, output_path):
         print('>>> Downloanding and cleaning sales data, takes a while')
@@ -2226,14 +2254,14 @@ class chi_cleaning_pipeline:
         print(f'-> [Stage 1] PLUTO shape: {pluto_stage1.shape}')
 
         print('>>> Updating [stage 1] PLUTO with sales data')
-        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40, instructions['CHI_COL_MAPPING'], output_path)
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, 40)
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
         reis = self.pipeline_reis_data(reis_path, instructions['CHI_REIS_RENAME'])
         print(f'-> REIS shape: {reis.shape}')
 
-        print('>>> Updating [stage 2] PLUTO with REIS')   
+        print('>>> Updating [Stage 2] PLUTO with REIS')   
         pluto_stage3 = self._update_pluto_with_df(pluto_stage2, reis, cols_id=['ADDRESS'])
         print(f'-> [Stage 3] PLUTO shape: {pluto_stage3.shape}')
 
@@ -2313,54 +2341,56 @@ if __name__ == '__main__':
     
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
-    chi_data_path, chi_reis_data, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data'
+    chi_data_path, chi_reis_data, chi_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
     ccp = chi_cleaning_pipeline()
     ccp.pipeline(instructions, chi_data_path, chi_reis_data, chi_export_path)
 
-    ### PHL PLUTO Update 
-    print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data'
-    pcp = phl_cleaning_pipeline()
-    pcp.pipeline(instructions, phl_data_path, phl_export_path)
-
     ### NYC PLUTO Update
     print(f'NYC PLUTO UPDATE START!')
-    nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
+    nyc_data_path, nyc_reis_data, nyc_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
+    
+    ### PHL PLUTO Update 
+    print(f'PHL PLUTO UPDATE START!')
+    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
+    pcp = phl_cleaning_pipeline()
+    pcp.pipeline(instructions, phl_data_path, phl_export_path)
+    
+#    # Run this ONLY WHEN YOU SUBSET THE FINAL LIST OF LOCATIONS    
 
-    ### Download images from Google API
-    PD = PicDownloader()
-    data_paths = ['../../data',
-                  '../../data',
-                  '../../data']
-
-    date_selected = '2020-03-05'
-    data_fns = [f'CHIPL PLUTO Monthly {date_selected}.csv',
-                f'NPL PLUTO Monthly {date_selected}.csv',
-                f'PHL PLUTO Monthly {date_selected}.csv']
-
-    saving_dirs = ['../Whiterock Database/Illinois/CHI/Pictures',
-                   '../Whiterock Database/New York/NYC/Pictures',
-                   '../Whiterock Database/Pennsylvania/PHL/Pictures']
-
-    folders = ['Brick', 
-               'Glass', 
-               'Limestone', 
-               'Wood Panels', 
-               'Other']
-
-    cities = ['CHI',
-              'NYC',
-              'PHL']
-
-    pic_path = '../pictures'
-
-    for i in range(len(cities)):
-        city = cities[i]
-        data_path = data_paths[i]
-        saving_dir = saving_dirs[i]
-        data_fn = data_fns[i]
-        data = pd.read_csv(f'{data_path}/{data_fn}', index_col=0)
-        cp.logger(PD.export_addr_img, instructions)
-        PD.export_addr_img(city, data, pic_path, saving_dir, folders)
+#    ### Download images from Google API
+#    PD = PicDownloader()
+#    data_paths = ['D:/PLUTO/PL',
+#                  'D:/PLUTO/PL',
+#                  'D:/PLUTO/PL',]
+#    
+#    select_date = '2020-03-05'
+#    data_fns = [f'CHIPL PLUTO Monthly {select_date}.csv',
+#                f'NPL PLUTO Monthly {select_date}.csv',
+#                f'PHL PLUTO Monthly {select_date}.csv']
+#
+#    saving_dirs = ['D:/PLUTO/PIC/CHI',
+#                   'D:/PLUTO/PIC/NYC',
+#                   'D:/PLUTO/PIC/PHL']
+#
+#    folders = ['Brick', 
+#               'Glass', 
+#               'Limestone', 
+#               'Wood Panels', 
+#               'Other']
+#
+#    cities = ['CHI',
+#              'NYC',
+#              'PHL']
+#
+#    pic_path = '../pictures'
+#
+#    for i in range(len(cities)):
+#        city = cities[i]
+#        data_path = data_paths[i]
+#        saving_dir = saving_dirs[i]
+#        data_fn = data_fns[i]
+#        data = pd.read_csv(f'{data_path}/{data_fn}', index_col=0)
+#        pcp.logger(PD.export_addr_img, instructions)
+#        PD.export_addr_img(city, data, pic_path, saving_dir, folders)
