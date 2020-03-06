@@ -2331,23 +2331,17 @@ if __name__ == '__main__':
 
     ### Download images from Google API
     PD = PicDownloader()
-    data_paths = [
-        '../../data',
-        '../../data',
-        '../../data',
-    ]
+    data_paths = ['../../data',
+                  '../../data',
+                  '../../data']
 
-    data_fns = [
-        f'CHIPL PLUTO Monthly {date.today()}.csv',
-        f'NPL PLUTO Monthly {date.today()}.csv',
-        f'PHL PLUTO Monthly {date.today()}.csv',
-    ]
+    data_fns = [f'CHIPL PLUTO Monthly {date.today()}.csv',
+                f'NPL PLUTO Monthly {date.today()}.csv',
+                f'PHL PLUTO Monthly {date.today()}.csv']
 
-    saving_dirs = [
-        '../Whiterock Database/Illinois/CHI/Pictures',
-        '../Whiterock Database/New York/NYC/Pictures',
-        '../Whiterock Database/Pennsylvania/PHL/Pictures',
-    ]
+    saving_dirs = ['../Whiterock Database/Illinois/CHI/Pictures',
+                    '../Whiterock Database/New York/NYC/Pictures',
+                    '../Whiterock Database/Pennsylvania/PHL/Pictures']
 
     folders = ['Brick', 
                'Glass', 
@@ -2355,11 +2349,9 @@ if __name__ == '__main__':
                'Wood Panels', 
                'Other']
 
-    cities = [
-        'CHI',
-        'NYC',
-        'PHL',
-    ]
+    cities = ['CHI',
+              'NYC',
+              'PHL']
 
     pic_path = '../pictures'
 
