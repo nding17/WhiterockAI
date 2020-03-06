@@ -2335,9 +2335,10 @@ if __name__ == '__main__':
                   '../../data',
                   '../../data']
 
-    data_fns = [f'CHIPL PLUTO Monthly {date.today()}.csv',
-                f'NPL PLUTO Monthly {date.today()}.csv',
-                f'PHL PLUTO Monthly {date.today()}.csv']
+    date_selected = '2020-03-05'
+    data_fns = [f'CHIPL PLUTO Monthly {date_selected}.csv',
+                f'NPL PLUTO Monthly {date_selected}.csv',
+                f'PHL PLUTO Monthly {date_selected}.csv']
 
     saving_dirs = ['../Whiterock Database/Illinois/CHI/Pictures',
                    '../Whiterock Database/New York/NYC/Pictures',
