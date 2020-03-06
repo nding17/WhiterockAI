@@ -1327,7 +1327,7 @@ class phl_cleaning_pipeline:
                        .astype(dtype={'SALE DATE': str})
         
         df_new['SALE DATE'] = pd.to_datetime(df_new['SALE DATE'])
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
+        df_new = df_new.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                        .reset_index(drop=True)
         
         return df_new
@@ -1336,7 +1336,7 @@ class phl_cleaning_pipeline:
     ### the order of date
     def subset_df_date(self, df_new, deltadays):
         delta = pd.Timedelta(days=deltadays)
-        df_new = df_new.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        df_new = df_new.sort_values(by='SALE DATE', ascending=False, na_position='last')
         latest_date = df_new['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         keep_index = df_new[(df_new['SALE DATE']>=earliest_date) & 
@@ -1361,7 +1361,7 @@ class phl_cleaning_pipeline:
     ### fill in new downloaded data
     def update_PLUTO(self, pluto, df_sub):
         pluto['SALE DATE'] = pd.to_datetime(pluto['SALE DATE'])
-        pluto = pluto.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        pluto = pluto.sort_values(by='SALE DATE', ascending=False, na_position='last')
 
         pluto_addresses = pluto['ADDRESS'].tolist()
         sub_addresses = df_sub['ADDRESS'].tolist()
@@ -1686,7 +1686,7 @@ class nyc_cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         df_smcl['SALE DATE'] = pd.to_datetime(df_smcl['SALE DATE'])
-        df_smcl = df_smcl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
+        df_smcl = df_smcl.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return df_smcl
@@ -1887,7 +1887,7 @@ class nyc_cleaning_pipeline(my_soup):
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
-        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
+        reis_cl = reis_cl.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return reis_cl
@@ -1901,7 +1901,7 @@ class nyc_cleaning_pipeline(my_soup):
     def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
         delta = pd.Timedelta(days=deltadays)
         sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
-        sales = sales.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        sales = sales.sort_values(by='SALE DATE', ascending=False, na_position='last')
         latest_date = sales['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         
@@ -1941,17 +1941,19 @@ class nyc_cleaning_pipeline(my_soup):
         fpluto_final = self._fill_loc(fpluto).reset_index(drop=True)
         fpluto_final.to_csv(f'{fpluto_path}/{fn_fpluto}.csv')
         
-        delta = pd.Timedelta(days=deltadays)
         fpluto_final['SALE DATE'] = pd.to_datetime(fpluto_final['SALE DATE'])
-        fpluto_final = fpluto_final[~fpluto_final['SALE DATE'].isnull()].reset_index(drop=True)
-
-        fpluto_final = fpluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
-        latest_date = fpluto_final['SALE DATE'].iloc[0]
+        
+        pluto_mon = fpluto_final[~fpluto_final['SALE DATE'].isnull()]
+        pluto_mon = pluto_mon.sort_values(by='SALE DATE', ascending=False, na_position='last').reset_index(drop=True)
+        
+        delta = pd.Timedelta(days=deltadays)
+        latest_date = pluto_mon['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         
-        keep_index = fpluto_final[(fpluto_final['SALE DATE']>=earliest_date) & 
-                                  (fpluto_final['SALE DATE']<=latest_date)].index.tolist()
-        pluto_mon = fpluto_final.iloc[keep_index].reset_index(drop=True)
+        keep_index = pluto_mon[(pluto_mon['SALE DATE']>=earliest_date) & 
+                               (pluto_mon['SALE DATE']<=latest_date)].index.tolist()
+        pluto_mon = pluto_mon.iloc[keep_index].reset_index(drop=True)
+        
         pluto_mon.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
     ### the entire pipeline to process PLUTO 
@@ -2003,7 +2005,7 @@ class chi_cleaning_pipeline:
     ### extract data from API 
     def _extract_data(self, api_id):
         MAX_LIMIT = 1000000000
-        # MAX_LIMIT = 10000
+#        MAX_LIMIT = 10000
         client = Socrata("datacatalog.cookcountyil.gov", None)
         results = client.get(api_id, limit=MAX_LIMIT)
         data = pd.DataFrame.from_records(results)
@@ -2126,7 +2128,7 @@ class chi_cleaning_pipeline:
     def _update_pluto_with_sales_data(self, pluto, sales, deltadays):
         delta = pd.Timedelta(days=deltadays)
         sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
-        sales = sales.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
+        sales = sales.sort_values(by='SALE DATE', ascending=False, na_position='last')
         latest_date = sales['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
@@ -2157,7 +2159,7 @@ class chi_cleaning_pipeline:
                          .astype(dtype={'SALE DATE': str})
         
         reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
-        reis_cl = reis_cl.sort_values(by=['SALE DATE'], ascending=False, na_position='last') \
+        reis_cl = reis_cl.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                          .reset_index(drop=True)
 
         return reis_cl
@@ -2223,17 +2225,19 @@ class chi_cleaning_pipeline:
     def _export_pluto(self, pluto_final, output_path, deltadays=40):
         pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
         
-        delta = pd.Timedelta(days=deltadays)
         pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
 
-        pluto_final = pluto_final[~pluto_final['SALE DATE'].isnull()].reset_index(drop=True)
-        pluto_final = pluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
-        latest_date = pluto_final['SALE DATE'].iloc[0]
+        pluto_mon = pluto_final[~pluto_final['SALE DATE'].isnull()]
+        pluto_mon = pluto_mon.sort_values(by='SALE DATE', ascending=False, na_position='last').reset_index(drop=True)
+        
+        delta = pd.Timedelta(days=deltadays)
+        latest_date = pluto_mon['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
         
-        keep_index = pluto_final[(pluto_final['SALE DATE']>=earliest_date) & 
-                                  (pluto_final['SALE DATE']<=latest_date)].index.tolist()
-        pluto_mon = pluto_final.iloc[keep_index].reset_index(drop=True)
+        keep_index = pluto_mon[(pluto_mon['SALE DATE']>=earliest_date) & 
+                               (pluto_mon['SALE DATE']<=latest_date)].index.tolist()
+        pluto_mon = pluto_mon.iloc[keep_index].reset_index(drop=True)
+        
         pluto_mon.to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
     def pipeline(self, ins, pluto_path, reis_path, output_path):
