@@ -2340,8 +2340,8 @@ if __name__ == '__main__':
                 f'PHL PLUTO Monthly {date.today()}.csv']
 
     saving_dirs = ['../Whiterock Database/Illinois/CHI/Pictures',
-                    '../Whiterock Database/New York/NYC/Pictures',
-                    '../Whiterock Database/Pennsylvania/PHL/Pictures']
+                   '../Whiterock Database/New York/NYC/Pictures',
+                   '../Whiterock Database/Pennsylvania/PHL/Pictures']
 
     folders = ['Brick', 
                'Glass', 
@@ -2361,5 +2361,5 @@ if __name__ == '__main__':
         saving_dir = saving_dirs[i]
         data_fn = data_fns[i]
         data = pd.read_csv(f'{data_path}/{data_fn}', index_col=0)
-        cp.logger(PD.export_addr_img(instructions))
+        cp.logger(PD.export_addr_img, instructions)
         PD.export_addr_img(city, data, pic_path, saving_dir, folders)
