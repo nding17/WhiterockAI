@@ -2319,7 +2319,7 @@ if __name__ == '__main__':
 
     ### PHL PLUTO Update 
     print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data/PHL Data', '../../data'
+    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data'
     pcp = phl_cleaning_pipeline()
     pcp.pipeline(instructions, phl_data_path, phl_export_path)
 
