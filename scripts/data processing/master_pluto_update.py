@@ -2227,6 +2227,8 @@ class chi_cleaning_pipeline:
         
         pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
 
+        # subset the df if the SALE DATE is not null
+        # also re-index afterwards to later subsetting 
         pluto_mon = pluto_final[~pluto_final['SALE DATE'].isnull()]
         pluto_mon = pluto_mon.sort_values(by='SALE DATE', ascending=False, na_position='last').reset_index(drop=True)
         
