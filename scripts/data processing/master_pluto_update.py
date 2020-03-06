@@ -1943,7 +1943,7 @@ class nyc_cleaning_pipeline(my_soup):
         
         delta = pd.Timedelta(days=deltadays)
         fpluto_final['SALE DATE'] = pd.to_datetime(fpluto_final['SALE DATE'])
-        fpluto_final = fpluto_final[~fpluto_final['SALE DATE'].isnull()]
+        fpluto_final = fpluto_final[~fpluto_final['SALE DATE'].isnull()].reset_index(drop=True)
 
         fpluto_final = fpluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
         latest_date = fpluto_final['SALE DATE'].iloc[0]
@@ -2226,7 +2226,7 @@ class chi_cleaning_pipeline:
         delta = pd.Timedelta(days=deltadays)
         pluto_final['SALE DATE'] = pd.to_datetime(pluto_final['SALE DATE'])
 
-        pluto_final = pluto_final[~pluto_final['SALE DATE'].isnull()]
+        pluto_final = pluto_final[~pluto_final['SALE DATE'].isnull()].reset_index(drop=True)
         pluto_final = pluto_final.sort_values(by=['SALE DATE'], ascending=False, na_position='last')
         latest_date = pluto_final['SALE DATE'].iloc[0]
         earliest_date = latest_date-delta
