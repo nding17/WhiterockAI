@@ -5726,8 +5726,9 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = False
 
-    rcdc = realtytrac_dot_come('CHI')
-    rcdc.scraping_pipeline(data_path, test=True)
+    if major_city == 'CHI':
+        rcdc = realtytrac_dot_come('CHI')
+        rcdc.scraping_pipeline(data_path, test=True)
 
     # berkshire hathaway New York For Sale
     bdc = berkshire_dot_com(major_city)
