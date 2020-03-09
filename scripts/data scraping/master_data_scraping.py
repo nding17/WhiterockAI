@@ -5490,12 +5490,12 @@ class realtytrac_dot_come(dot_com):
     def _no_thanks(self, browser):
         try:
             btn_nt = WebDriverWait(browser, 10).until(
-                    EC.element_to_be_clickable(
-                            (
-                                By.XPATH, "//a[@class='_hj-f5b2a1eb-9b07_survey_close _hj-f5b2a1eb-9b07_transition']"
-                            )
+                EC.element_to_be_clickable(
+                        (
+                            By.XPATH, "//a[@class='_hj-f5b2a1eb-9b07_survey_close _hj-f5b2a1eb-9b07_transition']"
                         )
                     )
+                )
 
             btn_nt.click()
         except:
