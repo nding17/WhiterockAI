@@ -462,10 +462,10 @@ class dot_com:
         """
         options = self._build_options()
 
-        # chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
-        # browser = webdriver.Chrome(executable_path = chrome_path, options=options)
+        chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
+        browser = webdriver.Chrome(executable_path = chrome_path, options=options)
 
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        # browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -3689,121 +3689,126 @@ class coldwell_dot_com(dot_com):
         
         listing_content = self._get_link_content(url)
         
-        ## Scrap the address, city, state, zip_code, apt #, asking price
-        address = listing_content.find('h1', class_='notranslate') \
-                                 .find('span', class_='notranslate') \
-                                 .get_text() \
-                                 .strip() \
-                                 .split(',')
-
-        city = address[1].strip()
-        state = address[2].strip().split(' ')[0].strip()
-        zip_code = address[2].strip().split(' ')[1].strip()
-        if len(address[0].split('#'))>1:
-            street = address[0].split('#')[0].strip()
-            apt_num = address[0].split('#')[1].strip()
-        else:
-            street = address[0].split('#')[0].strip()
-            apt_num = 'N/A'
-        asking_price = listing_content.find('span', itemprop='price').get_text()
-        asking_price = self._extract_num(asking_price)
-        
-        # Scrap the number of bedrooms,full bathroom, sqt, listing type
-        title = str()
-        for item in listing_content.find_all('ul', class_='details'):
-            title += item.get_text().strip()
         try:
-            listing_type = title.split('\n')[2]
-            bedrooms = re.findall(r'[0-9]+ Bed\w?', title)[0].split(' ')[0]
-            bathrooms = re.findall(r'[0-9]+ Full Bath\w?', title)[0].split(' ')[0]
-            sqt = re.findall(r'[0-9]+ Sq. Ft', title)[0].split(' ')[0]
-        except:
-            bedrooms, bathrooms = 'N/A', 'N/A'
+            ## Scrap the address, city, state, zip_code, apt #, asking price
+            address = listing_content.find('h1', class_='notranslate') \
+                                     .find('span', class_='notranslate') \
+                                     .get_text() \
+                                     .strip() \
+                                     .split(',')
+    
+            city = address[1].strip()
+            state = address[2].strip().split(' ')[0].strip()
+            zip_code = address[2].strip().split(' ')[1].strip()
+            if len(address[0].split('#'))>1:
+                street = address[0].split('#')[0].strip()
+                apt_num = address[0].split('#')[1].strip()
+            else:
+                street = address[0].split('#')[0].strip()
+                apt_num = 'N/A'
+            asking_price = listing_content.find('span', itemprop='price').get_text()
+            asking_price = self._extract_num(asking_price)
+            
+            # Scrap the number of bedrooms,full bathroom, sqt, listing type
+            title = str()
+            for item in listing_content.find_all('ul', class_='details'):
+                title += item.get_text().strip()
             try:
+                listing_type = title.split('\n')[2]
+                bedrooms = re.findall(r'[0-9]+ Bed\w?', title)[0].split(' ')[0]
+                bathrooms = re.findall(r'[0-9]+ Full Bath\w?', title)[0].split(' ')[0]
                 sqt = re.findall(r'[0-9]+ Sq. Ft', title)[0].split(' ')[0]
             except:
-                sqt = np.nan
-            listing_type = title.split('\n')[2]
-
-        ## Scrap all the other informations for this property
-        details = str()
-        for item in listing_content.find_all('li'):
-            details+= item.get_text()+'\n'       
-        for item in details.split('\n'):
-            if re.findall(r'Construction:', item)!=[]:
-                material = item.split(':')[1].strip()
-                break
-            else:
-                material = 'N/A'
-        for item in details.split('\n'):
-            if re.findall(r'Lot Size', item):
-                if item.split(':')[0] == 'Lot Size (Acres)':
-                    lot_size = item.split(':')[1].strip()
+                bedrooms, bathrooms = 'N/A', 'N/A'
+                try:
+                    sqt = re.findall(r'[0-9]+ Sq. Ft', title)[0].split(' ')[0]
+                except:
+                    sqt = np.nan
+                listing_type = title.split('\n')[2]
+    
+            ## Scrap all the other informations for this property
+            details = str()
+            for item in listing_content.find_all('li'):
+                details+= item.get_text()+'\n'       
+            for item in details.split('\n'):
+                if re.findall(r'Construction:', item)!=[]:
+                    material = item.split(':')[1].strip()
                     break
-            else:
-                lot_size = 'N/A'
-        for item in details.split('\n'):
-            if re.findall(r'Basement:', item):
-                base = item.split(':')[1].strip()
-                break
-            else:
-                base = 'N/A'
-        for item in details.split('\n'):      
-            if re.findall(r'Basement Desc.:', item):
-                base_desc = item.split(':')[1].strip()
-                break
-            else:
-                base_desc = 'N/A'
-        for item in details.split('\n'):
-            if re.findall(r'Year Built:', item):
-                year_built = item.split(':')[1].strip()
-                break
-            else:
-                year_built = 'N/A'
-        for item in details.split('\n'):
-            if re.findall(r'Stories/Levels',item):
-                floors = item.split(':')[1].strip()
-                break
-            else:
-                floors = 'N/A'
-        for item in details.split('\n'):
-            if re.findall(r'Architectural Info',item):
-                arch_info = item.split(':')[1].strip()
-                break
-            else:
-                arch_info = 'N/A'
-
-        data = [
-            street,
-            city, 
-            state, 
-            zip_code, 
-            apt_num, 
-            bathrooms,
-            bedrooms, 
-            sqt,
-            asking_price, 
-            listing_type,
-            lot_size, 
-            year_built, 
-            floors, 
-            base,
-            base_desc, 
-            arch_info, 
-            material,
-            url,
-        ]
-
-        ##Scrap all the image for each property and store them into each folder
-        ##Please change the file_root accordingly when tested
-        image_url = []
-        for image_link in listing_content.find_all('img', class_="owl-lazy"):
-            image_url.append(image_link.get('data-href'))
-
-        if image_url:
-            self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
-            
-        return data
+                else:
+                    material = 'N/A'
+            for item in details.split('\n'):
+                if re.findall(r'Lot Size', item):
+                    if item.split(':')[0] == 'Lot Size (Acres)':
+                        lot_size = item.split(':')[1].strip()
+                        break
+                else:
+                    lot_size = 'N/A'
+            for item in details.split('\n'):
+                if re.findall(r'Basement:', item):
+                    base = item.split(':')[1].strip()
+                    break
+                else:
+                    base = 'N/A'
+            for item in details.split('\n'):      
+                if re.findall(r'Basement Desc.:', item):
+                    base_desc = item.split(':')[1].strip()
+                    break
+                else:
+                    base_desc = 'N/A'
+            for item in details.split('\n'):
+                if re.findall(r'Year Built:', item):
+                    year_built = item.split(':')[1].strip()
+                    break
+                else:
+                    year_built = 'N/A'
+            for item in details.split('\n'):
+                if re.findall(r'Stories/Levels',item):
+                    floors = item.split(':')[1].strip()
+                    break
+                else:
+                    floors = 'N/A'
+            for item in details.split('\n'):
+                if re.findall(r'Architectural Info',item):
+                    arch_info = item.split(':')[1].strip()
+                    break
+                else:
+                    arch_info = 'N/A'
+    
+            data = [
+                street,
+                city, 
+                state, 
+                zip_code, 
+                apt_num, 
+                bathrooms,
+                bedrooms, 
+                sqt,
+                asking_price, 
+                listing_type,
+                lot_size, 
+                year_built, 
+                floors, 
+                base,
+                base_desc, 
+                arch_info, 
+                material,
+                url,
+            ]
+    
+            ##Scrap all the image for each property and store them into each folder
+            ##Please change the file_root accordingly when tested
+            image_url = []
+            for image_link in listing_content.find_all('img', class_="owl-lazy"):
+                image_url.append(image_link.get('data-href'))
+    
+            if image_url:
+                self._save_images(image_url, img_path, f'{street}, {city.title()}, {state.upper()}')
+                
+            return data
+        
+        except:
+            print(f'no data available at {url}')
+            return None
 
     def _get_max_page(self):
         url = f'https://www.coldwellbankerhomes.com/{self._state}/{self._city}/?sortId=2&offset=0'
@@ -3841,18 +3846,24 @@ class coldwell_dot_com(dot_com):
 
             # divide the apartment URLs list into small batches 
             url_batches = np.array_split(apt_urls, int(len(apt_urls))//10)
+            print(f'total number of batches: {len(url_batches)}')
 
             failed_point = 0 # record where the program breaks
 
             # batch jobs start
             print(f'total number of batches: {len(url_batches)}')
             for i, batch in enumerate(url_batches):
-                failed_point = i
-                print(f'batch {i} starts, there are {len(batch)} apartment URLs')
-                apt_data = [self._get_content(url, img_path) for url in batch]
-                self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
-                print(f'batch {i} done, sleep {sleep_secs} seconds\n')
-                time.sleep(15) # rest for a few seconds after each batch job done
+                try:
+                    failed_point = i
+                    print(f'batch {i} starts, there are {len(batch)} apartment URLs')
+                    apt_data = [self._get_content(url, img_path) for url in batch]
+                    apt_data = list(filter(None, apt_data))
+                    self.write_data(apt_data, 'coldwell_forsale.csv', CONST.COLDWELL_COLNAMES, data_path)
+                    print(f'batch {i} done, sleep {sleep_secs} seconds\n')
+                    time.sleep(15) # rest for a few seconds after each batch job done
+                except:
+                    print(f'batch {failed_point} failed')
+                    continue
 
             print('job done, congratulations!')
         except:
@@ -4483,7 +4494,8 @@ class hotpads_dot_com(dot_com):
     def __init__(self, city):
         dot_com.__init__(self, city)
         self._city = self._city.replace(' ', '-')
-        self._browser, _ = self._get_browser(f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent')
+        self._url = f'https://hotpads.com/{self._city}-{self._state}/apartments-for-rent'
+        self._browser, _ = self._get_browser(self._url)
 
 
     def _get_apt_urls(self, test=False):
@@ -4496,10 +4508,12 @@ class hotpads_dot_com(dot_com):
         apt_urls = []
 
         for i in range(1, max_pg+1):
+            browser.get(f'{self._url}/?page={i}')
             containers = browser.find_elements_by_xpath("//div[@class='ListingCard-content-container']")
             atags = [container.find_element_by_tag_name('a') for container in containers]
             hrefs = [a.get_attribute('href') for a in atags]
             apt_urls += hrefs
+            time.sleep(3)
 
             if test:
                 break
@@ -4623,12 +4637,12 @@ class hotpads_dot_com(dot_com):
             max_photos = browser.find_element_by_xpath("//div[@class='PhotoCarousel-item-count-badge']") \
                                 .text \
                                 .split(' ')[-1]
-
+    
             max_photos = int(self._extract_num(max_photos))
             for i in range(max_photos-1):
                 button_next = browser.find_element_by_xpath("//div[@class='PhotoCarousel-arrow PhotoCarousel-arrow-right']")
                 button_next.click()
-
+    
             photo_tags = browser.find_elements_by_xpath("//img[@class='ImageLoader PhotoCarousel-item']")
             img_urls = [pt.get_attribute('src') for pt in photo_tags]
             return img_urls
@@ -4687,7 +4701,7 @@ class hotpads_dot_com(dot_com):
                 browser = self._browser
                 browser.get(apt_url)
                 time.sleep(3)
-        
+    
                 try:
                     robot_check = browser.find_element_by_xpath("//div[@class='page-title']")
                     if 'Please verify you are a human' in robot_check.text:
@@ -4697,6 +4711,7 @@ class hotpads_dot_com(dot_com):
                 
                 try:
                     multi_units = browser.find_elements_by_xpath("//div[@class='BuildingUnitCard']")
+                    print(multi_units.text)
                     unit_urls = [unit.find_element_by_tag_name('a') \
                                      .get_attribute('href') for unit in multi_units]
                     for unit_url in unit_urls:
@@ -5234,7 +5249,7 @@ class berkshire_dot_com(dot_com):
 
         for i, pair in enumerate(pairs):
             key, value = pair[0], pair[1]
-            if key == 'Year Built' and 'Source' in value:
+            if key == 'Year Built' and (not value.is_digit()):
                 # if the year is not a numerical value
                 # delete it since their are two 'year built'
                 del pairs[i]
@@ -5390,6 +5405,17 @@ class data_merger:
 
     def __init__(self, data_path):
         self._data_path = data_path
+        
+    def _select_prop(self, prop_type):
+        acceptable = ['townhouse', 'single', 'multi']
+        accepted = False
+        
+        for acc in acceptable:
+            if acc in str(prop_type).lower():
+                accepted = True
+                break
+        
+        return accepted 
 
     def merge_super_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
@@ -5398,25 +5424,37 @@ class data_merger:
                         and 'Super_Master_File' not in f \
                         and 'property_to_estimate' not in f \
                         and 'Rent_Master' not in f]
+        
         dfs = []
+        
 
         for file in files:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
-                             error_bad_lines=False)
+                             error_bad_lines=False,
+                             encoding= 'unicode_escape')
             df['ADDRESS'] = df['ADDRESS'].astype(str)
+            
+            if 'forsale' in file:
+                df['SELECTED'] = df['PROPERTY TYPE'].apply(self._select_prop)
+                df = df[df['SELECTED']==True][df.columns.difference(['SELECTED'])]
+            
+            if 'forrent' in file:
+                df['PROPERTY TYPE'] = 'Rental'
+            
             dfs.append(df)
 
         final_df = pd.concat(dfs, 
                              axis=0, 
                              ignore_index=True, 
                              sort=False)
+        
 
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
 
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'{data_path}/{city} Super_Master_File {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/PHL/master_data/{city} Super_Master_File {date_today}.csv', index=False)
 
     def merge_forrent_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
@@ -5431,7 +5469,8 @@ class data_merger:
         for file in files:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
-                             error_bad_lines=False)
+                             error_bad_lines=False,
+                             encoding= 'unicode_escape')
             df['ADDRESS'] = df['ADDRESS'].astype(str)
             dfs.append(df)
 
@@ -5440,11 +5479,13 @@ class data_merger:
                              ignore_index=True, 
                              sort=False)
 
+
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
-
+        final_df['PROPERTY TYPE'] = 'Rental'
+        
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'{data_path}/{city} Rent_Master [bylocation;addresses] {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/PHL/master_data/{city} Rent_Master [bylocation;addresses] {date_today}.csv', index=False)
 
     def merge_forsale_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
@@ -5459,7 +5500,8 @@ class data_merger:
         for file in files:
             df = pd.read_csv(f'{data_path}/{file}',
                              index_col=0,
-                             error_bad_lines=False)
+                             error_bad_lines=False,
+                             encoding= 'unicode_escape')
             df['ADDRESS'] = df['ADDRESS'].astype(str)
             dfs.append(df)
 
@@ -5470,9 +5512,12 @@ class data_merger:
 
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
+        
+        final_df['SELECTED'] = final_df['PROPERTY TYPE'].apply(self._select_prop)
+        final_df = final_df[final_df['SELECTED']==True][final_df.columns.difference(['SELECTED'])]
 
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'{data_path}/property_to_estimate_{city} {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/PHL/master_data/property_to_estimate_{city} {date_today}.csv', index=False)
 
 if __name__ == '__main__':
     """
@@ -5489,68 +5534,72 @@ if __name__ == '__main__':
     # user need to provide these paths 
     # please also make sure you have the sub-folders
     # under img_path, for example, remax, rent etc. 
-    data_path = f'../../data/sample/{major_city}/info'
-    img_path = f'../../data/sample/{major_city}/images'
+    data_path = f'D:/scrap_data/{major_city}/info'
+    img_path = f'D:/scrap_data/{major_city}/images'
     
     # to run the scraping for the entire webpage 
     # turn this to False
     is_testing = False
-    
-    ### compass New York For Sale 
-    codcv2 = compass_fs_dot_com(major_city)
-    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
-    
-    ### elliman.com For Sale 
-    if major_city == 'NYC':
-        edc = elliman_dot_com(major_city)
-        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
-    
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com(major_city)
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
-    
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com(major_city)
-    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-    
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com(major_city, 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
-    
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
-    
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-    
+
     # berkshire hathaway New York For Sale
     bdc = berkshire_dot_com(major_city)
     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
     
-    ### compass New York For Rent 
-    codc = compass_dot_com(major_city)
-    codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    # ### hotpads.com For Rent
+    # hdc = hotpads_dot_com(major_city)
+    # hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+   
+    # ### trulia.com For Rent and For Sale
+    # tdc = trulia_dot_com(major_city, 'buy')
+    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+   
+    # ### trulia.com For Rent and For Rent
+    # tdc = trulia_dot_com(major_city, 'rent')
+    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+   
+    # ### trulia.com For Rent and Sold
+    # tdc = trulia_dot_com(major_city, 'sold')
+    # tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+
+    # ### compass New York For Sale 
+    # codcv2 = compass_fs_dot_com(major_city)
+    # codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+   
+    # ### elliman.com For Sale 
+    # if major_city == 'NYC':
+    #     edc = elliman_dot_com(major_city)
+    #     edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+       
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com(major_city, 1, 'max')
+    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+   
+    # ### loopnet.com New York For Sale 
+    # ldc = loopnet_dot_com(major_city)
+    # ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+   
+    # ### rent.com Philadelphia For Rent
+    # rdc = rent_dot_com(major_city)
+    # rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
     
-    ### hotpads.com For Rent
-    hdc = hotpads_dot_com(major_city)
-    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+    # ### coldwell Philadelphia For Sale
+    # cdc = coldwell_dot_com(major_city, 1, 'max')
+    # cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+   
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com(major_city)
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
     
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com(major_city, 'buy')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    
-    ### trulia.com For Rent and For Rent
-    tdc = trulia_dot_com(major_city, 'rent')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    
-    ### trulia.com For Rent and Sold
-    tdc = trulia_dot_com(major_city, 'sold')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-    
-    ### merge all the datafiles into a master data file 
-    dm = data_merger(data_path)
-    dm.merge_super_dfs(major_city)
-    dm.merge_forsale_dfs(major_city)
-    dm.merge_forrent_dfs(major_city)
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com(major_city)
+    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+   
+    # ### compass New York For Rent 
+    # codc = compass_dot_com(major_city)
+    # codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+
+    # ### merge all the datafiles into a master data file 
+    # dm = data_merger(data_path)
+    # dm.merge_super_dfs(major_city)
+    # dm.merge_forsale_dfs(major_city)
+    # dm.merge_forrent_dfs(major_city)
