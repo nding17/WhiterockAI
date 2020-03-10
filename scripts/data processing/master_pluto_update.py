@@ -2141,10 +2141,9 @@ class chi_cleaning_pipeline:
                                  on='ADDRESS') \
                           .drop_duplicates(subset=['ADDRESS'])
 
-        pluto_monthly = self._process_pluto(pluto_monthly, ins) \
-                            .reset_index(drop=True)
-
-        pluto_monthly.to_csv(f'CHIPL Monthly PLUTO {date.today()}.csv')
+        self._process_pluto(pluto_monthly, ins) \
+                            .reset_index(drop=True) \
+                            .to_csv(f'CHIPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
