@@ -2123,7 +2123,7 @@ class chi_cleaning_pipeline:
 
         cleaner = Address_cleaner()
         realty['ADDRESS'] = cleaner.easy_clean(realty['ADDRESS'].str.upper())
-        realty = realty.reset_index(drop=True)
+        realty = realty.drop_duplicates().reset_index(drop=True)
 
         return realty
 
@@ -2139,7 +2139,9 @@ class chi_cleaning_pipeline:
                                  how='inner',
                                  on='ADDRESS')
 
-        pluto_monthly.reset_index(drop=True).to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
+        pluto_monthly.drop_duplicates() \
+                     .reset_index(drop=True) \
+                     .to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
