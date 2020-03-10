@@ -5634,12 +5634,8 @@ class data_merger:
             
             dfs.append(df)
 
-        final_df = pd.concat(dfs, 
-                             axis=0, 
-                             ignore_index=True, 
-                             sort=False)
+        final_df = pd.concat(dfs, axis=0, ignore_index=True, sort=False)
         
-
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
 
