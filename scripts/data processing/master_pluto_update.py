@@ -1628,8 +1628,7 @@ class my_soup:
         # if we get the soup with the first attempt
         if soup:
             return soup
-        # if we don't get the soup during our first
-        # attempt
+        # if we don't get the soup during our first attempt
         else:
             attempts = 0
             while attempts < total_attempts:
@@ -1992,7 +1991,7 @@ class chi_cleaning_pipeline:
     ### extract data from API 
     def _extract_data(self, api_id):
         MAX_LIMIT = 1000000000
-#        MAX_LIMIT = 10000
+        # MAX_LIMIT = 10000
         client = Socrata("datacatalog.cookcountyil.gov", None)
         results = client.get(api_id, limit=MAX_LIMIT)
         data = pd.DataFrame.from_records(results)
@@ -2119,7 +2118,7 @@ class chi_cleaning_pipeline:
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
     def _update_pluto_with_sales_data(self, pluto, sales, realty, ins):
         final_pluto = self._update_pluto_with_df(pluto, sales)
-        final_pluto = self._update_pluto_with_df(pluto, realty)
+        final_pluto = self._update_pluto_with_df(pluto, realty, cols_id=['ADDRESS'])
         
         final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])   
         pluto_temp = self._process_pluto(final_pluto, ins)
