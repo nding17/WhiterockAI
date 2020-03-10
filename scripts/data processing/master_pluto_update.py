@@ -2112,15 +2112,16 @@ class chi_cleaning_pipeline:
 
     def _load_realty_trac(self, realty_path):
         realty = pd.read_csv(f'{realty_path}/realtytrac.csv', index_col=0)
+
+        cleaner = Address_cleaner()
+        realty['ADDRESS'] = cleaner.easy_clean(realty['ADDRESS'].str.upper())
         realty = realty.reset_index(drop=True)
+        
         return realty
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
     def _update_pluto_with_sales_data(self, pluto, sales, realty, output_path):
         final_pluto = self._update_pluto_with_df(pluto, sales)
-
-        cleaner = Address_cleaner()
-        realty['ADDRESS'] = cleaner.easy_clean(realty['ADDRESS'].str.upper())
         final_pluto = self._update_pluto_with_df(pluto, realty, cols_id=['ADDRESS'])
         
         final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])   
