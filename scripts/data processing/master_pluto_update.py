@@ -2113,10 +2113,18 @@ class chi_cleaning_pipeline:
     def _load_realty_trac(self, realty_path):
         realty = pd.read_csv(f'{realty_path}/realtytrac.csv', index_col=0)
 
+        def process_address(address):
+            for sep in ['APT', 'UNIT', '#', 'STE']:
+                if sep in address.upper():
+                    return address.upper().split(sep)[0]
+            return address
+
+        realty['ADDRESS'] = realty['ADDRESS'].apply(process_address)
+
         cleaner = Address_cleaner()
         realty['ADDRESS'] = cleaner.easy_clean(realty['ADDRESS'].str.upper())
         realty = realty.reset_index(drop=True)
-        
+
         return realty
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
