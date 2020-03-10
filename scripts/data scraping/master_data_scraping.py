@@ -5617,7 +5617,6 @@ class data_merger:
                         and 'Rent_Master' not in f]
         
         dfs = []
-        
 
         for file in files:
             df = pd.read_csv(f'{data_path}/{file}',

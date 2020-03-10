@@ -2111,22 +2111,15 @@ class chi_cleaning_pipeline:
 
         return pluto_cl
 
+    def _load_realty_trac(self, realty_path):
+        realty = pd.read_csv(f'{realty_path}/realtytrac.csv', index_col=0)
+        realty = realty.reset_index(drop=True)
+        return realty
+
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, deltadays, output_path, ins):
-        delta = pd.Timedelta(days=deltadays)
-        sales['SALE DATE'] = pd.to_datetime(sales['SALE DATE'])
-        sales = sales.sort_values(by='SALE DATE', ascending=False, na_position='last')
-        latest_date = sales['SALE DATE'].iloc[0]
-        earliest_date = latest_date-delta
-        keep_index = sales[(sales['SALE DATE']>=earliest_date) & 
-                           (sales['SALE DATE']<=latest_date)].index.tolist()
-        sales_sub = sales.iloc[keep_index].reset_index(drop=True)
-
-        sales_sub = sales_sub.sort_values(by='SALE DATE', na_position='last') \
-                             .drop_duplicates(subset=['PIN', 'ADDRESS', 'BLDG CODE', 'LAND SF'], 
-                                              keep='last')
-
-        final_pluto = self._update_pluto_with_df(pluto, sales_sub)
+    def _update_pluto_with_sales_data(self, pluto, sales, realty, ins):
+        final_pluto = self._update_pluto_with_df(pluto, sales)
+        final_pluto = self._update_pluto_with_df(pluto, realty)
         
         final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])   
         pluto_temp = self._process_pluto(final_pluto, ins)
@@ -2235,7 +2228,7 @@ class chi_cleaning_pipeline:
         pluto_final = pluto_final[pluto_final.columns.difference(['Sale Date'])]
         pluto_final.to_csv(f'{output_path}/CHIPL-001 All_Properties PLUTO.csv')
 
-    def pipeline(self, ins, pluto_path, reis_path, output_path):
+    def pipeline(self, ins, pluto_path, reis_path, realty_path, output_path):
         print('>>> Downloanding and cleaning sales data, takes a while')
         sales_data = self.pipeline_data(self._chi_sales_api_id, ins['CHI_SALES_CLEANING'])
         print(f'-> Sales data shape: {sales_data.shape}')
@@ -2252,16 +2245,15 @@ class chi_cleaning_pipeline:
         pluto_stage1 = self._update_pluto_with_df(pluto_old, pluto_new)
         print(f'-> [Stage 1] PLUTO shape: {pluto_stage1.shape}')
 
+        print('>>> Loading RealtyTrac data')
+        realty = self._load_realty_trac(realty_path)
+
         print('>>> Updating [stage 1] PLUTO with sales data')
-        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, 
-                                                          sales_data, 
-                                                          40, 
-                                                          output_path, 
-                                                          instructions['CHI_COL_MAPPING'])
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, realty, ins['CHI_COL_MAPPING'])
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
-        reis = self.pipeline_reis_data(reis_path, instructions['CHI_REIS_RENAME'])
+        reis = self.pipeline_reis_data(reis_path, ins['CHI_REIS_RENAME'])
         print(f'-> REIS shape: {reis.shape}')
 
         print('>>> Updating [Stage 2] PLUTO with REIS')   
@@ -2269,7 +2261,7 @@ class chi_cleaning_pipeline:
         print(f'-> [Stage 3] PLUTO shape: {pluto_stage3.shape}')
 
         print('>>> Processing [final stage] PLUTO')
-        pluto_final = self._process_pluto(pluto_stage3, instructions['CHI_COL_MAPPING'])
+        pluto_final = self._process_pluto(pluto_stage3, ins['CHI_COL_MAPPING'])
         print(f'-> Final PLUTO shape: {pluto_final.shape}')
 
         print('>>> Exporting final PLUTO')
@@ -2341,25 +2333,24 @@ class PicDownloader:
 if __name__ == '__main__':
 
     instructions = ci().instructions
-
-    ### PHL PLUTO Update 
-    print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
-    pcp = phl_cleaning_pipeline()
-    pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
-    chi_data_path, chi_reis_data, chi_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    chi_data_path, chi_reis_data, realty_path, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data/CHI Data', '../../data'
     ccp = chi_cleaning_pipeline()
-    ccp.pipeline(instructions, chi_data_path, chi_reis_data, chi_export_path)
+    ccp.pipeline(instructions, chi_data_path, chi_reis_data, realty_path, chi_export_path)
 
     ### NYC PLUTO Update
     print(f'NYC PLUTO UPDATE START!')
-    nyc_data_path, nyc_reis_data, nyc_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
     
+    ### PHL PLUTO Update 
+    print(f'PHL PLUTO UPDATE START!')
+    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data'
+    pcp = phl_cleaning_pipeline()
+    pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
 #    # Run this ONLY WHEN YOU SUBSET THE FINAL LIST OF LOCATIONS    
 
