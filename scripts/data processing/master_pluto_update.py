@@ -2116,7 +2116,7 @@ class chi_cleaning_pipeline:
         return realty
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, realty, ins):
+    def _update_pluto_with_sales_data(self, pluto, sales, realty, deltadays, ins, output_path):
         final_pluto = self._update_pluto_with_df(pluto, sales)
         final_pluto = self._update_pluto_with_df(pluto, realty, cols_id=['ADDRESS'])
         
@@ -2248,7 +2248,12 @@ class chi_cleaning_pipeline:
         realty = self._load_realty_trac(realty_path)
 
         print('>>> Updating [stage 1] PLUTO with sales data')
-        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, realty, ins['CHI_COL_MAPPING'])
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, 
+                                                          sales_data, 
+                                                          realty, 
+                                                          40, 
+                                                          ins['CHI_COL_MAPPING'],
+                                                          output_path)
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
