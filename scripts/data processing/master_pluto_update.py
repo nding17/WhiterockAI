@@ -1914,8 +1914,9 @@ class nyc_cleaning_pipeline(my_soup):
                                               keep='last')
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
-        
-        sales_sub.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
+
+        sales_fil = self._process_new_pluto(sales_sub)
+        sales_fil.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
@@ -2137,11 +2138,13 @@ class chi_cleaning_pipeline:
         pluto_monthly = pd.merge(final_pluto[final_pluto.columns.difference(['SALE PRICE', 'SALE DATE', 'PROPERTY TYPE'])],
                                  realty[['ADDRESS', 'SALE PRICE', 'SALE DATE', 'PROPERTY TYPE']], 
                                  how='inner',
-                                 on='ADDRESS')
+                                 on='ADDRESS') \
+                          .drop_duplicates(subset=['ADDRESS'])
 
-        pluto_monthly.drop_duplicates(subset=['ADDRESS']) \
-                     .reset_index(drop=True) \
-                     .to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
+        pluto_monthly = self._process_pluto(pluto_monthly, ins) \
+                            .reset_index(drop=True)
+
+        pluto_monthly.to_csv(f'CHIPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
