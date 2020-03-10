@@ -5445,7 +5445,13 @@ class realtytrac_dot_come(dot_com):
         street, city, state, zipcode = None, None, None, None
         try:
             address = frame.find_element_by_xpath("//h1[@itemprop='address']").text
-            street = address.split('\n')[0].upper().split('APT')[0].strip()
+
+            street = address.split('\n')[0].upper().strip()
+            for sep in ['APT', 'UNIT', '#', 'STE']:
+                if sep in address.split('\n')[0].upper():
+                    street = address.split('\n')[0].upper().split('APT')[0].strip()
+                    break
+
             region = address.split('\n')[1].split(',')
             city = region[0].strip()
             state = region[1].strip().split(' ')[0].strip()
@@ -5728,7 +5734,7 @@ if __name__ == '__main__':
 
     if major_city == 'CHI':
         rcdc = realtytrac_dot_come('CHI')
-        rcdc.scraping_pipeline(data_path, test=True)
+        rcdc.scraping_pipeline(data_path, test=is_testing)
 
     # berkshire hathaway New York For Sale
     bdc = berkshire_dot_com(major_city)

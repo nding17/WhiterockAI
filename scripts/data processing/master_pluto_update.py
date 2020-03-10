@@ -2341,6 +2341,12 @@ class PicDownloader:
 if __name__ == '__main__':
 
     instructions = ci().instructions
+
+    ### PHL PLUTO Update 
+    print(f'PHL PLUTO UPDATE START!')
+    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
+    pcp = phl_cleaning_pipeline()
+    pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
@@ -2354,11 +2360,6 @@ if __name__ == '__main__':
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
     
-    ### PHL PLUTO Update 
-    print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
-    pcp = phl_cleaning_pipeline()
-    pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
 #    # Run this ONLY WHEN YOU SUBSET THE FINAL LIST OF LOCATIONS    
 

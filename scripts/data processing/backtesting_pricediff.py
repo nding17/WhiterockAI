@@ -46,7 +46,7 @@ if __name__ == '__main__':
                 if str(df1[df1['ADDRESS']==prop[0]]['zip_code'].values[0])[:5]==prop[1]:
                     price_diff.append([prop[0],
                                        df1[df1['ADDRESS']==prop[0]]['zip_code'].values[0],
-                                       prop[2], 
+                                       prop[2],
                                        prop[3],
                                        df2[df2['ADDRESS']==prop[0]]['SALE PRICE'].values[0] - prop[2],
                                        df2[df2['ADDRESS']==prop[0]]['SALE PRICE'].values[0] - prop[3],
