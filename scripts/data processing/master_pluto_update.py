@@ -1921,7 +1921,6 @@ class nyc_cleaning_pipeline(my_soup):
                         'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
                         'W', 'Y', 'Z'])].index.tolist() + \
                      sales_sub[sales_sub['GSF']<800].index.tolist() + \
-                     sales_sub[sales_sub['# FLOORS']==0].index.tolist() + \
                      sales_sub[sales_sub['# UNITS']==0].index.tolist()
 
         ### export monthly sales data
@@ -2347,18 +2346,18 @@ class PicDownloader:
 if __name__ == '__main__':
 
     instructions = ci().instructions
-    
-    ### CHI PLUTO Update 
-    print(f'CHI PLUTO UPDATE START!')
-    chi_data_path, chi_reis_data, realty_path, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data/CHI Data', '../../data'
-    ccp = chi_cleaning_pipeline()
-    ccp.pipeline(instructions, chi_data_path, chi_reis_data, realty_path, chi_export_path)
 
     ### NYC PLUTO Update
     print(f'NYC PLUTO UPDATE START!')
     nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
+    
+    ### CHI PLUTO Update 
+    print(f'CHI PLUTO UPDATE START!')
+    chi_data_path, chi_reis_data, realty_path, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data/CHI Data', '../../data'
+    ccp = chi_cleaning_pipeline()
+    ccp.pipeline(instructions, chi_data_path, chi_reis_data, realty_path, chi_export_path)
     
     ### PHL PLUTO Update 
     print(f'PHL PLUTO UPDATE START!')
