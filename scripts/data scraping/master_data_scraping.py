@@ -5263,7 +5263,7 @@ class berkshire_dot_com(dot_com):
 
         for i, pair in enumerate(pairs):
             key, value = pair[0], pair[1]
-            if key == 'Year Built' and (not value.strip().is_digit()):
+            if key == 'Year Built' and (not value.strip().isdigit()):
                 # if the year is not a numerical value
                 # delete it since their are two 'year built'
                 del pairs[i]
