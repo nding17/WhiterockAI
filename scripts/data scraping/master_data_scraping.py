@@ -5430,7 +5430,7 @@ class realtytrac_dot_come(dot_com):
         apt_urls = []
 
         for i in range(1, last_page+1):
-            browser.get(f'{self._url}/p-{i}?sortbyfield=featured,desc&itemsper=50')
+            browser.get(f'{self._url}/p-{i}')
             time.sleep(6)
             apts = browser.find_elements_by_xpath("//div[@class='LVF-thumb thumb empty-pic img-loadding']")
             urls = [apt.find_element_by_tag_name('a').get_attribute('href') for apt in apts]
