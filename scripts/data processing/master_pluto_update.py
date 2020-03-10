@@ -1915,8 +1915,19 @@ class nyc_cleaning_pipeline(my_soup):
 
         final_pluto = self._update_pluto_with_df(pluto, sales_sub)
 
-        sales_fil = self._process_new_pluto(sales_sub)
-        sales_fil.to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
+        drop_index = sales_sub[sales_sub['BLDG CLASS'].isin([
+                        'A8', 'C6', 'C8', 'C9', 'CM', 'D', 'E',
+                        'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                        'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
+                        'W', 'Y', 'Z'])].index.tolist() + \
+                     sales_sub[sales_sub['GSF']<800].index.tolist() + \
+                     sales_sub[sales_sub['# FLOORS']==0].index.tolist() + \
+                     sales_sub[sales_sub['# UNITS']==0].index.tolist()
+
+        ### export monthly sales data
+        sales_sub.drop(drop_index) \
+                 .reset_index(drop=True) \
+                 .to_csv(f'{fpluto_path}/NPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
@@ -2141,6 +2152,7 @@ class chi_cleaning_pipeline:
                                  on='ADDRESS') \
                           .drop_duplicates(subset=['ADDRESS'])
 
+        ### exporting monthly sales data 
         self._process_pluto(pluto_monthly, ins) \
                             .reset_index(drop=True) \
                             .to_csv(f'CHIPL Monthly PLUTO {date.today()}.csv')
