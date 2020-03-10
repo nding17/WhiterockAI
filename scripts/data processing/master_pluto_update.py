@@ -2154,8 +2154,8 @@ class chi_cleaning_pipeline:
 
         ### exporting monthly sales data 
         self._process_pluto(pluto_monthly, ins) \
-                            .reset_index(drop=True) \
-                            .to_csv(f'CHIPL Monthly PLUTO {date.today()}.csv')
+            .reset_index(drop=True) \
+            .to_csv(f'{output_path}/CHIPL Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
