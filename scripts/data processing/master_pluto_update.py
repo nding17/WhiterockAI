@@ -2139,7 +2139,7 @@ class chi_cleaning_pipeline:
                                  how='inner',
                                  on='ADDRESS')
 
-        pluto_monthly.drop_duplicates() \
+        pluto_monthly.drop_duplicates(subset=['ADDRESS']) \
                      .reset_index(drop=True) \
                      .to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
