@@ -2116,31 +2116,18 @@ class chi_cleaning_pipeline:
         return realty
 
     ### update the PLUTO with the most recent sales data cleaned and processed earlier 
-    def _update_pluto_with_sales_data(self, pluto, sales, realty, deltadays, ins, output_path):
+    def _update_pluto_with_sales_data(self, pluto, sales, realty, output_path):
         final_pluto = self._update_pluto_with_df(pluto, sales)
         final_pluto = self._update_pluto_with_df(pluto, realty, cols_id=['ADDRESS'])
         
         final_pluto['SALE DATE'] = pd.to_datetime(final_pluto['SALE DATE'])   
-        pluto_temp = self._process_pluto(final_pluto, ins)
+        
+        pluto_monthly = pd.merge(final_pluto[final_pluto.columns.difference(['SALE PRICE', 'SALE DATE', 'PROPERTY TYPE'])],
+                                 realty[['ADDRESS', 'SALE PRICE', 'SALE DATE', 'PROPERTY TYPE']], 
+                                 how='inner',
+                                 on='ADDRESS')
 
-        # subset the df if the SALE DATE is not null
-        # also re-index afterwards to later subsetting 
-        pluto_monthly = pluto_temp[~pluto_temp['SALE DATE'].isnull()]
-        pluto_monthly = pluto_monthly.sort_values(by='SALE DATE', 
-                                                  ascending=False, 
-                                                  na_position='last') \
-                                     .reset_index(drop=True)
-        
-        delta = pd.Timedelta(days=deltadays)
-        latest_date = pluto_monthly['SALE DATE'].iloc[0]
-        earliest_date = latest_date-delta
-        
-        keep_index = pluto_monthly[(pluto_monthly['SALE DATE']>=earliest_date) & 
-                                   (pluto_monthly['SALE DATE']<=latest_date)].index.tolist()
-        pluto_monthly = pluto_monthly.iloc[keep_index].reset_index(drop=True)
-        pluto_monthly = pluto_monthly[pluto_monthly.columns.difference(['Sale Date'])]
-        
-        pluto_monthly.to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
+        pluto_monthly.reset_index(drop=True).to_csv(f'{output_path}/CHI Monthly PLUTO {date.today()}.csv')
 
         return final_pluto
 
@@ -2248,12 +2235,7 @@ class chi_cleaning_pipeline:
         realty = self._load_realty_trac(realty_path)
 
         print('>>> Updating [stage 1] PLUTO with sales data')
-        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, 
-                                                          sales_data, 
-                                                          realty, 
-                                                          40, 
-                                                          ins['CHI_COL_MAPPING'],
-                                                          output_path)
+        pluto_stage2 = self._update_pluto_with_sales_data(pluto_stage1, sales_data, realty, output_path)
         print(f'-> [Stage 2] PLUTO shape: {pluto_stage2.shape}')
 
         print('>>> Loading and cleaning REIS')
