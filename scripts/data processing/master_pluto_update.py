@@ -375,6 +375,34 @@ class ci:
             'UNIT': 1,
         }
     }
+        
+    PHL_REIS_RENAME = {
+        'Property Type': 'PROPERTY TYPE',
+        'Street Address': 'ADDRESS',
+        'City': 'CITY',
+        'State': 'STATE',
+        'Zip': 'ZIP',
+        'County': 'COUNTY',
+        'Year Renovated': 'YEAR RENOVATED',
+        'Asking Rent (Units)': 'ASKING RENT (UNITS)',
+        'Asking Rent (SF)': 'ASKING RENT (SF)',
+        'Vacancy': 'VACANCY',
+        'Building Class': 'BLDG CLASS',
+        'Cap Rate': 'CAP RATE',
+        'Sale Price': 'SALE PRICE',
+        'Sale Date': 'SALE DATE',
+        'Transaction Type': 'TRANSACTION TYPE',
+        'Buyer': 'BUYER',
+        'Year Built': 'YEAR BUILT',
+        'Seller': 'SELLER',
+        'Construction Status': 'CONSTRUCTION STATUS',
+        'Expected Completion': 'EXPECTED COMPLETION',
+        'Expected Groundbreak': 'EXPECTED GROUNDBREAK',
+        'Developer': 'DEVELOPER',
+        'Developer Phone': 'DEVELOPER PHONE',
+        'Sector Name': 'SECTOR NAME',
+        'Submarket': 'REIS SUBMARKET',
+    }
 
     ### some log instructions - status update messages 
     PHL_LOGGING = {
@@ -1294,6 +1322,7 @@ class ci:
         'PHL_COLS_ADD': PHL_COLS_ADD,
         'PHL_PLUTO_RENAME': PHL_PLUTO_RENAME,
         'PHL_PLUTO_PROCESS': PHL_PLUTO_PROCESS,
+        'PHL_REIS_RENAME': PHL_REIS_RENAME,
         'PHL_LOGGING': PHL_LOGGING,
         'NYC_SALES_CLEANING': NYC_SALES_CLEANING,
         'NYC_PLUTO_CLEANING': NYC_PLUTO_CLEANING,
@@ -1354,6 +1383,10 @@ class phl_cleaning_pipeline:
 
         df_sub = df_sub.drop(drop_index) \
                        .reset_index(drop=True)
+        
+        cleaner = Address_cleaner()
+        df_sub['ADDRESS'] = df_sub['ADDRESS'].astype(str)
+        df_sub['ADDRESS'] = cleaner.easy_clean(df_sub['ADDRESS'].str.upper())
 
         return df_sub
 
@@ -1435,6 +1468,10 @@ class phl_cleaning_pipeline:
         
         pluto_conc = pluto_conc.sort_values(by='SALE DATE', ascending=False, na_position='last') \
                                .reset_index(drop=True)
+                               
+        cleaner = Address_cleaner()
+        pluto_conc['ADDRESS'] = pluto_conc['ADDRESS'].astype(str)
+        pluto_conc['ADDRESS'] = cleaner.easy_clean(pluto_conc['ADDRESS'].str.upper())
 
         return pluto_conc
 
@@ -1500,6 +1537,9 @@ class phl_cleaning_pipeline:
     def load_old_PLUTO(self, pluto_path):
         fn_pluto = 'PHLPL-001 All_Properties [byaddress;location] PLUTO.csv'
         pluto = pd.read_csv(f'{pluto_path}/{fn_pluto}')
+        cleaner = Address_cleaner()
+        pluto['ADDRESS'] = pluto['ADDRESS'].astype(str)
+        pluto['ADDRESS'] = cleaner.easy_clean(pluto['ADDRESS'].str.upper())
         return pluto
 
     def export_data(self, data, exp_path, file_name):
@@ -1539,6 +1579,95 @@ class phl_cleaning_pipeline:
         
         self.logger(self.export_data, instructions)
         self.export_data(pnew, export_path, 'PHLPL-001 All_Properties [byaddress;location] PLUTO.csv')
+    
+    def _load_reis(self, reis_path):
+        reis = pd.read_excel(f'{reis_path}/REIS Full Property Report 150k.xlsx')
+        return reis
+
+    def _clean_reis(self, reis, ins):
+        reis_cl = reis.rename(columns=ins, errors='raise')
+        reis_cl = reis_cl[[*ins.values()]]
+
+        cleaner = Address_cleaner()
+        reis_cl['ADDRESS'] = reis_cl['ADDRESS'].astype(str)
+        reis_cl['ADDRESS'] = cleaner.easy_clean(reis_cl['ADDRESS'].str.upper())
+
+        reis_cl = reis_cl.reindex(reis_cl.columns.tolist(), axis=1) \
+                         .astype(dtype={'SALE DATE': str})
+        
+        reis_cl['SALE DATE'] = pd.to_datetime(reis_cl['SALE DATE'])
+        reis_cl = reis_cl.sort_values(by='SALE DATE', ascending=False, na_position='last') \
+                         .reset_index(drop=True)
+
+        return reis_cl
+
+    def pipeline_reis_data(self, reis_path, ins):
+        reis = self._load_reis(reis_path)
+        reis_cl = self._clean_reis(reis, ins)
+        return reis_cl
+    
+    def _update_pluto_with_df(self, pluto_old, df_new, cols_id=['ADDRESS']):
+        # make sure there are no duplicated columns 
+        # to prevent conflicts 
+        pluto_old = pluto_old.loc[:,~pluto_old.columns.duplicated()]
+        df_new = df_new.loc[:,~df_new.columns.duplicated()]
+
+        # all the columns of the old PLUTO
+        cols_op = pluto_old.columns.tolist()
+        # all the columns of the new PLUTO
+        cols_np = df_new.columns.tolist()
+
+        # PLUTO update dataframe
+        # added emtpy columns to be added later on
+        added_cols = list(set(cols_np)-set(cols_op))
+        pluto_up = pluto_old.copy().reindex(columns=cols_op+added_cols)
+
+        pluto_up_check = pluto_up.drop_duplicates(subset=cols_id).reset_index(drop=True) # reset index
+        df_new_check = df_new.drop_duplicates(subset=cols_id).reset_index(drop=True) # make sure the index is not messed up
+
+        # ADDRESS, BLOCK, LOT and # UNITS combined are unique identifiers of the 
+        # properties in PLUTO
+        id_up = pluto_up_check[cols_id] # identifiers for the old PLUTO
+        id_new = df_new_check[cols_id] # identifiers for the new PLUTO
+
+        # find the same identifiers: identifiers that exist in both new and old PLUTO data
+        # as well as the different identifiers that are unique in each PLUTO data
+        same_id = pd.merge(id_up, id_new, on=cols_id, how='inner')
+        diff_id = id_new.loc[~id_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)] # diff identifiers
+
+        print(f'{id_new.shape[0]} rows to be integrated in total')
+        print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
+
+        if same_id.shape[0]:
+            df_new = df_new.reset_index(drop=True)
+            pluto_up = pluto_up.reset_index(drop=True)
+
+            # the index of a list of the same identifiers in the new PLUTO
+            idx_sid_new = df_new.loc[df_new.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
+            # the index of a list of the same identifiers in the old PLUTO
+            idx_sid_up = pluto_up.loc[pluto_up.set_index(cols_id).index.isin(same_id.set_index(cols_id).index)].index.tolist()
+
+            # update the old PLUTO with the data in the new PLUTO
+            cols_update = list(set(cols_np)-set(cols_id))
+            pluto_up.at[idx_sid_up, cols_update] = df_new[cols_update].iloc[idx_sid_new]
+
+        # concat the updated PLUTO with new property data that's not 
+        # already in the old PLUTO file
+        pluto_up = pd.concat([pluto_up, df_new.loc[df_new.set_index(cols_id).index.isin(diff_id.set_index(cols_id).index)]], sort=False)
+
+        return pluto_up
+    
+    def pipeline_v2(self, instructions, pluto_path, reis_path, export_path):
+        print('>>> Alternative pipeline (new PLUTO is not available)...')
+        print('>>> Loading and cleaning REIS')
+        reis = self.pipeline_reis_data(reis_path, instructions['PHL_REIS_RENAME'])
+        print('>>> Loading and cleaning old PLUTO')
+        pluto = self.load_old_PLUTO(pluto_path)
+        print('>>> Updating PLUTO with just REIS')
+        pluto_v2 = self._update_pluto_with_df(pluto, reis)
+        print('>>> Exporting PLUTO')
+        pluto_v2.to_csv(f'{export_path}/PHLPL-001 All_Properties [byaddress;location] PLUTO.csv')
+        print('>>> Job Done! Congratulations!')
 
 class my_soup:
 
@@ -2348,7 +2477,13 @@ class PicDownloader:
 if __name__ == '__main__':
 
     instructions = ci().instructions
-    
+
+    ### PHL PLUTO Update 
+    print(f'PHL PLUTO UPDATE START!')
+    phl_data_path, phl_reis_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    pcp = phl_cleaning_pipeline()
+    pcp.pipeline_v2(instructions, phl_data_path, phl_reis_path, phl_export_path)
+
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
     chi_data_path, chi_reis_data, realty_path, chi_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/scrap_data/CHI/info', 'D:/PLUTO/PL'
@@ -2360,12 +2495,6 @@ if __name__ == '__main__':
     nyc_data_path, nyc_reis_data, nyc_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
     ncp = nyc_cleaning_pipeline()
     ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
-    
-    ### PHL PLUTO Update 
-    print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
-    pcp = phl_cleaning_pipeline()
-    pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
 #    # Run this ONLY WHEN YOU SUBSET THE FINAL LIST OF LOCATIONS    
 
