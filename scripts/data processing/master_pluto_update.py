@@ -1921,6 +1921,7 @@ class nyc_cleaning_pipeline(my_soup):
                         'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
                         'W', 'Y', 'Z'])].index.tolist() + \
                      sales_sub[sales_sub['GSF']<800].index.tolist() + \
+                     sales_sub[sales_sub['# FLOORS']==0].index.tolist() + \
                      sales_sub[sales_sub['# UNITS']==0].index.tolist()
 
         ### export monthly sales data
@@ -2070,7 +2071,7 @@ class chi_cleaning_pipeline:
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
-        if same_id.shape[0]:
+        if same_id.shape[0]>0:
             df_new = df_new.reset_index(drop=True)
             pluto_up = pluto_up.reset_index(drop=True)
 
@@ -2150,6 +2151,8 @@ class chi_cleaning_pipeline:
                                  how='inner',
                                  on='ADDRESS') \
                           .drop_duplicates(subset=['ADDRESS'])
+        
+        pluto_monthly = pluto_monthly[pluto_monthly.columns.difference(['Sale Date'])].dropna(subset=['# BATH', '# BED'])
 
         ### exporting monthly sales data 
         self._process_pluto(pluto_monthly, ins) \
@@ -2346,22 +2349,22 @@ class PicDownloader:
 if __name__ == '__main__':
 
     instructions = ci().instructions
-
-    ### NYC PLUTO Update
-    print(f'NYC PLUTO UPDATE START!')
-    nyc_data_path, nyc_reis_data, nyc_export_path = '../../data/NYC Data', '../../data/NYC Data', '../../data'
-    ncp = nyc_cleaning_pipeline()
-    ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
     
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
-    chi_data_path, chi_reis_data, realty_path, chi_export_path = '../../data/CHI Data', '../../data/CHI Data', '../../data/CHI Data', '../../data'
+    chi_data_path, chi_reis_data, realty_path, chi_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/scrap_data/CHI/info', 'D:/PLUTO/PL'
     ccp = chi_cleaning_pipeline()
     ccp.pipeline(instructions, chi_data_path, chi_reis_data, realty_path, chi_export_path)
+
+    ### NYC PLUTO Update
+    print(f'NYC PLUTO UPDATE START!')
+    nyc_data_path, nyc_reis_data, nyc_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
+    ncp = nyc_cleaning_pipeline()
+    ncp.pipeline(instructions, nyc_data_path, nyc_reis_data, nyc_export_path)
     
     ### PHL PLUTO Update 
     print(f'PHL PLUTO UPDATE START!')
-    phl_data_path, phl_export_path = '../../data/PHL Data', '../../data'
+    phl_data_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO/PL'
     pcp = phl_cleaning_pipeline()
     pcp.pipeline(instructions, phl_data_path, phl_export_path)
     
