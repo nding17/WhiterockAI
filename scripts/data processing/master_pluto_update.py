@@ -2070,7 +2070,7 @@ class chi_cleaning_pipeline:
         print(f'{id_new.shape[0]} rows to be integrated in total')
         print(f'{same_id.shape[0]} rows to be updated, {diff_id.shape[0]} rows to be added')
 
-        if same_id.shape[0]>0:
+        if same_id.shape[0]:
             df_new = df_new.reset_index(drop=True)
             pluto_up = pluto_up.reset_index(drop=True)
 
