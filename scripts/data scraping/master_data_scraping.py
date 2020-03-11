@@ -5222,7 +5222,7 @@ class berkshire_dot_com(dot_com):
         try:
             img_urls = []
             
-            button_exp = WebDriverWait(browser, 20).until(
+            button_exp = WebDriverWait(browser, 5).until(
                     EC.element_to_be_clickable(
                             (
                                 By.XPATH, "//a[@class='btn btn-expand']"
@@ -5270,11 +5270,10 @@ class berkshire_dot_com(dot_com):
 
         for i, pair in enumerate(pairs):
             key, value = pair[0], pair[1]
-            if key == 'Year Built':
-                if not value.strip().isdigit():
-                    # if the year is not a numerical value
-                    # delete it since their are two 'year built'
-                    del pairs[i]
+            if key == 'Year Built' and (not value.strip().isdigit()):
+                # if the year is not a numerical value
+                # delete it since their are two 'year built'
+                del pairs[i]
 
         d = dict(pairs)
 
@@ -5738,7 +5737,7 @@ if __name__ == '__main__':
             e.g. ny (NOT New York)
     """
 
-    major_city = 'CHI'
+    major_city = 'NYC'
     
     # user need to provide these paths 
     # please also make sure you have the sub-folders
@@ -5748,7 +5747,7 @@ if __name__ == '__main__':
     
     # to run the scraping for the entire webpage 
     # turn this to False
-    is_testing = False
+    is_testing = True
 
     if major_city == 'CHI':
         rcdc = realtytrac_dot_come('CHI')
