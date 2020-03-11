@@ -476,10 +476,10 @@ class dot_com:
         """
         options = self._build_options()
 
-        # chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
-        # browser = webdriver.Chrome(executable_path = chrome_path, options=options)
+        chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
+        browser = webdriver.Chrome(executable_path = chrome_path, options=options)
 
-        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        # browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -5221,8 +5221,15 @@ class berkshire_dot_com(dot_com):
     def _get_img_urls(self, browser):
         try:
             img_urls = []
+            
+            button_exp = WebDriverWait(browser, 20).until(
+                    EC.element_to_be_clickable(
+                            (
+                                By.XPATH, "//a[@class='btn btn-expand']"
+                            )
+                        )
+                    )
 
-            button_exp = browser.find_element_by_xpath("//a[@class='btn btn-expand']")
             button_exp.click()
             gallery = browser.find_elements_by_xpath("//img[@src='data:']")
             img_urls = [img.get_attribute('data-image') for img in gallery]
@@ -5263,10 +5270,11 @@ class berkshire_dot_com(dot_com):
 
         for i, pair in enumerate(pairs):
             key, value = pair[0], pair[1]
-            if key == 'Year Built' and (not value.strip().isdigit()):
-                # if the year is not a numerical value
-                # delete it since their are two 'year built'
-                del pairs[i]
+            if key == 'Year Built':
+                if not value.strip().isdigit():
+                    # if the year is not a numerical value
+                    # delete it since their are two 'year built'
+                    del pairs[i]
 
         d = dict(pairs)
 
@@ -5606,6 +5614,9 @@ class data_merger:
                 accepted = True
                 break
         
+        if 'condo' in str(prop_type).lower():
+            accepted = False
+        
         return accepted 
 
     def merge_super_dfs(self, city):
@@ -5628,19 +5639,27 @@ class data_merger:
             if 'forsale' in file:
                 df['SELECTED'] = df['PROPERTY TYPE'].apply(self._select_prop)
                 df = df[df['SELECTED']==True][df.columns.difference(['SELECTED'])]
+                
+                df['PROPERTY TYPE'].mask(df['PROPERTY TYPE'].str.contains(pat='townhouse', flags=re.IGNORECASE, regex=True, na=False), 'Townhouse', inplace=True)
+                df['PROPERTY TYPE'].mask(df['PROPERTY TYPE'].str.contains(pat='single', flags=re.IGNORECASE, regex=True, na=False), 'Single Family', inplace=True)
+                df['PROPERTY TYPE'].mask(df['PROPERTY TYPE'].str.contains(pat='multi', flags=re.IGNORECASE, regex=True, na=False), 'Multi-family', inplace=True)
             
             if 'forrent' in file:
                 df['PROPERTY TYPE'] = 'Rental'
             
             dfs.append(df)
 
-        final_df = pd.concat(dfs, axis=0, ignore_index=True, sort=False)
+        final_df = pd.concat(dfs, 
+                             axis=0, 
+                             ignore_index=True, 
+                             sort=False)
         
+
         cleaner = Address_cleaner()
         final_df['ADDRESS'] = cleaner.easy_clean(final_df['ADDRESS'].str.upper())
 
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'D:/PHL/master_data/{city} Super_Master_File {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/{city}/master_data/{city} Super_Master_File {date_today}.csv', index=False)
 
     def merge_forrent_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
@@ -5671,7 +5690,7 @@ class data_merger:
         final_df['PROPERTY TYPE'] = 'Rental'
         
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'D:/PHL/master_data/{city} Rent_Master [bylocation;addresses] {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/{city}/master_data/{city} Rent_Master [bylocation;addresses] {date_today}.csv', index=False)
 
     def merge_forsale_dfs(self, city):
         files = [f for f in listdir(self._data_path) \
@@ -5701,9 +5720,13 @@ class data_merger:
         
         final_df['SELECTED'] = final_df['PROPERTY TYPE'].apply(self._select_prop)
         final_df = final_df[final_df['SELECTED']==True][final_df.columns.difference(['SELECTED'])]
+        
+        final_df['PROPERTY TYPE'].mask(final_df['PROPERTY TYPE'].str.contains(pat='townhouse', flags=re.IGNORECASE, regex=True, na=False), 'Townhouse', inplace=True)
+        final_df['PROPERTY TYPE'].mask(final_df['PROPERTY TYPE'].str.contains(pat='single', flags=re.IGNORECASE, regex=True, na=False), 'Single Family', inplace=True)
+        final_df['PROPERTY TYPE'].mask(final_df['PROPERTY TYPE'].str.contains(pat='multi', flags=re.IGNORECASE, regex=True, na=False), 'Multi-family', inplace=True)
 
         date_today = str(datetime.date.today())
-        final_df.to_csv(f'D:/PHL/master_data/property_to_estimate_{city} {date_today}.csv', index=False)
+        final_df.to_csv(f'D:/{city}/master_data/property_to_estimate_{city} {date_today}.csv', index=False)
 
 if __name__ == '__main__':
     """
@@ -5720,12 +5743,12 @@ if __name__ == '__main__':
     # user need to provide these paths 
     # please also make sure you have the sub-folders
     # under img_path, for example, remax, rent etc. 
-    data_path = f'../../data/sample/{major_city}/info'
-    img_path = f'../../data/sample/{major_city}/images'
+    data_path = f'D:/scrap_data/{major_city}/info'
+    img_path = f'D:/scrap_data/{major_city}/images'
     
     # to run the scraping for the entire webpage 
     # turn this to False
-    is_testing = True
+    is_testing = False
 
     if major_city == 'CHI':
         rcdc = realtytrac_dot_come('CHI')
