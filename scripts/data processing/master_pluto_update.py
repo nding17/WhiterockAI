@@ -1921,7 +1921,6 @@ class nyc_cleaning_pipeline(my_soup):
                         'N', 'O', 'P', 'Q', 'R', 'T', 'U', 'V',
                         'W', 'Y', 'Z'])].index.tolist() + \
                      sales_sub[sales_sub['GSF']<800].index.tolist() + \
-                     sales_sub[sales_sub['# FLOORS']==0].index.tolist() + \
                      sales_sub[sales_sub['# UNITS']==0].index.tolist()
 
         ### export monthly sales data
