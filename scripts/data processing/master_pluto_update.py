@@ -1530,8 +1530,11 @@ class phl_cleaning_pipeline:
 
     def download_df(self):
         # API based data fetching
-        API = 'https://phl.carto.com:443/api/v2/sql?q=select * from phl.opa_properties_public'.replace(' ', '%20')
-        df = pd.read_json(API)
+        # API = 'https://phl.carto.com:443/api/v2/sql?q=select * from phl.opa_properties_public'.replace(' ', '%20')
+        API = 'https://phl.carto.com/api/v2/sql?q=SELECT+*,+ST_Y(the_geom)+AS+lat,+ST_X(the_geom)+AS+lng+FROM' \
+              '+opa_properties_public+WHERE+market_value%3C%3D196800&filename=opa_properties_public&format=csv' \
+              '&skipfields=cartodb_id,the_geom,the_geom_webmercator'
+        df = pd.read_csv(API)
         return df
 
     def load_old_PLUTO(self, pluto_path):
@@ -1551,7 +1554,7 @@ class phl_cleaning_pipeline:
         print(PHL_LOGGING[func_name])
     
     ### all-in-one pipeline function to handle all the processing tasks
-    def pipeline(self, instructions, pluto_path, export_path):
+    def pipeline(self, instructions, pluto_path, reis_path, export_path):
         warnings.simplefilter(action='ignore')
 
         self.logger(self.download_df, instructions)
@@ -1568,9 +1571,15 @@ class phl_cleaning_pipeline:
         
         self.logger(self.load_old_PLUTO, instructions)
         pluto = self.load_old_PLUTO(pluto_path)
+
+        print('>>> Loading and cleaning REIS')
+        reis = self.pipeline_reis_data(reis_path, instructions['PHL_REIS_RENAME'])
+
+        print('>>> Updating PLUTO with just REIS')
+        pluto_v2 = self._update_pluto_with_df(pluto, reis)
         
         self.logger(self.update_PLUTO, instructions)
-        p = self.update_PLUTO(pluto, df_sub)
+        p = self.update_PLUTO(pluto_v2, df_sub)
         print(f'\t->pre-processed PLUTO df shape: {p.shape}')
         
         self.logger(self.process_PLUTO, instructions)
@@ -2482,7 +2491,8 @@ if __name__ == '__main__':
     print(f'PHL PLUTO UPDATE START!')
     phl_data_path, phl_reis_path, phl_export_path = 'D:/PLUTO', 'D:/PLUTO', 'D:/PLUTO/PL'
     pcp = phl_cleaning_pipeline()
-    pcp.pipeline_v2(instructions, phl_data_path, phl_reis_path, phl_export_path)
+    # pcp.pipeline_v2(instructions, phl_data_path, phl_reis_path, phl_export_path)
+    pcp.pipeline(instructions, phl_data_path, phl_reis_path, phl_export_path)
 
     ### CHI PLUTO Update 
     print(f'CHI PLUTO UPDATE START!')
