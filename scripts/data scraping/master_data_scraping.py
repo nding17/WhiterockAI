@@ -968,12 +968,12 @@ class elliman_dot_com(dot_com):
             ppt_details = soup.find_all('div', class_='m-listing-info')[1]
             all_props = ppt_details.find_all('div', class_='listing-info__box')
             
-            keys = [prop.find('dt', class_='listing-info__title').get_text().strip() for prop in all_props]
-            values = [prop.find('dd', class_='listing-info__value').get_text().strip() for prop in all_props]
+            keys = [prop.find('dt', attrs={'itemprop': 'name'}).get_text().strip().lower() for prop in all_props]
+            values = [prop.find('dd', attrs={'itemprop': 'value'}).get_text() for prop in all_props]
             d = dict(zip(keys, values))
-                        
-            gsf = self._ad(d, 'Interior')
-            year_built = self._ad(d, 'Year Built')
+                                    
+            gsf = self._extract_num((self._ad(d, 'interior')))
+            year_built = self._ad(d, 'year built')
             
             return gsf, year_built
         except:
@@ -5729,7 +5729,7 @@ if __name__ == '__main__':
     ### hotpads.com For Rent
     hdc = hotpads_dot_com(major_city)
     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
-
-    ### coldwell Philadelphia For Sale
-    cdc = coldwell_dot_com(major_city, 1, 'max')
-    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+#
+#    ### coldwell Philadelphia For Sale
+#    cdc = coldwell_dot_com(major_city, 1, 'max')
+#    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
