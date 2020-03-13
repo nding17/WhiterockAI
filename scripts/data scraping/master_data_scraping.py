@@ -44,12 +44,13 @@ class CONST:
         'ADDRESS', 
         'CITY',
         'STATE',
+        'ZIP',
         'ASKING PRICE',
         'BED', 
         'BATH', 
         'PROPERTY TYPE',
         'GSF',
-        'LISTING ID',
+        'YEAR BUILT',
         'LINK',
     )
 
@@ -660,6 +661,7 @@ class elliman_dot_com(dot_com):
         dot_com.__init__(self, city)
         self._apt_urls = []
         self._apt_data = []
+        self._browser, _ = self._get_browser('https://www.elliman.com/')
 
     #############################
     # private functions section #
@@ -686,7 +688,7 @@ class elliman_dot_com(dot_com):
         'https://www.elliman.com/search/for-sale/search-2?sdid=1&sid=44458208&sk=1'
         """
 
-        template = f'https://www.elliman.com/search/for-sale/search-{pg_num}?sdid=1&sid=44458208&sk=1'
+        template = f'https://www.elliman.com/newyorkcity/sales/new-york-ny-usa/{pg_num}-pg'
         return template 
 
     def _get_apt_urls_per_page(self, soup):
@@ -715,7 +717,7 @@ class elliman_dot_com(dot_com):
         """
 
         # identify the tag that contains apt URL
-        apartments = soup.find_all('li', class_='listing_address first')
+        apartments = soup.find_all('div', class_='listing-item__tab-content')
         apt_urls = [apt.find('a')['href'] for apt in apartments]
         # formulate a complete apartment URL
         apt_urls = [f'{CONST.ELLIMAN_HEADER}{url}' for url in apt_urls]
@@ -804,56 +806,34 @@ class elliman_dot_com(dot_com):
                 pg_num += 1 # next page 
         
         return apt_urls
-    
+        
     def _get_img_urls_per_apt(self, apt_url):
-
-        """
-        Find the image URLs given the URL of an apartment
-
-        Parameters
-        ----------
-        apt_url : str
-            the URL of a specific apartment or a general website
-
-        Returns
-        -------
-        imgs_complete : list(str)
-            this is a list of image URLs that you are able to 
-            directly download 
-
-        >>> _get_img_urls_per_apt(apt_url)
-        ['https://www.elliman.com/img/28ea62bf97218c78209c8f817602a278cd375825+440++1',
-         'https://www.elliman.com/img/a1d89f0c403d17c150dec8e213eee8a1c71a67ee+440++1',
-         'https://www.elliman.com/img/21be72cc0dc3df9f33739a88fdb025769b46b6a0+440++1',
-         ..., ]
-        """
-
         try:
-            # multiple attempts until you get the desired soup for the apartment
-            soup_apt = self._soup_attempts(apt_url)
-            # scrape the gallery link
-            photo_link = soup_apt.find('li', class_='listing_all_photos')\
-                                 .find('a')['href']
-            # construct the gallery URL
-            photo_link = f'{CONST.ELLIMAN_HEADER}{photo_link}'
-            # try to scrape the contents in the gallery URL
-            soup_photo = self._soup_attempts(photo_link)
-            # try to find a list of images and their corresponding URLs
-            imgs = soup_photo.find('div', class_='w_listitem_left')\
-                             .find_all('img')
-            imgs_complete = []
-
-            for img in imgs:
-                # special image link with complete address
-                if 'http' in img['src']:
-                    imgs_complete.append(img['src'])
-                else:
-                    # this is the images that are available from the 
-                    # website server 
-                    imgs_complete.append(f"{CONST.ELLIMAN_HEADER}{img['src']}")
-            return imgs_complete
+            browser = self._browser
+            browser.get(apt_url)
+            
+            btn = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//span[@title='Photos']"))        
+            )
+            
+            btn.click()
+            
+            gallery = WebDriverWait(browser, 10).until(
+                EC.element_to_be_clickable((By.XPATH, "//div[@class='js-thumbnail-wrapper  carousel__thumbnail']"))        
+            )
+            
+            gallery.click()
+            
+            thumbnail = WebDriverWait(browser, 10).until(
+                EC.presence_of_element_located((By.XPATH, "//div[@class='js-carousel-wrapper  js-scroll-carousel-slider  scroll-carousel__slider']"))        
+            )
+            
+            photos = thumbnail.find_elements_by_xpath("//div[@class='carousel__slide  scroll-carousel__item  js-scroll-carousel-item']")
+            
+            img_urls = [photo.find_element_by_tag_name('img').get_attribute('src') for photo in photos]
+            return img_urls
         except:
-            return None
+            return []
 
     def _get_address(self, soup):
 
@@ -874,20 +854,23 @@ class elliman_dot_com(dot_com):
         >>> _get_address(soup)
         ('35 Sidney Pl', 'Brooklyn Heights', 'New York')
         """
-
+        street, city, state, zipcode = None, None, None, None
         try:
             # property detail tag
-            ppt_details = soup.find('div', class_='w_listitem_description')
+            street = soup.find('div', class_='main-address').get_text().strip()
             # find address tag
-            address = ppt_details.find('li', class_='first listing_address')\
-                                 .get_text()
+            address = soup.find('div', class_='c-address')
+            
             # pattern for the address in this website
-            addr_pattern = r'([A-Za-z0-9\s\-\,]+)? - ([A-Za-z0-9\s\-]+)?, ([A-Za-z0-9\s\-]+)?'
-            # scrape out the address information
-            street, neighborhood, city = re.findall(addr_pattern, address)[0]
-            return street, neighborhood, city
+            locality = address.find_all('span', class_='locality')
+            city = locality[0].get_text().strip()
+            if len(locality) > 1:
+                city = locality[1].get_text().strip()
+            state = address.find('span', class_='region').get_text().strip()
+            zipcode = address.find('span', class_='postal-code').get_text().strip()
+            return street, city, state, zipcode
         except:
-            return None, None, None
+            return street, city, state, zipcode
 
     def _get_price(self, soup):
 
@@ -911,12 +894,8 @@ class elliman_dot_com(dot_com):
         """
 
         try:
-            # property details tag
-            ppt_details = soup.find('div', class_='w_listitem_description')
             # price tag
-            price = ppt_details.find('li', class_='listing_price')\
-                               .get_text()\
-                               .replace(',','') # clean up the text
+            price = soup.find('div', class_='c-price').get_text().replace(',','') # clean up the text
             return self._extract_num(price) # extract number from the text
         except:
             return None
@@ -942,55 +921,27 @@ class elliman_dot_com(dot_com):
         (5.0, 3.0, 0.0)
 
         """
+        beds, baths, htype = None, None, None
 
         try:
-            ppt_details = soup.find('div', class_='w_listitem_description')
-            features = ppt_details.find('li', class_='listing_features')\
-                                  .get_text()\
-                                  .strip()\
-                                  .split(' | ')
-
-            beds, baths, halfbaths = 0, 0, 0
+            ppt_details = soup.find('div', class_='listing-info__items')
+            features = ppt_details.find_all('dl', class_='listing-info__box-content')
+            features = [feature.get_text() for feature in features]
+            
             # try to identify the room type
             for feature in features:
                 if 'beds' in feature.lower():
                     beds = self._extract_num(feature)
                 if 'baths' in feature.lower():
                     baths = self._extract_num(feature)
-                if 'half bath' in feature.lower():
-                    halfbaths = self._extract_num(feature)
+                if (not 'beds' in feature.lower()) and \
+                   (not 'baths' in feature.lower()) and \
+                   (not 'half baths' in feature.lower()):
+                    htype = feature.strip()
 
-            return beds, baths, halfbaths
+            return beds, baths, htype
         except:
-            return None, None, None
-
-    def _get_htype(self, soup):
-        """
-        A helper function that gets listing type of the apartment given the 
-        soup of the specific apartment you are scraping 
-
-        Parameters
-        ----------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-
-        Returns
-        -------
-        str
-            the listing type
-
-        >>> _get_htype(soup)
-        'Multi-family'
-        """
-        try:
-            ppt_details = soup.find('div', class_='w_listitem_description')
-            # housing type tag
-            htype = ppt_details.find('li', class_='listing_extras')\
-                               .get_text()\
-                               .strip()
-            return htype
-        except:
-            return None
+            return beds, baths, htype
 
     def _get_sqft(self, soup):
         """
@@ -1012,51 +963,21 @@ class elliman_dot_com(dot_com):
         3012.0
 
         """
-
+        gsf, year_built = None, None
         try:
-            ppt_details = soup.find('div', class_='w_listitem_description')
-            all_props = ppt_details.find_all('li')
-            props_text = [prop.get_text().strip() for prop in all_props]
-            # filter out the element that contains specific text 
-            sqft = filter(lambda x: 'Approximate Sq. Feet' in x, props_text)
-            sqft = list(sqft)[0].replace(',','')
-            sqft = self._extract_num(sqft)
-            return sqft
+            ppt_details = soup.find_all('div', class_='m-listing-info')[1]
+            all_props = ppt_details.find_all('div', class_='listing-info__box')
+            
+            keys = [prop.find('dt', class_='listing-info__title').get_text().strip() for prop in all_props]
+            values = [prop.find('dd', class_='listing-info__value').get_text().strip() for prop in all_props]
+            d = dict(zip(keys, values))
+                        
+            gsf = self._ad(d, 'Interior')
+            year_built = self._ad(d, 'Year Built')
+            
+            return gsf, year_built
         except:
-            return None
-
-    def _get_list_id(self, soup):
-        """
-
-        A helper function that gets the listing ID of the apartment given the 
-        soup of the specific apartment you are scraping. Please note that the
-        result is a string instead of a number 
-
-        Parameters
-        ----------
-        soup : bs4.BeautifulSoup
-            a scraper for a specified webpage
-
-        Returns
-        -------
-        str
-            the listing ID of the specific apartment 
-
-        >>> _get_list_id(soup)
-        '4008777'
-
-        """
-
-        try:
-            ppt_details = soup.find('div', class_='w_listitem_description')
-            # find listing ID tag
-            list_id = ppt_details.find('li', class_='listing_id')\
-                                 .get_text()\
-                                 .replace('Listing ID: ', '')\
-                                 .strip()
-            return list_id
-        except:
-            return None
+            return gsf, year_built
 
     def _get_apt_data(self, url):
 
@@ -1077,27 +998,26 @@ class elliman_dot_com(dot_com):
 
         """
         soup = self._soup_attempts(url)
-        street, neighborhood, city = self._get_address(soup)
-        state = self._state.upper()
+        street, city, state, zipcode = self._get_address(soup)
         price = self._get_price(soup)
-        beds, baths, _ = self._get_features(soup)
-        htype = self._get_htype(soup)
-        sqft = self._get_sqft(soup)
-        listid = self._get_list_id(soup)
+        beds, baths, htype = self._get_features(soup)
+        sqft, year_built = self._get_sqft(soup)
         
         # create a list that package all the useful data
         unit = [
             street, 
             city,
             state,
+            zipcode,
             price,
             beds, 
             baths, 
             htype,
             sqft,
-            listid,
+            year_built,
             url,
         ]
+        
         
         return unit
 
@@ -1240,14 +1160,15 @@ class elliman_dot_com(dot_com):
                         if imgs and soup:
                             break
                 # street is the name of the image folder 
-                street, _, _ = self._get_address(soup)
+                street, city, state, _ = self._get_address(soup)
 
                 if imgs:
                     # automatically save images onto the local machine 
-                    self._save_images(imgs, data_path, street)
+                    self._save_images(imgs, data_path, f'{street}, {city}, {state.upper()}')
             except:
                 # time to give up and try to find what's going on
-                raise ValueError(f'FAILED apt: {street}, url: {url}')
+                print(f'FAILED apt: {street}, url: {url}')
+                continue
 
         if verbose:
             print('all images scraped')
@@ -1279,6 +1200,7 @@ class elliman_dot_com(dot_com):
                 self.write_data(apt_data, 'elliman_forsale.csv', CONST.ELLIMAN_COLNAMES, data_path)
                 print(f'batch {i} done, sleep {sleep_secs} seconds\n')
                 time.sleep(15) # rest for a few seconds after each batch job done
+            self._browser.close()
             print('job done, congratulations!')
 
         except:
@@ -5747,7 +5669,7 @@ if __name__ == '__main__':
     
     # to run the scraping for the entire webpage 
     # turn this to False
-    is_testing = True
+    is_testing = False
 
     if major_city == 'CHI':
         rcdc = realtytrac_dot_come('CHI')
