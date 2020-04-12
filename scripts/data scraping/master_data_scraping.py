@@ -477,10 +477,10 @@ class dot_com:
         """
         options = self._build_options()
 
-        chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
-        browser = webdriver.Chrome(executable_path = chrome_path, options=options)
+        # chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
+        # browser = webdriver.Chrome(executable_path = chrome_path, options=options)
 
-        # browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
+        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
         browser.get(webpage)
         wait = WebDriverWait(browser, 20) # maximum wait time is 20 seconds 
         return browser, wait
@@ -764,6 +764,9 @@ class elliman_dot_com(dot_com):
                 if verbose:
                     print('50 pages scraped, sleep 15 seconds')
                 time.sleep(15)
+                
+            if pg_num == 845:
+                break
                 
             webpage = self._get_webpage(pg_num)
             soup_pg = self._soup_attempts(webpage)
@@ -3872,10 +3875,10 @@ class compass_dot_com(dot_com):
     ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
         try:
-            price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
+            price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 chisNx u-flexContainer--row') \
                              .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
-            keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
+            keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption1').get_text() for tag in price_tags]
             values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
             d = dict(zip(keys, values))
@@ -3923,7 +3926,7 @@ class compass_dot_com(dot_com):
         try:
             browser = self._browser
             browser.get(apt_url)
-            view_more = browser.find_element_by_xpath("//button[@class='sc-kkGfuU hltMrU cx-nakedBtn textIntent-caption1--strong']")
+            view_more = browser.find_element_by_xpath("//button[@class='sc-fzolEj eRcVDD cx-nakedBtn textIntent-caption1--strong']")
             view_more.click()
             amenities = browser.find_elements_by_xpath("//span[@data-tn='uc-listing-amenity']")
             amenities = [a.text.lower() for a in amenities]
@@ -4067,10 +4070,10 @@ class compass_fs_dot_com(compass_dot_com):
 
     ### get the price details from the apartments, including price, bath and beds
     def _get_price(self, soup):
-        price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 bKZPkc u-flexContainer--row') \
+        price_tags = soup.find('div', class_='summary__RightContent-e4c4ok-4 chisNx u-flexContainer--row') \
                          .find_all('div', class_='summary__StyledSummaryDetailUnit-e4c4ok-13 dsPYTb')
 
-        keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption2').get_text() for tag in price_tags]
+        keys = [tag.find('div', class_='summary__SummaryCaption-e4c4ok-5 fGowyh textIntent-caption1').get_text() for tag in price_tags]
         values = [self._extract_num(tag.find('div', class_='textIntent-title2').get_text()) for tag in price_tags]
 
         d = dict(zip(keys, values))
@@ -5664,72 +5667,78 @@ if __name__ == '__main__':
     # user need to provide these paths 
     # please also make sure you have the sub-folders
     # under img_path, for example, remax, rent etc. 
-    data_path = f'D:/scrap_data/{major_city}/info'
-    img_path = f'D:/scrap_data/{major_city}/images'
+    data_path = f'../../data/sample/{major_city}/info/2020-4'
+    img_path = f'../../data/sample/{major_city}/images'
     
     # to run the scraping for the entire webpage 
     # turn this to False
-    is_testing = False
-
-    if major_city == 'CHI':
-        rcdc = realtytrac_dot_come('CHI')
-        rcdc.scraping_pipeline(data_path, test=is_testing)
-
-    # berkshire hathaway New York For Sale
-    bdc = berkshire_dot_com(major_city)
-    bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
-
-    ### remax.com Philadelphia For Sale
-    rmdc = remax_dot_com(major_city)
-    rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    is_testing = True
     
-    ### apartments.com New York For Rent
-    adc = apartments_dot_com(major_city)
-    adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-   
+# =============================================================================
+#     # berkshire hathaway New York For Sale
+#     bdc = berkshire_dot_com(major_city)
+#     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+# 
+#     ### remax.com Philadelphia For Sale
+#     rmdc = remax_dot_com(major_city)
+#     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+#     
+#     ### apartments.com New York For Rent
+#     adc = apartments_dot_com(major_city)
+#     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+#    
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+# =============================================================================
 
-    ### compass New York For Sale 
-    codcv2 = compass_fs_dot_com(major_city)
-    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    # ### compass New York For Sale 
+    # codcv2 = compass_fs_dot_com(major_city)
+    # codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
    
-    ### elliman.com For Sale 
-    if major_city == 'NYC':
-        edc = elliman_dot_com(major_city)
-        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
-   
-    ### loopnet.com New York For Sale 
-    ldc = loopnet_dot_com(major_city)
-    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
-   
-    ### rent.com Philadelphia For Rent
-    rdc = rent_dot_com(major_city)
-    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+# =============================================================================
+#     ### elliman.com For Sale 
+#     if major_city == 'NYC':
+#         edc = elliman_dot_com(major_city)
+#         edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+#    
+#     ### loopnet.com New York For Sale 
+#     ldc = loopnet_dot_com(major_city)
+#     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+#    
+#     ### rent.com Philadelphia For Rent
+#     rdc = rent_dot_com(major_city)
+#     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+# 
+#     ### merge all the datafiles into a master data file 
+#     dm = data_merger(data_path)
+#     dm.merge_super_dfs(major_city)
+#     dm.merge_forsale_dfs(major_city)
+#     dm.merge_forrent_dfs(major_city)
+#     
+#     if major_city == 'CHI':
+#         rcdc = realtytrac_dot_come('CHI')
+#         rcdc.scraping_pipeline(data_path, test=is_testing)
+# 
+#     ### trulia.com For Rent and For Sale
+#     tdc = trulia_dot_com(major_city, 'buy')
+#     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+#    
+#     ### trulia.com For Rent and For Rent
+#     tdc = trulia_dot_com(major_city, 'rent')
+#     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+#    
+#     ### trulia.com For Rent and Sold
+#     tdc = trulia_dot_com(major_city, 'sold')
+#     tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
+# 
+#     ### hotpads.com For Rent
+#     hdc = hotpads_dot_com(major_city)
+#     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
+# =============================================================================
 
-    ### merge all the datafiles into a master data file 
-    dm = data_merger(data_path)
-    dm.merge_super_dfs(major_city)
-    dm.merge_forsale_dfs(major_city)
-    dm.merge_forrent_dfs(major_city)
-
-    ### trulia.com For Rent and For Sale
-    tdc = trulia_dot_com(major_city, 'buy')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-   
-    ### trulia.com For Rent and For Rent
-    tdc = trulia_dot_com(major_city, 'rent')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-   
-    ### trulia.com For Rent and Sold
-    tdc = trulia_dot_com(major_city, 'sold')
-    tdc.scraping_pipeline(data_path, f'{img_path}/trulia', test=is_testing)
-
-    ### hotpads.com For Rent
-    hdc = hotpads_dot_com(major_city)
-    hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
-#
-#    ### coldwell Philadelphia For Sale
-#    cdc = coldwell_dot_com(major_city, 1, 'max')
-#    cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+# =============================================================================
+#     ### coldwell Philadelphia For Sale
+#     cdc = coldwell_dot_com(major_city, 1, 'max')
+#     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
+# =============================================================================
