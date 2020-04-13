@@ -182,11 +182,6 @@ class CONST:
         'PROPERTY TYPE',
         'CENTRAL AC', 
         'WATERFRONT', 
-        '# FLOORS', 
-        'LAND SF', 
-        'TAX AMOUNT', 
-        'TAX YEAR', 
-        'MATERIAL',
         'LINK',
     )
 
@@ -4079,44 +4074,6 @@ class compass_fs_dot_com(compass_dot_com):
         d = dict(zip(keys, values))
         return self._ad(d,'Price'), self._ad(d,'Beds'), self._ad(d,'Baths') # this is what's different from for rent 
 
-    ### fetch the amenity details
-    def _get_amenities(self, soup):
-        try:
-            elems = soup.find_all('div', class_='property-information__FieldSection-sc-1il5vdr-7 kTiQQm textIntent-caption1')
-
-            ks = [e.text.split(':')[0].strip() for e in elems]
-            vs = [e.text.split(':')[1].strip() for e in elems]
-            d = dict(zip(ks, vs))
-
-            def _y_n(text):
-                try:
-                    if 'yes' in text.lower():
-                        return 1
-                    if 'no' in text.lower():
-                        return 0
-                except:
-                    return None
-
-            central_ac = _y_n(self._ad(d, 'Central Air'))
-            waterfront = _y_n(self._ad(d, 'Waterfront'))
-
-            stories = self._extract_num(self._ad(d, 'Levels Count'))
-
-            land_sf = self._extract_num(self._ad(d, 'Lot Size Acres'))
-
-            if land_sf == np.nan:
-                land_sf = self._extract_num(self._ad(d, 'Lot SQFT'))
-                if not land_sf == np.nan:
-                    land_sf = land_sf / 43560
-
-            tax_amount = self._extract_num(self._ad(d, 'Tax Annual Amount'))
-            tax_year = self._ad(d, 'Tax Year')
-            material = self._ad(d, 'Construction Materials')
-
-            return central_ac, waterfront, stories, land_sf, tax_amount, tax_year, material
-        except:
-            return None, None, None, None, None, None, None
-
     ### get the apartment data for sale; there's some minor differences with
     ### Compass for rent 
     def _get_apt_data(self, url, img_path):
@@ -4128,7 +4085,7 @@ class compass_fs_dot_com(compass_dot_com):
         price, beds, bath = self._get_price(soup)
         sqft = self._get_sf(soup)
         yrbuilt, rtype = self._get_prop_details(soup)
-        central_ac, waterfront, stories, land_sf, tax_amount, tax_year, material = self._get_amenities(soup)
+        central_ac, waterfront = self._get_amenities(soup)
 
         data = [
             city,
@@ -4143,11 +4100,6 @@ class compass_fs_dot_com(compass_dot_com):
             rtype,
             central_ac, 
             waterfront, 
-            stories, 
-            land_sf, 
-            tax_amount, 
-            tax_year, 
-            material,
             url,
         ]
 
@@ -5674,47 +5626,44 @@ if __name__ == '__main__':
     # turn this to False
     is_testing = True
     
-# =============================================================================
-#     # berkshire hathaway New York For Sale
-#     bdc = berkshire_dot_com(major_city)
-#     bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
-# 
-#     ### remax.com Philadelphia For Sale
-#     rmdc = remax_dot_com(major_city)
-#     rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
-#     
-#     ### apartments.com New York For Rent
-#     adc = apartments_dot_com(major_city)
-#     adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
-#    
+    # # berkshire hathaway New York For Sale
+    # bdc = berkshire_dot_com(major_city)
+    # bdc.scraping_pipeline(data_path, f'{img_path}/berkshire', test=is_testing)
+
+    # ### remax.com Philadelphia For Sale
+    # rmdc = remax_dot_com(major_city)
+    # rmdc.scraping_pipeline(data_path, f'{img_path}/remax', test=is_testing)
+    
+    # ### apartments.com New York For Rent
+    # adc = apartments_dot_com(major_city)
+    # adc.scraping_pipeline(data_path, f'{img_path}/apartments', test=is_testing)
+   
     ### compass New York For Rent 
     codc = compass_dot_com(major_city)
     codc.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
-# =============================================================================
 
-    # ### compass New York For Sale 
-    # codcv2 = compass_fs_dot_com(major_city)
-    # codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
+    ### compass New York For Sale 
+    codcv2 = compass_fs_dot_com(major_city)
+    codcv2.scraping_pipeline(data_path, f'{img_path}/compass', test=is_testing)
    
-# =============================================================================
-#     ### elliman.com For Sale 
-#     if major_city == 'NYC':
-#         edc = elliman_dot_com(major_city)
-#         edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
-#    
-#     ### loopnet.com New York For Sale 
-#     ldc = loopnet_dot_com(major_city)
-#     ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
-#    
-#     ### rent.com Philadelphia For Rent
-#     rdc = rent_dot_com(major_city)
-#     rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
-# 
-#     ### merge all the datafiles into a master data file 
-#     dm = data_merger(data_path)
-#     dm.merge_super_dfs(major_city)
-#     dm.merge_forsale_dfs(major_city)
-#     dm.merge_forrent_dfs(major_city)
+    ### elliman.com For Sale 
+    if major_city == 'NYC':
+        edc = elliman_dot_com(major_city)
+        edc.scraping_pipeline(data_path, f'{img_path}/elliman', test=is_testing)
+   
+    ### loopnet.com New York For Sale 
+    ldc = loopnet_dot_com(major_city)
+    ldc.scraping_pipeline(data_path, f'{img_path}/loopnet', test=is_testing)
+   
+    ### rent.com Philadelphia For Rent
+    rdc = rent_dot_com(major_city)
+    rdc.scraping_pipeline(data_path, f'{img_path}/rent', test=is_testing)
+
+    ### merge all the datafiles into a master data file 
+    dm = data_merger(data_path)
+    dm.merge_super_dfs(major_city)
+    dm.merge_forsale_dfs(major_city)
+    dm.merge_forrent_dfs(major_city)
 #     
 #     if major_city == 'CHI':
 #         rcdc = realtytrac_dot_come('CHI')
@@ -5735,10 +5684,7 @@ if __name__ == '__main__':
 #     ### hotpads.com For Rent
 #     hdc = hotpads_dot_com(major_city)
 #     hdc.scraping_pipeline(data_path, f'{img_path}/hotpads', test=is_testing)
-# =============================================================================
 
-# =============================================================================
 #     ### coldwell Philadelphia For Sale
 #     cdc = coldwell_dot_com(major_city, 1, 'max')
 #     cdc.scraping_pipeline(data_path, f'{img_path}/coldwell', test=is_testing)
-# =============================================================================
