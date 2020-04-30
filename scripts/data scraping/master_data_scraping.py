@@ -472,7 +472,7 @@ class dot_com:
         """
         options = self._build_options()
 
-        chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/79.0.3945.36/win32/chromedriver.exe'
+        chrome_path = 'C:/Users/jorda/.wdm/drivers/chromedriver/81/win32/chromedriver.exe'
         browser = webdriver.Chrome(executable_path = chrome_path, options=options)
 
 #        browser = webdriver.Chrome(ChromeDriverManager().install(), options=options)
